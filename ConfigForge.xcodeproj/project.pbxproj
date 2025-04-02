@@ -1,0 +1,536 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 90;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		17935F3A2D9D7D410055BABF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17935F232D9D7D400055BABF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17935F2A2D9D7D400055BABF;
+			remoteInfo = ConfigForge;
+		};
+		17935F442D9D7D410055BABF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 17935F232D9D7D400055BABF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 17935F2A2D9D7D400055BABF;
+			remoteInfo = ConfigForge;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		17935F2B2D9D7D400055BABF /* ConfigForge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConfigForge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		17935F392D9D7D410055BABF /* ConfigForgeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConfigForgeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		17935F432D9D7D410055BABF /* ConfigForgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConfigForgeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		17935F2D2D9D7D400055BABF /* ConfigForge */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ConfigForge;
+			sourceTree = "<group>";
+		};
+		17935F3C2D9D7D410055BABF /* ConfigForgeTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ConfigForgeTests;
+			sourceTree = "<group>";
+		};
+		17935F462D9D7D410055BABF /* ConfigForgeUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ConfigForgeUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		17935F282D9D7D400055BABF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		17935F362D9D7D410055BABF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		17935F402D9D7D410055BABF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		17935F222D9D7D400055BABF = {
+			isa = PBXGroup;
+			children = (
+				17935F2D2D9D7D400055BABF /* ConfigForge */,
+				17935F3C2D9D7D410055BABF /* ConfigForgeTests */,
+				17935F462D9D7D410055BABF /* ConfigForgeUITests */,
+				17935F2C2D9D7D400055BABF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		17935F2C2D9D7D400055BABF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				17935F2B2D9D7D400055BABF /* ConfigForge.app */,
+				17935F392D9D7D410055BABF /* ConfigForgeTests.xctest */,
+				17935F432D9D7D410055BABF /* ConfigForgeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		17935F2A2D9D7D400055BABF /* ConfigForge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17935F4D2D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForge" */;
+			buildPhases = (
+				17935F272D9D7D400055BABF /* Sources */,
+				17935F282D9D7D400055BABF /* Frameworks */,
+				17935F292D9D7D400055BABF /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				17935F2D2D9D7D400055BABF /* ConfigForge */,
+			);
+			name = ConfigForge;
+			productName = ConfigForge;
+			productReference = 17935F2B2D9D7D400055BABF /* ConfigForge.app */;
+			productType = "com.apple.product-type.application";
+		};
+		17935F382D9D7D410055BABF /* ConfigForgeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17935F502D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeTests" */;
+			buildPhases = (
+				17935F352D9D7D410055BABF /* Sources */,
+				17935F362D9D7D410055BABF /* Frameworks */,
+				17935F372D9D7D410055BABF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17935F3B2D9D7D410055BABF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				17935F3C2D9D7D410055BABF /* ConfigForgeTests */,
+			);
+			name = ConfigForgeTests;
+			productName = ConfigForgeTests;
+			productReference = 17935F392D9D7D410055BABF /* ConfigForgeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		17935F422D9D7D410055BABF /* ConfigForgeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 17935F532D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeUITests" */;
+			buildPhases = (
+				17935F3F2D9D7D410055BABF /* Sources */,
+				17935F402D9D7D410055BABF /* Frameworks */,
+				17935F412D9D7D410055BABF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				17935F452D9D7D410055BABF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				17935F462D9D7D410055BABF /* ConfigForgeUITests */,
+			);
+			name = ConfigForgeUITests;
+			productName = ConfigForgeUITests;
+			productReference = 17935F432D9D7D410055BABF /* ConfigForgeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		17935F232D9D7D400055BABF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					17935F2A2D9D7D400055BABF = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					17935F382D9D7D410055BABF = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 17935F2A2D9D7D400055BABF;
+					};
+					17935F422D9D7D410055BABF = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 17935F2A2D9D7D400055BABF;
+					};
+				};
+			};
+			buildConfigurationList = 17935F262D9D7D400055BABF /* Build configuration list for PBXProject "ConfigForge" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = 17935F222D9D7D400055BABF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 90;
+			productRefGroup = 17935F2C2D9D7D400055BABF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				17935F2A2D9D7D400055BABF /* ConfigForge */,
+				17935F382D9D7D410055BABF /* ConfigForgeTests */,
+				17935F422D9D7D410055BABF /* ConfigForgeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		17935F292D9D7D400055BABF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		17935F372D9D7D410055BABF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		17935F412D9D7D410055BABF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		17935F272D9D7D400055BABF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		17935F352D9D7D410055BABF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		17935F3F2D9D7D410055BABF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		17935F3B2D9D7D410055BABF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17935F2A2D9D7D400055BABF /* ConfigForge */;
+			targetProxy = 17935F3A2D9D7D410055BABF /* PBXContainerItemProxy */;
+		};
+		17935F452D9D7D410055BABF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 17935F2A2D9D7D400055BABF /* ConfigForge */;
+			targetProxy = 17935F442D9D7D410055BABF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		17935F4B2D9D7D410055BABF /* Debug configuration for PBXProject "ConfigForge" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		17935F4C2D9D7D410055BABF /* Release configuration for PBXProject "ConfigForge" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		17935F4E2D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForge" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ConfigForge/ConfigForge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		17935F4F2D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForge" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ConfigForge/ConfigForge.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForge;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		17935F512D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForgeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ConfigForge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ConfigForge";
+			};
+			name = Debug;
+		};
+		17935F522D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForgeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ConfigForge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ConfigForge";
+			};
+			name = Release;
+		};
+		17935F542D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForgeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ConfigForge;
+			};
+			name = Debug;
+		};
+		17935F552D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = DUPETW8BMH;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForgeUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = ConfigForge;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		17935F262D9D7D400055BABF /* Build configuration list for PBXProject "ConfigForge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17935F4B2D9D7D410055BABF /* Debug configuration for PBXProject "ConfigForge" */,
+				17935F4C2D9D7D410055BABF /* Release configuration for PBXProject "ConfigForge" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+		17935F4D2D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17935F4E2D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForge" */,
+				17935F4F2D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForge" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+		17935F502D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17935F512D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeTests" */,
+				17935F522D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeTests" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+		17935F532D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				17935F542D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeUITests" */,
+				17935F552D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeUITests" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 17935F232D9D7D400055BABF /* Project object */;
+}

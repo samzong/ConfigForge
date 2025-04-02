@@ -1,0 +1,95 @@
+# macOS App 开发 .gitignore
+
+# macOS 系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Xcode
+#
+## 用户特定的 Xcode 文件
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+/*.gcno
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+## 构建生成的文件
+build/
+DerivedData/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## 其他
+*.exe
+*.dmg
+*.pkg
+*.app
+*.ipa
+*.xcarchive
+.sassc
+*.xccheckout
+profile
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift 包管理器
+.build/
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+.netrc
+
+# CocoaPods (如果使用)
+Pods/
+Podfile.lock
+
+# Carthage (如果使用)
+Carthage/Build/
+
+# fastlane (如果使用)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# 代码覆盖率报告
+coverage/
+
+# SwiftLint 处理过文件 (如果使用)
+swiftlint-report.html
+
+# AppCode IDE (如果使用)
+.idea/
+
+# Swift IDE 工具包
+.swiftpm
+
+# Env 文件 (如果存在)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+

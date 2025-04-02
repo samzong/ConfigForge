@@ -77,7 +77,7 @@ class SSHConfigViewModel: ObservableObject {
             return
         }
         
-        let updatedEntry = SSHConfigEntry(id: id, host: host, properties: properties)
+        let updatedEntry = SSHConfigEntry(host: host, properties: properties)
         
         // 如果只是更新自身，不需要检查Host冲突
         let otherEntries = entries.filter { $0.id != id }
@@ -99,7 +99,7 @@ class SSHConfigViewModel: ObservableObject {
     // 备份配置
     func backupConfig(to destination: URL?) {
         guard let destination = destination else {
-            let desktopURL = fileManager.fileManager.urls(for: .desktopDirectory, in: .userDomainMask).first!
+            let desktopURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask).first!
             backupConfig(to: desktopURL)
             return
         }
@@ -107,7 +107,7 @@ class SSHConfigViewModel: ObservableObject {
         let result = fileManager.backupConfigFile(to: destination)
         
         switch result {
-        case .success(let url):
+        case .success(_):
             errorMessage = nil
             // 可以展示成功信息，如: "备份已保存至 \(url.path)"
         case .failure(let error):

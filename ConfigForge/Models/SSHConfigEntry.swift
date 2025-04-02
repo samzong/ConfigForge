@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SSHConfigEntry: Identifiable {
+struct SSHConfigEntry: Identifiable, Hashable {
     let id = UUID()
     var host: String
     var properties: [String: String]
@@ -17,4 +17,13 @@ struct SSHConfigEntry: Identifiable {
     var user: String? { properties["User"] }
     var port: String? { properties["Port"] }
     var identityFile: String? { properties["IdentityFile"] }
+    
+    // 实现Hashable协议
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: SSHConfigEntry, rhs: SSHConfigEntry) -> Bool {
+        lhs.id == rhs.id
+    }
 }

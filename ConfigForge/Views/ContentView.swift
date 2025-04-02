@@ -7,6 +7,12 @@
 
 import SwiftUI
 
+// 添加一个可识别的错误消息结构体
+struct ErrorMessage: Identifiable {
+    let id = UUID()
+    let message: String
+}
+
 struct ContentView: View {
     @StateObject private var viewModel = SSHConfigViewModel()
     
@@ -53,10 +59,10 @@ struct ContentView: View {
             }
         }
         .alert(item: Binding(
-            get: { viewModel.errorMessage != nil ? viewModel.errorMessage : nil },
-            set: { viewModel.errorMessage = $0 }
-        )) { message in
-            Alert(title: Text("错误"), message: Text(message), dismissButton: .default(Text("确定")))
+            get: { viewModel.errorMessage != nil ? ErrorMessage(message: viewModel.errorMessage!) : nil },
+            set: { viewModel.errorMessage = $0?.message }
+        )) { error in
+            Alert(title: Text("错误"), message: Text(error.message), dismissButton: .default(Text("确定")))
         }
     }
 }

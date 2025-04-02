@@ -44,7 +44,7 @@ class SSHConfigParser {
                 // 开始新的Host
                 currentHost = value
                 currentProperties = [:]
-            } else if let host = currentHost {
+            } else if currentHost != nil {
                 // 添加属性到当前Host
                 currentProperties[keyword.capitalized] = value
             }

@@ -12,11 +12,27 @@ class SSHConfigFileManager {
     
     // 获取SSH配置文件路径
     private var sshConfigPath: String {
-        return NSHomeDirectory() + "/.ssh/config"
+        return AppConstants.sshConfigPath
     }
     
     // 读取配置文件
     func readConfigFile() -> Result<String, Error> {
+        // 检查文件是否存在，如果不存在则创建一个空文件
+        if !fileManager.fileExists(atPath: sshConfigPath) {
+            do {
+                // 确保.ssh目录存在
+                let sshDirPath = NSHomeDirectory() + "/.ssh"
+                if !fileManager.fileExists(atPath: sshDirPath) {
+                    try fileManager.createDirectory(atPath: sshDirPath, withIntermediateDirectories: true, attributes: nil)
+                }
+                
+                // 创建空的config文件
+                try "".write(toFile: sshConfigPath, atomically: true, encoding: .utf8)
+            } catch {
+                return .failure(error)
+            }
+        }
+        
         do {
             let content = try String(contentsOfFile: sshConfigPath, encoding: .utf8)
             return .success(content)

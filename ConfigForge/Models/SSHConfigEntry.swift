@@ -13,10 +13,21 @@ struct SSHConfigEntry: Identifiable, Hashable {
     var properties: [String: String]
     
     // 计算属性用于直接访问常用配置
-    var hostname: String? { properties["HostName"] }
-    var user: String? { properties["User"] }
-    var port: String? { properties["Port"] }
-    var identityFile: String? { properties["IdentityFile"] }
+    var hostname: String? { 
+        properties["HostName"] ?? ""
+    }
+    
+    var user: String? { 
+        properties["User"] ?? ""
+    }
+    
+    var port: String? { 
+        properties["Port"] ?? "22"
+    }
+    
+    var identityFile: String? { 
+        properties["IdentityFile"] ?? ""
+    }
     
     // 实现Hashable协议
     func hash(into hasher: inout Hasher) {

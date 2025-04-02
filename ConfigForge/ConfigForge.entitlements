@@ -4,5 +4,13 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<false/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+	<key>com.apple.security.files.home-relative-path.read-write</key>
+	<array>
+		<string>/.ssh/</string>
+	</array>
 </dict>
 </plist>

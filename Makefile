@@ -183,43 +183,57 @@ update-homebrew:
 	@cd tmp/$(HOMEBREW_TAP_REPO) && echo "    - 创建新分支: $(BRANCH_NAME)" && git checkout -b $(BRANCH_NAME)
 
 	@echo "==> 更新 cask 文件..."
-	@cd tmp/$(HOMEBREW_TAP_REPO) && \
-	X86_64_SHA256=$$(shasum -a 256 ../$(APP_NAME)-x86_64.dmg | cut -d ' ' -f 1) && \
-	ARM64_SHA256=$$(shasum -a 256 ../$(APP_NAME)-arm64.dmg | cut -d ' ' -f 1) && \
+	@X86_64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-x86_64.dmg | cut -d ' ' -f 1) && \
+	ARM64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-arm64.dmg | cut -d ' ' -f 1) && \
+	echo "==> 再次确认SHA256: x86_64=$$X86_64_SHA256, arm64=$$ARM64_SHA256" && \
+	cd tmp/$(HOMEBREW_TAP_REPO) && \
+	echo "==> 当前目录: $$(pwd)" && \
+	echo "==> CASK_FILE路径: $(CASK_FILE)" && \
 	if [ -f $(CASK_FILE) ]; then \
-		echo "    - 使用 sed 更新现有的 cask 文件..."; \
+		echo "    - 发现现有cask文件，使用sed更新..."; \
+		echo "    - cask文件内容 (更新前):"; \
+		cat $(CASK_FILE); \
 		sed -i '' "s/version \\\".*\\\"/version \\\"$(CLEAN_VERSION)\\\"/g" $(CASK_FILE); \
+		echo "    - 更新版本后的cask文件:"; \
+		cat $(CASK_FILE); \
 		if grep -q "Hardware::CPU.arm" $(CASK_FILE); then \
+			echo "    - 更新ARM架构SHA256..."; \
 			sed -i '' "/if Hardware::CPU.arm/,/else/ s/sha256 \\\".*\\\"/sha256 \\\"$$ARM64_SHA256\\\"/g" $(CASK_FILE); \
+			echo "    - 更新Intel架构SHA256..."; \
 			sed -i '' "/else/,/end/ s/sha256 \\\".*\\\"/sha256 \\\"$$X86_64_SHA256\\\"/g" $(CASK_FILE); \
+			echo "    - 更新ARM下载URL..."; \
 			sed -i '' "s|url \\\".*v#{version}/.*-ARM64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg\\\"|g" $(CASK_FILE); \
+			echo "    - 更新Intel下载URL..."; \
 			sed -i '' "s|url \\\".*v#{version}/.*-Intel.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg\\\"|g" $(CASK_FILE); \
+			echo "    - 最终cask文件内容:"; \
+			cat $(CASK_FILE); \
 		else \
 			echo "❌ 未知的 cask 格式，无法更新 SHA256 值"; \
 			exit 1; \
 		fi; \
 	else \
-		echo "    - 创建新的 cask 文件..."; \
+		echo "    - 未找到cask文件，创建新文件..."; \
 		mkdir -p $$(dirname $(CASK_FILE)); \
-		cat > $(CASK_FILE) << EOF \
-cask "configforge" do \
-  version "$(CLEAN_VERSION)" \
-  \
-  if Hardware::CPU.arm? \
-    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg" \
-    sha256 "$$ARM64_SHA256" \
-  else \
-    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg" \
-    sha256 "$$X86_64_SHA256" \
-  end \
-  \
-  name "$(APP_NAME)" \
-  desc "配置文件管理工具" \
-  homepage "https://github.com/samzong/$(APP_NAME)" \
-  \
-  app "$(APP_NAME).app" \
-end \
-EOF \
+		echo "    - 使用文本方式创建cask文件..."; \
+		echo 'cask "configforge" do' > $(CASK_FILE); \
+		echo '  version "$(CLEAN_VERSION)"' >> $(CASK_FILE); \
+		echo '' >> $(CASK_FILE); \
+		echo '  if Hardware::CPU.arm?' >> $(CASK_FILE); \
+		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg"' >> $(CASK_FILE); \
+		echo '    sha256 "'$$ARM64_SHA256'"' >> $(CASK_FILE); \
+		echo '  else' >> $(CASK_FILE); \
+		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg"' >> $(CASK_FILE); \
+		echo '    sha256 "'$$X86_64_SHA256'"' >> $(CASK_FILE); \
+		echo '  end' >> $(CASK_FILE); \
+		echo '' >> $(CASK_FILE); \
+		echo '  name "$(APP_NAME)"' >> $(CASK_FILE); \
+		echo '  desc "配置文件管理工具"' >> $(CASK_FILE); \
+		echo '  homepage "https://github.com/samzong/$(APP_NAME)"' >> $(CASK_FILE); \
+		echo '' >> $(CASK_FILE); \
+		echo '  app "$(APP_NAME).app"' >> $(CASK_FILE); \
+		echo 'end' >> $(CASK_FILE); \
+		echo "    - 检查创建的cask文件:"; \
+		cat $(CASK_FILE) || echo "❌ 无法读取cask文件"; \
 	fi
 	
 	@echo "==> 检查更改..."
@@ -231,8 +245,10 @@ EOF \
 		git config user.email "actions@github.com"; \
 		git commit -m "chore: update $(APP_NAME) to v$(CLEAN_VERSION)"; \
 		git push -u origin $(BRANCH_NAME); \
+		echo "    - 准备创建PR数据..."; \
 		pr_data=$$(printf '{\"title\":\"chore: update %s to v%s\",\"body\":\"Auto-generated PR\\\\n- Version: %s\\\\n- x86_64 SHA256: %s\\\\n- arm64 SHA256: %s\",\"head\":\"%s\",\"base\":\"main\"}' \
 			"$(APP_NAME)" "$(CLEAN_VERSION)" "$(CLEAN_VERSION)" "$$X86_64_SHA256" "$$ARM64_SHA256" "$(BRANCH_NAME)"); \
+		echo "    - PR数据: $$pr_data"; \
 		curl -X POST \
 			-H "Authorization: token $(GH_PAT)" \
 			-H "Content-Type: application/json" \

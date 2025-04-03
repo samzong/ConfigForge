@@ -1,0 +1,58 @@
+/* General */
+"app.name" = "ConfigForge";
+"app.save" = "Save";
+"app.edit" = "Edit";
+"app.delete" = "Delete";
+"app.cancel" = "Cancel";
+"app.confirm" = "Confirm";
+"app.error" = "Error";
+"app.success" = "Success";
+
+/* Language */
+"app.language" = "Language";
+"app.language.english" = "English";
+"app.language.chinese" = "Chinese";
+"app.language.restart.title" = "Language Changed";
+"app.language.restart.message" = "Please restart the application for the language change to take effect.";
+
+/* Sidebar */
+"sidebar.search" = "Search hosts";
+"sidebar.add.host" = "Add Host";
+
+/* Host List */
+"host.new" = "new-host";
+"host.enter.name" = "Enter host name";
+"host.invalid" = "Invalid host name, please correct before saving";
+
+/* Config Properties */
+"property.hostname" = "HostName";
+"property.hostname.placeholder" = "e.g. example.com";
+"property.user" = "User";
+"property.user.placeholder" = "e.g. admin";
+"property.port" = "Port";
+"property.port.placeholder" = "Default: 22";
+"property.identityfile" = "IdentityFile";
+"property.identityfile.placeholder" = "e.g. ~/.ssh/id_rsa";
+
+/* Editor */
+"editor.empty.title" = "Select or Create SSH Config";
+"editor.empty.description" = "Select an item from the list on the left, or click \"Add Host\" to create a new configuration";
+
+/* Messages */
+"message.config.loaded" = "Configuration loaded successfully";
+"message.config.saved" = "Configuration saved successfully";
+"message.host.added" = "Added %@";
+"message.host.updated" = "Updated %@";
+"message.host.deleted" = "Deleted %@";
+"message.backup.success" = "Configuration backed up to %@";
+"message.restore.success" = "Configuration restored from backup";
+"message.error.file.access" = "File access error";
+"message.error.empty.host" = "Host name cannot be empty";
+"message.error.duplicate.host" = "A host with this name already exists";
+"message.error.backup.failed" = "Backup failed";
+"message.error.restore.failed" = "Restore failed";
+"message.error.entry.not.found" = "Entry not found";
+"message.error.export.failed" = "Failed to export backup: %@";
+"message.error.import.failed" = "Failed to import backup: %@";
+"message.error.backup.not.selected" = "No backup file selected";
+"message.error.invalid.format" = "Invalid configuration format. Some entries may not be parsed correctly."; 

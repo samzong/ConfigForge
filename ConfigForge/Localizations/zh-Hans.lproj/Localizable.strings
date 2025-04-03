@@ -1,0 +1,58 @@
+/* General */
+"app.name" = "ConfigForge";
+"app.save" = "保存";
+"app.edit" = "编辑";
+"app.delete" = "删除";
+"app.cancel" = "取消";
+"app.confirm" = "确定";
+"app.error" = "错误";
+"app.success" = "成功";
+
+/* Language */
+"app.language" = "语言";
+"app.language.english" = "英文";
+"app.language.chinese" = "中文";
+"app.language.restart.title" = "语言已更改";
+"app.language.restart.message" = "请重启应用程序以使语言更改生效。";
+
+/* Sidebar */
+"sidebar.search" = "搜索主机";
+"sidebar.add.host" = "添加主机";
+
+/* Host List */
+"host.new" = "new-host";
+"host.enter.name" = "请输入主机名";
+"host.invalid" = "主机名无效，请修正后再保存";
+
+/* Config Properties */
+"property.hostname" = "HostName";
+"property.hostname.placeholder" = "例如: example.com";
+"property.user" = "User";
+"property.user.placeholder" = "例如: admin";
+"property.port" = "Port";
+"property.port.placeholder" = "默认: 22";
+"property.identityfile" = "IdentityFile";
+"property.identityfile.placeholder" = "例如: ~/.ssh/id_rsa";
+
+/* Editor */
+"editor.empty.title" = "选择或创建SSH配置";
+"editor.empty.description" = "从左侧列表选择一个条目进行编辑，或点击\"添加主机\"创建新配置";
+
+/* Messages */
+"message.config.loaded" = "配置已成功加载";
+"message.config.saved" = "配置已成功保存";
+"message.host.added" = "已添加 %@";
+"message.host.updated" = "已更新 %@";
+"message.host.deleted" = "已删除 %@";
+"message.backup.success" = "配置已备份至 %@";
+"message.restore.success" = "配置已从备份恢复";
+"message.error.file.access" = "文件访问错误";
+"message.error.empty.host" = "主机名不能为空";
+"message.error.duplicate.host" = "已存在同名主机";
+"message.error.backup.failed" = "备份失败";
+"message.error.restore.failed" = "恢复失败";
+"message.error.entry.not.found" = "找不到要更新的条目";
+"message.error.export.failed" = "无法导出备份: %@";
+"message.error.import.failed" = "无法导入备份: %@";
+"message.error.backup.not.selected" = "未选择备份文件";
+"message.error.invalid.format" = "配置文件格式无效。某些条目可能无法正确解析。"; 

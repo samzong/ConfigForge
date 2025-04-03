@@ -87,7 +87,7 @@ class SSHConfigViewModel: ObservableObject {
         case .success(let content):
             entries = parser.parseConfig(content: content)
             if !entries.isEmpty {
-                setMessage("配置已成功加载", type: .success)
+                setMessage("message.config.loaded".localized, type: .success)
             }
         case .failure(let error):
             setMessage(AppConstants.ErrorMessages.fileAccessError + ": \(error.localizedDescription)", type: .error)
@@ -102,9 +102,9 @@ class SSHConfigViewModel: ObservableObject {
         
         switch result {
         case .success:
-            setMessage("配置已成功保存", type: .success)
+            setMessage("message.config.saved".localized, type: .success)
         case .failure(let error):
-            setMessage("保存配置文件失败: \(error.localizedDescription)", type: .error)
+            setMessage("message.error.export.failed".localized(error.localizedDescription), type: .error)
         }
     }
     
@@ -114,6 +114,9 @@ class SSHConfigViewModel: ObservableObject {
             setMessage(AppConstants.ErrorMessages.emptyHostError, type: .error)
             return
         }
+        
+        // 如果是本地化的新主机标识，使用原始标识符
+        let finalHost = (host == "host.new".localized) ? "host.new" : host
         
         // 创建一个包含默认值的属性副本
         var finalProperties = properties
@@ -132,12 +135,12 @@ class SSHConfigViewModel: ObservableObject {
             finalProperties["IdentityFile"] = ""
         }
         
-        let newEntry = SSHConfigEntry(host: host, properties: finalProperties)
+        let newEntry = SSHConfigEntry(host: finalHost, properties: finalProperties)
         
         if parser.validateEntry(entry: newEntry, existingEntries: entries) {
             entries.append(newEntry)
             saveConfig()
-            setMessage("已添加 \(host)", type: .success)
+            setMessage("message.host.added".localized(finalHost), type: .success)
             // 选择新添加的条目
             selectedEntry = newEntry
         } else {
@@ -152,8 +155,11 @@ class SSHConfigViewModel: ObservableObject {
             return
         }
         
+        // 如果是本地化的新主机标识，使用原始标识符
+        let finalHost = (host == "host.new".localized) ? "host.new" : host
+        
         guard let index = entries.firstIndex(where: { $0.id == id }) else {
-            setMessage("找不到要更新的条目", type: .error)
+            setMessage("message.error.entry.not.found".localized, type: .error)
             return
         }
         
@@ -174,7 +180,7 @@ class SSHConfigViewModel: ObservableObject {
             finalProperties["IdentityFile"] = ""
         }
         
-        let updatedEntry = SSHConfigEntry(host: host, properties: finalProperties)
+        let updatedEntry = SSHConfigEntry(host: finalHost, properties: finalProperties)
         
         // 如果只是更新自身，不需要检查Host冲突
         let otherEntries = entries.filter { $0.id != id }
@@ -182,7 +188,7 @@ class SSHConfigViewModel: ObservableObject {
         if parser.validateEntry(entry: updatedEntry, existingEntries: otherEntries) {
             entries[index] = updatedEntry
             saveConfig()
-            setMessage("已更新 \(host)", type: .success)
+            setMessage("message.host.updated".localized(finalHost), type: .success)
             // 更新选定条目
             selectedEntry = updatedEntry
         } else {
@@ -195,7 +201,7 @@ class SSHConfigViewModel: ObservableObject {
         if let hostToDelete = entries.first(where: { $0.id == id })?.host {
             entries.removeAll { $0.id == id }
             saveConfig()
-            setMessage("已删除 \(hostToDelete)", type: .success)
+            setMessage("message.host.deleted".localized(hostToDelete), type: .success)
         }
     }
     
@@ -211,7 +217,7 @@ class SSHConfigViewModel: ObservableObject {
         
         switch result {
         case .success(let url):
-            setMessage("配置已备份至 \(url.lastPathComponent)", type: .success)
+            setMessage("message.backup.success".localized(url.lastPathComponent), type: .success)
         case .failure(let error):
             setMessage(AppConstants.ErrorMessages.backupFailed + ": \(error.localizedDescription)", type: .error)
         }
@@ -220,7 +226,7 @@ class SSHConfigViewModel: ObservableObject {
     // 从备份恢复
     func restoreConfig(from source: URL?) {
         guard let source = source else {
-            setMessage("未选择备份文件", type: .error)
+            setMessage("message.error.backup.not.selected".localized, type: .error)
             return
         }
         
@@ -229,7 +235,7 @@ class SSHConfigViewModel: ObservableObject {
         switch result {
         case .success:
             loadConfig() // 重新加载配置
-            setMessage("配置已从备份恢复", type: .success)
+            setMessage("message.restore.success".localized, type: .success)
         case .failure(let error):
             setMessage(AppConstants.ErrorMessages.restoreFailed + ": \(error.localizedDescription)", type: .error)
         }

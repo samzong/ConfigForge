@@ -15,7 +15,7 @@ enum AppConstants {
     static let defaultBackupFileName = "ssh_config_backup"
     
     // 应用名称
-    static let appName = "ConfigForge"
+    static let appName = "app.name".localized
     
     // 应用版本
     static var appVersion: String {
@@ -24,11 +24,11 @@ enum AppConstants {
     
     // 错误消息
     enum ErrorMessages {
-        static let fileAccessError = "无法访问SSH配置文件。请确保应用有权限访问您的.ssh目录。"
-        static let invalidConfigFormat = "配置文件格式无效。某些条目可能无法正确解析。"
-        static let duplicateHostError = "主机名已存在，请使用不同的名称。"
-        static let emptyHostError = "主机名不能为空。"
-        static let backupFailed = "备份失败，请检查文件权限。"
-        static let restoreFailed = "恢复失败，备份文件可能已损坏。"
+        static let fileAccessError = "message.error.file.access".localized
+        static let invalidConfigFormat = "message.error.invalid.format".localized
+        static let duplicateHostError = "message.error.duplicate.host".localized
+        static let emptyHostError = "message.error.empty.host".localized
+        static let backupFailed = "message.error.backup.failed".localized
+        static let restoreFailed = "message.error.restore.failed".localized
     }
 } 

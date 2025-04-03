@@ -26,13 +26,13 @@ class SSHConfigParser {
             }
             
             // 分割每行为关键字和值
-            let components = trimmedLine.components(separatedBy: .whitespaces)
-                                       .filter { !$0.isEmpty }
+            let components = trimmedLine.split(maxSplits: 1, whereSeparator: { $0.isWhitespace })
+                                       .map(String.init)
             
             guard components.count >= 2 else { continue }
             
             let keyword = components[0].lowercased()
-            let value = components[1...].joined(separator: " ")
+            let value = components[1].trimmingCharacters(in: .whitespaces)
             
             // 检查是否是Host行
             if keyword == "host" {

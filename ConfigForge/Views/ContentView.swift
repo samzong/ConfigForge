@@ -444,6 +444,7 @@ struct ModernEntryEditorView: View {
                     // 移除"添加其他属性"按钮
                 }
                 .padding()
+                .animation(.easeInOut(duration: 0.2), value: viewModel.isEditing)
             }
         }
         .background(Color(.windowBackgroundColor))
@@ -457,11 +458,32 @@ struct ModernEntryEditorView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             
-            // 统一 UI 样式：无论是否编辑，都显示TextField，只是根据状态控制是否可编辑
-            TextField(placeholder, text: value)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .disabled(!viewModel.isEditing)
-                .opacity(viewModel.isEditing ? 1.0 : 0.8)
+            // 统一 UI 样式：使用ZStack叠加TextField和Text，根据状态显示不同视图
+            ZStack(alignment: .leading) {
+                // 两种状态下都使用相同的底层样式，保持视觉一致性
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(Color(NSColor.textBackgroundColor))
+                    .frame(height: 30)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+                
+                // 编辑状态时显示可编辑的TextField
+                if viewModel.isEditing {
+                    TextField(placeholder, text: value)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 4)
+                } else {
+                    // 非编辑状态时显示只读的Text
+                    Text(value.wrappedValue.isEmpty ? placeholder : value.wrappedValue)
+                        .foregroundColor(value.wrappedValue.isEmpty ? .gray.opacity(0.5) : .primary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 4)
+                }
+            }
+            .frame(height: 30)
         }
         .padding()
         .background(Color.secondary.opacity(0.05))
@@ -476,25 +498,48 @@ struct ModernEntryEditorView: View {
                 .foregroundColor(.primary)
             
             HStack {
-                TextField("property.identityfile.placeholder".localized, text: Binding(
-                    get: { editedProperties["IdentityFile"] ?? "" },
-                    set: { editedProperties["IdentityFile"] = $0 }
-                ))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .disabled(!viewModel.isEditing)
-                .opacity(viewModel.isEditing ? 1.0 : 0.8)
-                
-                // 文件选择器按钮只在编辑模式下显示
-                if viewModel.isEditing {
-                    Button(action: {
-                        print("文件选择按钮被点击")
-                        selectIdentityFile()
-                    }) {
-                        Image(systemName: "folder")
-                            .foregroundColor(.blue)
+                // 使用与其他输入字段相同的ZStack结构
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(Color(NSColor.textBackgroundColor))
+                        .frame(height: 30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                    
+                    // 编辑状态下的TextField
+                    if viewModel.isEditing {
+                        TextField("property.identityfile.placeholder".localized, text: Binding(
+                            get: { editedProperties["IdentityFile"] ?? "" },
+                            set: { editedProperties["IdentityFile"] = $0 }
+                        ))
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 4)
+                    } else {
+                        // 非编辑状态下的Text
+                        let value = editedProperties["IdentityFile"] ?? ""
+                        Text(value.isEmpty ? "property.identityfile.placeholder".localized : value)
+                            .foregroundColor(value.isEmpty ? .gray.opacity(0.5) : .primary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
                     }
-                    .buttonStyle(BorderedButtonStyle())
                 }
+                .frame(height: 30)
+                
+                // 文件选择器按钮保持在同样位置但根据状态更改透明度
+                Button(action: {
+                    if viewModel.isEditing {
+                        selectIdentityFile()
+                    }
+                }) {
+                    Image(systemName: "folder")
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(BorderedButtonStyle())
+                .disabled(!viewModel.isEditing)
+                .opacity(viewModel.isEditing ? 1.0 : 0.5)
             }
         }
         .padding()
@@ -523,40 +568,50 @@ struct ModernEntryEditorView: View {
         }
     }
     
-    // 顶部信息栏，优化new-host输入框显示
+    // 顶部信息栏，优化布局稳定性
     private var headerView: some View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                if viewModel.isEditing {
+                // 使用ZStack保持一致的高度和位置，避免布局跳动
+                ZStack {
                     // 获取本地化的新主机标识
                     let newHostString = "host.new".localized
                     
-                    // 让new-host输入框更加明显
-                    TextField("host.enter.name".localized, text: $editedHost)
-                        .font(.title2.bold())
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(maxWidth: 300)
-                        .onChange(of: editedHost) { newValue in
-                            // 验证主机名，使用Task.detached避免视图更新过程中直接修改状态
-                            Task {
-                                let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
-                                let isValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
-                                
-                                await MainActor.run {
-                                    hostValid = isValid
+                    // 编辑状态时显示TextField
+                    if viewModel.isEditing {
+                        TextField("host.enter.name".localized, text: $editedHost)
+                            .font(.title2.bold())
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .frame(maxWidth: 300, minHeight: 40)
+                            .padding(4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(entry.host == newHostString ? Color.accentColor.opacity(0.1) : Color.clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(entry.host == newHostString ? Color.accentColor : Color.clear, lineWidth: 1)
+                                    )
+                            )
+                            .onChange(of: editedHost) { newValue in
+                                // 验证主机名，使用Task.detached避免视图更新过程中直接修改状态
+                                Task {
+                                    let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
+                                    let isValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
+                                    
+                                    await MainActor.run {
+                                        hostValid = isValid
+                                    }
                                 }
                             }
-                        }
-                        // 如果是new-host，添加视觉提示
-                        .background(entry.host == newHostString ? Color.accentColor.opacity(0.1) : Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .stroke(entry.host == newHostString ? Color.accentColor : Color.clear, lineWidth: 1)
-                        )
-                } else {
-                    Text(entry.host)
-                        .font(.title2.bold())
+                    } else {
+                        // 非编辑状态时显示Text
+                        Text(entry.host)
+                            .font(.title2.bold())
+                            .frame(maxWidth: 300, minHeight: 40, alignment: .leading)
+                            .padding(4)
+                    }
                 }
+                .frame(height: 40)
                 
                 HStack {
                     if !entry.hostname.isEmpty {
@@ -593,14 +648,13 @@ struct ModernEntryEditorView: View {
                     }
                     
                     // 使用延迟调用避免在视图更新周期中切换状态
-                    Task {
-                        try? await Task.sleep(for: .milliseconds(10))
-                        await MainActor.run {
-                            viewModel.isEditing.toggle()
-                        }
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.isEditing.toggle()
                     }
                 } else {
-                    viewModel.isEditing.toggle()
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.isEditing.toggle()
+                    }
                 }
             }) {
                 Text(viewModel.isEditing ? "app.save".localized : "app.edit".localized)
@@ -613,6 +667,7 @@ struct ModernEntryEditorView: View {
         }
         .padding()
         .background(Color(NSColor.textBackgroundColor))
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isEditing)
     }
     
     // 获取除基本属性外的其他属性键

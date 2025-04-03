@@ -282,13 +282,7 @@ struct EntryEditorView: View {
    open ConfigForge.xcodeproj
    ```
 
-3. 配置开发团队:
-   - 打开 Xcode
-   - 导航到 Project Navigator
-   - 选择 ConfigForge 项目
-   - 在 "Signing & Capabilities" 选项卡中配置开发团队
-
-4. 构建和运行:
+3. 构建和运行:
    - 选择 "My Mac" 作为运行目标
    - 点击运行按钮或使用 ⌘+R 快捷键
 
@@ -312,54 +306,9 @@ struct EntryEditorView: View {
    git push origin feature/your-feature-name
    ```
 
-5. 创建 Pull Request 进行代码审查
+## 测试策略
 
-## 7. 文件结构
-
-```
-ConfigForge/
-├── ConfigForge.xcodeproj/
-├── ConfigForge/
-│   ├── App/
-│   │   └── ConfigForgeApp.swift
-│   ├── Models/
-│   │   └── SSHConfigEntry.swift
-│   ├── ViewModels/
-│   │   └── SSHConfigViewModel.swift
-│   ├── Views/
-│   │   ├── ContentView.swift
-│   │   ├── EntryListView.swift
-│   │   ├── EntryEditorView.swift
-│   │   └── Components/
-│   │       ├── EditorControls.swift
-│   │       ├── HostEditor.swift
-│   │       └── PropertiesEditor.swift
-│   ├── Services/
-│   │   ├── SSHConfigFileManager.swift
-│   │   └── SSHConfigParser.swift
-│   ├── Utilities/
-│   │   ├── Extensions/
-│   │   │   └── String+Extensions.swift
-│   │   └── Constants.swift
-│   ├── Resources/
-│   │   ├── Assets.xcassets/
-│   │   └── Info.plist
-│   └── Preview Content/
-│       └── PreviewData.swift
-├── ConfigForgeTests/
-│   ├── Services/
-│   │   ├── SSHConfigFileManagerTests.swift
-│   │   └── SSHConfigParserTests.swift
-│   └── ViewModels/
-│       └── SSHConfigViewModelTests.swift
-├── DEVELOPMENT.md
-├── LICENSE
-└── README.md
-```
-
-## 8. 测试策略
-
-### 8.1 单元测试
+### 单元测试
 
 使用 XCTest 框架为核心组件编写单元测试:
 
@@ -367,7 +316,7 @@ ConfigForge/
 - **服务测试**: 测试 `SSHConfigFileManager` 和 `SSHConfigParser` 的功能
 - **视图模型测试**: 确保 `SSHConfigViewModel` 正确处理业务逻辑
 
-### 8.2 UI 测试
+### UI 测试
 
 使用 XCTest 的 UI 测试功能:
 
@@ -375,47 +324,12 @@ ConfigForge/
 - 验证 UI 组件的行为和交互
 - 确保正确显示错误信息和状态
 
-### 8.3 集成测试
-
-- 测试各组件之间的协作
-- 验证完整的数据流程
-- 模拟文件系统交互
-
-## 10. 版本规划
-
-### 10.1 MVP (当前目标)
-
-- 基本的 SSH 配置条目管理
-- 搜索和排序功能
-- 基础语法高亮
-- 手动备份和恢复功能
-- 支持多种 macOS 版本 (10.15 Catalina 及以上)
-- 支持 Intel 和 Apple Silicon 芯片架构
-
-### 10.2 未来版本
-
-- 高级语法验证和自动完成
-- SSH 密钥管理
-
-## 11. 贡献指南
-
-### 11.1 代码规范
+## 代码规范
 
 - 遵循 Swift API 设计指南
 - 使用 SwiftLint 保持代码风格一致
 - 为所有公共 API 提供文档注释
 
-### 11.2 Pull Request 流程
-
-1. 确保所有测试通过
-2. 更新文档（如有必要）
-3. 填写 PR 模板
-4. 请求至少一名代码审查者
-5. 解决审查意见
-6. 等待 CI 验证通过
-7. 合并到 `main` 分支
-
-## 12. 资源和参考
 
 - [Swift 官方文档](https://swift.org/documentation/)
 - [SwiftUI 官方文档](https://developer.apple.com/documentation/swiftui)

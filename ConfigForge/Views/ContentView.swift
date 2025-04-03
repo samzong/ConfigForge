@@ -124,24 +124,7 @@ struct ContentView: View {
     // 主机上下文菜单
     private func hostContextMenu(for entry: SSHConfigEntry) -> some View {
         Group {
-            // 分组子菜单
-            Menu("移动到...") {
-                Button("全部") {
-                    viewModel.setGroup(forEntry: entry.id, group: .other)
-                }
-                
-                Divider()
-                
-                ForEach(HostGroup.allCases) { group in
-                    if group != .other {
-                        Button(group.rawValue) {
-                            viewModel.setGroup(forEntry: entry.id, group: group)
-                        }
-                    }
-                }
-            }
-            
-            Divider()
+            // 移除分组子菜单
             
             Button("删除", role: .destructive) {
                 viewModel.deleteEntry(id: entry.id)
@@ -335,10 +318,6 @@ struct HostRowModern: View {
     let entry: SSHConfigEntry
     @Binding var isSelected: Bool
     @ObservedObject var viewModel: SSHConfigViewModel
-    
-    private var hostGroup: HostGroup {
-        HostGroup.fromTag(entry.properties["Group"])
-    }
     
     var body: some View {
         Button(action: {
@@ -634,7 +613,7 @@ struct ModernEntryEditorView: View {
     
     // 获取除基本属性外的其他属性键
     private var otherPropertyKeys: [String] {
-        let basicKeys = ["HostName", "User", "Port", "IdentityFile", "PreferredAuthentications", "Group"]
+        let basicKeys = ["HostName", "User", "Port", "IdentityFile", "PreferredAuthentications"]
         return editedProperties.keys
             .filter { !basicKeys.contains($0) }
             .sorted()

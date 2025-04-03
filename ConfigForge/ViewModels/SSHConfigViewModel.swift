@@ -14,23 +14,6 @@ enum MessageType {
     case info
 }
 
-// 主机分组枚举
-enum HostGroup: String, CaseIterable, Identifiable {
-    case personal = "个人"
-    case work = "工作"
-    case development = "开发"
-    case production = "生产"
-    case other = "其他"
-    
-    var id: String { self.rawValue }
-    
-    static func fromTag(_ tag: String?) -> HostGroup {
-        guard let tag = tag else { return .other }
-        
-        return HostGroup.allCases.first { $0.rawValue == tag } ?? .other
-    }
-}
-
 // 可识别的消息结构体
 struct AppMessage: Identifiable {
     let id: UUID
@@ -52,7 +35,6 @@ class SSHConfigViewModel: ObservableObject {
     @Published var isEditing: Bool = false
     @Published var errorMessage: String?
     @Published var appMessage: AppMessage?
-    @Published var selectedGroup: HostGroup? = nil
     
     let fileManager = SSHConfigFileManager()
     let parser = SSHConfigParser()
@@ -66,54 +48,13 @@ class SSHConfigViewModel: ObservableObject {
     var filteredEntries: [SSHConfigEntry] {
         var filtered = entries
         
-        // 先按组过滤
-        if let group = selectedGroup {
-            filtered = filtered.filter { entry in
-                // 查找Group标签
-                if let groupTag = entry.properties["Group"] {
-                    return groupTag == group.rawValue
-                }
-                return group == .other // 如果没有Group标签，归为"其他"
-            }
-        }
-        
-        // 再按搜索文本过滤
+        // 按搜索文本过滤
         if !searchText.isEmpty {
             filtered = filtered.filter { $0.host.localizedCaseInsensitiveContains(searchText) }
         }
         
         // 最后按主机名排序
         return filtered.sorted { $0.host < $1.host }
-    }
-    
-    // 获取特定组内的主机数量
-    func entryCount(forGroup group: HostGroup) -> Int {
-        if group == .other {
-            return entries.filter { $0.properties["Group"] == nil }.count
-        } else {
-            return entries.filter { $0.properties["Group"] == group.rawValue }.count
-        }
-    }
-    
-    // 设置条目所属组
-    func setGroup(forEntry entryId: UUID, group: HostGroup) {
-        guard let index = entries.firstIndex(where: { $0.id == entryId }) else { return }
-        
-        var updatedProperties = entries[index].properties
-        
-        if group == .other {
-            updatedProperties.removeValue(forKey: "Group")
-        } else {
-            updatedProperties["Group"] = group.rawValue
-        }
-        
-        let updatedEntry = SSHConfigEntry(
-            host: entries[index].host,
-            properties: updatedProperties
-        )
-        
-        entries[index] = updatedEntry
-        saveConfig()
     }
     
     // 设置消息

@@ -42,7 +42,7 @@ jobs:
       - name: Generate Changelog
         run: |
           gem install github_changelog_generator
-          github_changelog_generator -u samzong -p ConfigForge --token ${{ secrets.GITHUB_TOKEN }} --future-release ${{ env.VERSION }}
+          github_changelog_generator -u samzong -p ConfigForge --token ${{ secrets.GITHUB_TOKEN }} --future-release ${{ env.VERSION }} --configure-sections
           cat CHANGELOG.md > release_notes.md
 
       - name: Create Release

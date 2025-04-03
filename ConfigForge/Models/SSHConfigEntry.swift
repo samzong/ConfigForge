@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SSHConfigEntry: Identifiable, Hashable {
+struct SSHConfigEntry: Identifiable, Hashable, Sendable {
     let id = UUID()
     var host: String
     var properties: [String: String]

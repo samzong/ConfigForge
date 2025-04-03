@@ -35,6 +35,17 @@ enum AppConstants {
         static let entryNotFoundError = "message.error.entry.not.found".localized
     }
     
+    // 成功消息
+    enum SuccessMessages {
+        static let configLoaded = "message.success.config.loaded".localized
+        static let configSaved = "message.success.config.saved".localized
+        static let entryAdded = "message.success.entry.added".localized
+        static let entryUpdated = "message.success.entry.updated".localized
+        static let entryDeleted = "message.success.entry.deleted".localized
+        static let configBackedUp = "message.success.config.backup".localized
+        static let configRestored = "message.success.config.restore".localized
+    }
+    
     // 常用的SSH配置属性
     static let commonSSHProperties = [
         "HostName", 

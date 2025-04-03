@@ -6,6 +6,5 @@ unreleased-label=## [未发布]
 bug-labels=bug,Bug,问题
 enhancement-labels=enhancement,Enhancement,feature,功能,优化
 exclude-labels=wontfix,duplicate,question,invalid,doc
-exclude-tags-regex=v0\.0\.[0-9]
 add-sections={"优化":{"prefix":"### 优化","labels":["优化","improvement"]},"文档":{"prefix":"### 文档","labels":["文档","documentation"]}}
 since-tag=v0.0.1

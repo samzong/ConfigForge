@@ -7,6 +7,7 @@
 "app.confirm" = "Confirm";
 "app.error" = "Error";
 "app.success" = "Success";
+"app.save.help" = "Save current configuration to SSH file";
 
 /* Language */
 "app.language" = "Language";
@@ -46,9 +47,22 @@
 "message.host.deleted" = "Deleted %@";
 "message.backup.success" = "Configuration backed up to %@";
 "message.restore.success" = "Configuration restored from backup";
+
+/* Success Messages */
+"message.success.config.loaded" = "Configuration loaded successfully";
+"message.success.config.saved" = "Configuration saved successfully";
+"message.success.entry.added" = "New host configuration added";
+"message.success.entry.updated" = "Configuration updated";
+"message.success.entry.deleted" = "Configuration deleted";
+"message.success.config.backup" = "Configuration backed up successfully";
+"message.success.config.restore" = "Configuration restored successfully";
+
+/* Error Messages */
 "message.error.file.access" = "File access error";
 "message.error.empty.host" = "Host name cannot be empty";
 "message.error.duplicate.host" = "A host with this name already exists";
+"message.error.invalid.port" = "Invalid port number";
+"message.error.permission.denied" = "Permission denied";
 "message.error.backup.failed" = "Backup failed";
 "message.error.restore.failed" = "Restore failed";
 "message.error.entry.not.found" = "Entry not found";

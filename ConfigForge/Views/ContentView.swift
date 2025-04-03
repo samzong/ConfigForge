@@ -74,7 +74,6 @@ struct ContentView: View {
                 List(viewModel.filteredEntries, selection: Binding(
                     get: { viewModel.selectedEntry },
                     set: { newValue in
-                        // 使用ViewModel提供的安全方法
                         viewModel.safelySelectEntry(newValue)
                     }
                 )) { entry in
@@ -96,24 +95,13 @@ struct ContentView: View {
                 Button(action: {
                     let newHostString = "host.new".localized
                     let newEntry = SSHConfigEntry(host: newHostString, properties: [:])
-
-                    // 先将选中项设置为nil，以避免界面更新冲突
-                    viewModel.safelySelectEntry(nil)
+                    viewModel.entries.append(newEntry)
+                    viewModel.selectedEntry = newEntry
                     
-                    // 创建新条目，分两步进行
-                    Task {
-                        // 等待先前的状态更新完成
-                        try? await Task.sleep(for: .milliseconds(100))
-                        
-                        await MainActor.run {
-                            viewModel.selectedEntry = newEntry
-                            // 短暂延迟后设置编辑模式
-                            Task {
-                                try? await Task.sleep(for: .milliseconds(50))
-                                await MainActor.run {
-                                    viewModel.isEditing = true
-                                }
-                            }
+                    // 立即进入编辑模式
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.isEditing = true
                         }
                     }
                 }) {
@@ -147,15 +135,12 @@ struct ContentView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .toolbar {
-                // 移除了保存按钮
-            }
         }
         .frame(minWidth: 800, minHeight: 500)
         .background(Color(.windowBackgroundColor))
         .fileExporter(
             isPresented: $isShowingBackupFilePicker,
-            document: SSHConfigDocument(configContent: viewModel.parser.formatConfig(entries: viewModel.entries)),
+            document: SSHConfigDocument(configContent: formatConfigContent(viewModel: viewModel)),
             contentType: .text,
             defaultFilename: AppConstants.defaultBackupFileName
         ) { result in
@@ -163,7 +148,7 @@ struct ContentView: View {
             case .success(let url):
                 viewModel.backupConfig(to: url)
             case .failure(let error):
-                viewModel.setMessage("message.error.export.failed".localized(error.localizedDescription), type: .error)
+                ErrorHandler.handle(error, messageHandler: viewModel.getMessageHandler())
             }
         }
         .fileImporter(
@@ -177,54 +162,18 @@ struct ContentView: View {
                     viewModel.restoreConfig(from: url)
                 }
             case .failure(let error):
-                viewModel.setMessage("message.error.import.failed".localized(error.localizedDescription), type: .error)
+                ErrorHandler.handle(error, messageHandler: viewModel.getMessageHandler())
             }
         }
-        .overlay {
-            // 消息提示
-            if let message = viewModel.appMessage {
-                VStack {
-                    MessageBanner(message: message) {
-                        viewModel.appMessage = nil
-                    }
-                    Spacer()
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.easeInOut, value: viewModel.appMessage != nil)
-            }
-        }
-        .overlay {
-            // 加载状态指示器
-            if viewModel.isLoading {
-                ZStack {
-                    Color.black.opacity(0.3)
-                        .edgesIgnoringSafeArea(.all)
-                    
-                    VStack(spacing: 15) {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        
-                        Text("app.loading".localized)
-                            .font(.headline)
-                            .foregroundColor(.white)
-                    }
-                    .padding(25)
-                    .background(Color.gray.opacity(0.8))
-                    .cornerRadius(10)
-                }
-            }
-        }
-        .alert(item: Binding(
-            get: { viewModel.errorMessage != nil ? ErrorMessage(message: viewModel.errorMessage!) : nil },
-            set: { viewModel.errorMessage = $0?.message }
-        )) { error in
-            Alert(
-                title: Text("app.error".localized), 
-                message: Text(error.message), 
-                dismissButton: .default(Text("app.confirm".localized))
-            )
-        }
+        .loadingOverlay(isLoading: viewModel.getAsyncUtility().isLoading)
+        .messageOverlay(messageHandler: viewModel.getMessageHandler())
+    }
+    
+    // 在ContentView中创建一个格式化内容的方法
+    private func formatConfigContent(viewModel: SSHConfigViewModel) -> String {
+        // 通过Task运行同步代码以获取格式化内容
+        let content = viewModel.parser.formatConfig(entries: viewModel.entries)
+        return content
     }
 }
 
@@ -633,7 +582,7 @@ struct ModernEntryEditorView: View {
             Button(action: {
                 if viewModel.isEditing {
                     if !hostValid || editedHost.isEmpty {
-                        viewModel.setMessage("host.invalid".localized, type: .error)
+                        viewModel.getMessageHandler().show(AppConstants.ErrorMessages.emptyHostError, type: .error)
                         return
                     }
                     
@@ -641,7 +590,12 @@ struct ModernEntryEditorView: View {
                     let newHostString = "host.new".localized
                     
                     // 保存编辑
-                    if entry.id == UUID() || entry.host == newHostString { // 新条目
+                    if entry.host == newHostString { // 新条目
+                        // 移除临时添加的条目
+                        if let index = viewModel.entries.firstIndex(where: { $0.id == entry.id }) {
+                            viewModel.entries.remove(at: index)
+                        }
+                        // 使用正式的添加方法
                         viewModel.addEntry(host: editedHost, properties: editedProperties)
                     } else {
                         viewModel.updateEntry(id: entry.id, host: editedHost, properties: editedProperties)

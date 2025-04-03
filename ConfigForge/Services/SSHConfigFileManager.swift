@@ -58,27 +58,27 @@ class SSHConfigFileManager {
     }
     
     // 读取配置文件
-    func readConfigFile() -> Result<String, Error> {
+    func readConfigFile() async throws -> String {
         // 先检查文件访问权限
         let accessCheck = checkFileAccess()
         if case .failure(let error) = accessCheck {
-            return .failure(error)
+            throw error
         }
         
         do {
             let content = try String(contentsOfFile: sshConfigPath, encoding: .utf8)
-            return .success(content)
+            return content
         } catch {
-            return .failure(error)
+            throw error
         }
     }
     
     // 写入配置文件
-    func writeConfigFile(content: String) -> Result<Void, Error> {
+    func writeConfigFile(content: String) async throws {
         // 先检查文件访问权限
         let accessCheck = checkFileAccess()
         if case .failure(let error) = accessCheck {
-            return .failure(error)
+            throw error
         }
         
         // 创建临时备份，避免写入中断导致文件损坏
@@ -96,8 +96,6 @@ class SSHConfigFileManager {
             if fileManager.fileExists(atPath: backupPath) {
                 try fileManager.removeItem(atPath: backupPath)
             }
-            
-            return .success(())
         } catch {
             // 写入失败，尝试从备份恢复
             if fileManager.fileExists(atPath: backupPath) {
@@ -113,68 +111,33 @@ class SSHConfigFileManager {
                     print("备份恢复失败: \(error)")
                 }
             }
-            return .failure(error)
+            throw error
         }
     }
     
     // 备份配置文件
-    func backupConfigFile(to destination: URL) -> Result<URL, Error> {
-        let sourceURL = URL(fileURLWithPath: sshConfigPath)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
-        let timestamp = dateFormatter.string(from: Date())
-        
-        let backupFileName = "config_backup_\(timestamp)"
-        let backupURL = destination.appendingPathComponent(backupFileName)
-        
+    func backupConfigFile(content: String, to destination: URL) async throws {
+        // 写入内容到目标文件
         do {
-            try fileManager.copyItem(at: sourceURL, to: backupURL)
-            return .success(backupURL)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
+            let timestamp = dateFormatter.string(from: Date())
+            
+            let backupFileName = "config_backup_\(timestamp)"
+            let backupURL = destination.appendingPathComponent(backupFileName)
+            
+            try content.write(to: backupURL, atomically: true, encoding: .utf8)
         } catch {
-            return .failure(error)
+            throw error
         }
     }
     
     // 从备份恢复配置文件
-    func restoreConfigFile(from source: URL) -> Result<Void, Error> {
-        let destinationURL = URL(fileURLWithPath: sshConfigPath)
-        
+    func restoreConfigFile(from source: URL) async throws -> String {
         do {
-            // 尝试创建原文件的备份，以防恢复失败
-            let backupPath = sshConfigPath + ".restore_bak"
-            if fileManager.fileExists(atPath: sshConfigPath) {
-                try fileManager.copyItem(atPath: sshConfigPath, toPath: backupPath)
-            }
-            
-            // 如果目标文件存在，先删除
-            if fileManager.fileExists(atPath: sshConfigPath) {
-                try fileManager.removeItem(at: destinationURL)
-            }
-            
-            try fileManager.copyItem(at: source, to: destinationURL)
-            
-            // 恢复成功，删除临时备份
-            if fileManager.fileExists(atPath: backupPath) {
-                try fileManager.removeItem(atPath: backupPath)
-            }
-            
-            return .success(())
+            return try String(contentsOf: source, encoding: .utf8)
         } catch {
-            // 恢复失败，尝试从临时备份恢复
-            let backupPath = sshConfigPath + ".restore_bak"
-            if fileManager.fileExists(atPath: backupPath) {
-                do {
-                    // 如果目标文件存在，先删除它，然后复制备份
-                    if fileManager.fileExists(atPath: sshConfigPath) {
-                        try fileManager.removeItem(atPath: sshConfigPath)
-                    }
-                    try fileManager.copyItem(atPath: backupPath, toPath: sshConfigPath)
-                    try fileManager.removeItem(atPath: backupPath)
-                } catch {
-                    print("恢复备份失败: \(error)")
-                }
-            }
-            return .failure(error)
+            throw error
         }
     }
 }

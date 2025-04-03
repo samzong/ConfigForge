@@ -23,6 +23,31 @@ struct ContentView: View {
         HStack(spacing: 0) {
             // 左侧侧边栏
             VStack(spacing: 0) {
+                // 添加Logo和应用名称以及顶部按钮
+                HStack {
+                    Image("Logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 40)
+                    Text("ConfigForge")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.primary)
+                    Spacer()
+                    
+                    // 保存按钮
+                    Button(action: {
+                        viewModel.saveConfig()
+                    }) {
+                        Text("app.save".localized)
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .controlSize(.small)
+                    .keyboardShortcut("s", modifiers: .command)
+                    .help("app.save.help".localized)
+                }
+                .padding([.horizontal, .top], 12)
+                .padding(.bottom, 4)
+                
                 // 搜索区域
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -46,18 +71,22 @@ struct ContentView: View {
                 .padding([.horizontal, .top], 8)
                 
                 // 主机列表区域
-                List(selection: $viewModel.selectedEntry) {
-                    ForEach(viewModel.filteredEntries) { entry in
-                        HostRowView(entry: entry)
-                            .tag(entry)
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    viewModel.deleteEntry(id: entry.id)
-                                } label: {
-                                    Label("app.delete".localized, systemImage: "trash")
-                                }
-                            }
+                List(viewModel.filteredEntries, selection: Binding(
+                    get: { viewModel.selectedEntry },
+                    set: { newValue in
+                        // 使用ViewModel提供的安全方法
+                        viewModel.safelySelectEntry(newValue)
                     }
+                )) { entry in
+                    HostRowView(entry: entry)
+                        .tag(entry)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                viewModel.deleteEntry(id: entry.id)
+                            } label: {
+                                Label("app.delete".localized, systemImage: "trash")
+                            }
+                        }
                 }
                 .listStyle(.sidebar)
                 
@@ -67,8 +96,26 @@ struct ContentView: View {
                 Button(action: {
                     let newHostString = "host.new".localized
                     let newEntry = SSHConfigEntry(host: newHostString, properties: [:])
-                    viewModel.isEditing = true 
-                    viewModel.selectedEntry = newEntry
+
+                    // 先将选中项设置为nil，以避免界面更新冲突
+                    viewModel.safelySelectEntry(nil)
+                    
+                    // 创建新条目，分两步进行
+                    Task {
+                        // 等待先前的状态更新完成
+                        try? await Task.sleep(for: .milliseconds(100))
+                        
+                        await MainActor.run {
+                            viewModel.selectedEntry = newEntry
+                            // 短暂延迟后设置编辑模式
+                            Task {
+                                try? await Task.sleep(for: .milliseconds(50))
+                                await MainActor.run {
+                                    viewModel.isEditing = true
+                                }
+                            }
+                        }
+                    }
                 }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
@@ -101,15 +148,7 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity)
             .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    Button(action: {
-                        viewModel.saveConfig()
-                    }) {
-                        Label("app.save".localized, systemImage: "square.and.arrow.down")
-                    }
-                    .keyboardShortcut("s", modifiers: .command)
-                    .help("app.save.help".localized)
-                }
+                // 移除了保存按钮
             }
         }
         .frame(minWidth: 800, minHeight: 500)
@@ -154,6 +193,28 @@ struct ContentView: View {
                 .animation(.easeInOut, value: viewModel.appMessage != nil)
             }
         }
+        .overlay {
+            // 加载状态指示器
+            if viewModel.isLoading {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .edgesIgnoringSafeArea(.all)
+                    
+                    VStack(spacing: 15) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        
+                        Text("app.loading".localized)
+                            .font(.headline)
+                            .foregroundColor(.white)
+                    }
+                    .padding(25)
+                    .background(Color.gray.opacity(0.8))
+                    .cornerRadius(10)
+                }
+            }
+        }
         .alert(item: Binding(
             get: { viewModel.errorMessage != nil ? ErrorMessage(message: viewModel.errorMessage!) : nil },
             set: { viewModel.errorMessage = $0?.message }
@@ -177,8 +238,8 @@ struct HostRowView: View {
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.primary)
             
-            if let hostname = entry.hostname, !hostname.isEmpty {
-                Text(hostname)
+            if !entry.hostname.isEmpty {
+                Text(entry.hostname)
                     .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
@@ -269,6 +330,7 @@ struct EmptyEditorViewModern: View {
                 .font(.system(size: 56))
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
+                .padding(.bottom, 10)
             
             LocalizedText("editor.empty.title")
                 .font(.title3)
@@ -356,7 +418,7 @@ struct ModernEntryEditorView: View {
                     // 端口配置项
                     configPropertyView(
                         label: "property.port".localized,
-                        systemImage: "link",
+                        systemImage: "number.circle",
                         value: Binding(
                             get: { editedProperties["Port"] ?? "22" },
                             set: { editedProperties["Port"] = $0 }
@@ -386,22 +448,6 @@ struct ModernEntryEditorView: View {
         }
         .background(Color(.windowBackgroundColor))
         .id(entry.id)
-        .fileImporter(
-            isPresented: $isShowingFilePicker,
-            allowedContentTypes: [.item],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    // 使用文件路径
-                    editedProperties[currentEditingKey] = url.path
-                }
-            case .failure:
-                // 处理错误情况
-                break
-            }
-        }
     }
     
     // 统一编辑和非编辑状态下的UI样式
@@ -441,8 +487,8 @@ struct ModernEntryEditorView: View {
                 // 文件选择器按钮只在编辑模式下显示
                 if viewModel.isEditing {
                     Button(action: {
-                        currentEditingKey = "IdentityFile"
-                        isShowingFilePicker = true
+                        print("文件选择按钮被点击")
+                        selectIdentityFile()
                     }) {
                         Image(systemName: "folder")
                             .foregroundColor(.blue)
@@ -454,6 +500,27 @@ struct ModernEntryEditorView: View {
         .padding()
         .background(Color.secondary.opacity(0.05))
         .cornerRadius(8)
+    }
+    
+    // 使用NSOpenPanel选择文件
+    private func selectIdentityFile() {
+        let openPanel = NSOpenPanel()
+        openPanel.title = "选择SSH密钥文件"
+        openPanel.showsResizeIndicator = true
+        openPanel.showsHiddenFiles = true  // 显示隐藏文件，因为.ssh目录通常是隐藏的
+        openPanel.canChooseDirectories = false
+        openPanel.canCreateDirectories = false
+        openPanel.allowsMultipleSelection = false
+        openPanel.allowedContentTypes = [.text, .data]  // 允许文本和数据文件
+        
+        openPanel.begin { (result) in
+            if result == .OK, let url = openPanel.url {
+                DispatchQueue.main.async {
+                    self.editedProperties["IdentityFile"] = url.path
+                    print("已选择文件路径: \(url.path)")
+                }
+            }
+        }
     }
     
     // 顶部信息栏，优化new-host输入框显示
@@ -470,9 +537,15 @@ struct ModernEntryEditorView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .frame(maxWidth: 300)
                         .onChange(of: editedHost) { newValue in
-                            // 验证主机名
-                            let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
-                            hostValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
+                            // 验证主机名，使用Task.detached避免视图更新过程中直接修改状态
+                            Task {
+                                let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
+                                let isValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
+                                
+                                await MainActor.run {
+                                    hostValid = isValid
+                                }
+                            }
                         }
                         // 如果是new-host，添加视觉提示
                         .background(entry.host == newHostString ? Color.accentColor.opacity(0.1) : Color.clear)
@@ -486,13 +559,13 @@ struct ModernEntryEditorView: View {
                 }
                 
                 HStack {
-                    if let hostname = entry.hostname, !hostname.isEmpty {
-                        Text(hostname)
+                    if !entry.hostname.isEmpty {
+                        Text(entry.hostname)
                             .foregroundColor(.secondary)
                     }
                     
-                    if let user = entry.user, !user.isEmpty {
-                        Text("@\(user)")
+                    if !entry.user.isEmpty {
+                        Text("@\(entry.user)")
                             .foregroundColor(.secondary)
                     }
                 }
@@ -518,8 +591,17 @@ struct ModernEntryEditorView: View {
                     } else {
                         viewModel.updateEntry(id: entry.id, host: editedHost, properties: editedProperties)
                     }
+                    
+                    // 使用延迟调用避免在视图更新周期中切换状态
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(10))
+                        await MainActor.run {
+                            viewModel.isEditing.toggle()
+                        }
+                    }
+                } else {
+                    viewModel.isEditing.toggle()
                 }
-                viewModel.isEditing.toggle()
             }) {
                 Text(viewModel.isEditing ? "app.save".localized : "app.edit".localized)
                     .frame(minWidth: 80)

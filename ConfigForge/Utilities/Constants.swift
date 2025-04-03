@@ -30,5 +30,20 @@ enum AppConstants {
         static let emptyHostError = "message.error.empty.host".localized
         static let backupFailed = "message.error.backup.failed".localized
         static let restoreFailed = "message.error.restore.failed".localized
+        static let invalidPortError = "message.error.invalid.port".localized
+        static let permissionDeniedError = "message.error.permission.denied".localized
+        static let entryNotFoundError = "message.error.entry.not.found".localized
     }
+    
+    // 常用的SSH配置属性
+    static let commonSSHProperties = [
+        "HostName", 
+        "User", 
+        "Port", 
+        "IdentityFile",
+        "ProxyCommand",
+        "ServerAliveInterval",
+        "ForwardAgent",
+        "IdentitiesOnly"
+    ]
 } 

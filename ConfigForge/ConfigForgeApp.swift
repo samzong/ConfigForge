@@ -42,7 +42,7 @@ struct ConfigForgeApp: App {
                 }
                 
                 Button("app.language.chinese".localized) {
-                    appLanguage = "zh-Hans"
+                    appLanguage = "zh"
                     restartAppAlert()
                 }
             }

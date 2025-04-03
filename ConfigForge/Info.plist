@@ -9,5 +9,15 @@
         <string>en</string>
         <string>zh-Hans</string>
     </array>
+    <key>CFBundleDisplayName</key>
+    <string>ConfigForge</string>
+    <key>CFBundleName</key>
+    <string>ConfigForge</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.samzong.ConfigForge</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
 </dict>
 </plist> 

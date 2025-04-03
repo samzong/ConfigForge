@@ -13,20 +13,44 @@ struct SSHConfigEntry: Identifiable, Hashable {
     var properties: [String: String]
     
     // 计算属性用于直接访问常用配置
-    var hostname: String? { 
+    var hostname: String { 
         properties["HostName"] ?? ""
     }
     
-    var user: String? { 
+    var user: String { 
         properties["User"] ?? ""
     }
     
-    var port: String? { 
+    var port: String { 
         properties["Port"] ?? "22"
     }
     
-    var identityFile: String? { 
+    var identityFile: String { 
         properties["IdentityFile"] ?? ""
+    }
+    
+    // 验证端口号是否有效
+    var isPortValid: Bool {
+        guard let portStr = properties["Port"], !portStr.isEmpty else {
+            return true // 如果没有设置端口，使用默认值22是有效的
+        }
+        
+        guard let port = Int(portStr) else {
+            return false // 端口必须是数字
+        }
+        
+        return port >= 1 && port <= 65535 // 有效端口范围
+    }
+    
+    // 验证主机名是否有效
+    var isHostNameValid: Bool {
+        guard let hostName = properties["HostName"], !hostName.isEmpty else {
+            return true // 空主机名在技术上是有效的，尽管不太有用
+        }
+        
+        // 简单的主机名验证 - 不能仅包含空格
+        let trimmed = hostName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !trimmed.isEmpty
     }
     
     // 实现Hashable协议

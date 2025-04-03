@@ -1,7 +1,7 @@
 # ConfigForge
 
 <p align="center">
-  <img src="Resources/logo.png" alt="ConfigForge Logo" width="200">
+  <img src="ConfigForge/Assets.xcassets/AppIcon.appiconset/icon_128x128_1x.png" alt="ConfigForge Logo" width="200">
 </p>
 
 <p align="center">

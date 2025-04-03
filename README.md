@@ -52,6 +52,10 @@ ConfigForge 是一款专为 macOS 用户设计的开源 SSH 配置管理工具�
 
 ConfigForge 需要访问您的 `~/.ssh/config` 文件才能正常工作。在首次运行时，可能会请求文件访问权限。所有操作都在本地进行，不会发送任何数据到外部服务器。
 
+## 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 以了解所有版本的更新详情。
+
 ## 开发者指南
 
 如果您对开发感兴趣，请查看 [DEVELOPMENT.md](DEVELOPMENT.md) 文件，其中包含完整的技术架构、组件设计和开发指南。

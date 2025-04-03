@@ -354,9 +354,70 @@ A: 应用将尝试解析文件，即使存在格式问题。无法解析的行�
 **Q: 是否支持多个SSH配置文件?**  
 A: MVP版本仅支持 `~/.ssh/config` 文件。多配置文件支持计划在未来版本中实现。
 
-## 14. 附录
+## 14. 版本控制与更新日志
 
-### 14.1 相关技术版本信息
+### 14.1 版本规范
+
+项目使用[语义化版本控制](https://semver.org/lang/zh-CN/)，格式为 `X.Y.Z`：
+
+- **X**: 主要版本号，不兼容的API变更
+- **Y**: 次要版本号，向后兼容的功能性新增
+- **Z**: 修订号，向后兼容的问题修正
+
+### 14.2 生成更新日志
+
+项目使用 [GitHub Changelog Generator](https://github.com/github-changelog-generator/github-changelog-generator) 自动生成更新日志。
+
+开发者需要在本地安装此工具：
+
+```bash
+gem install github_changelog_generator
+```
+
+#### 生成更新日志步骤：
+
+1. 设置 GitHub Token 环境变量：
+   ```bash
+   export GITHUB_TOKEN=your_github_token
+   ```
+
+2. 生成更新日志：
+   ```bash
+   # 生成下一个版本的更新日志
+   make changelog NEXT_VERSION=vX.Y.Z
+   
+   # 或者生成到最新标签的更新日志
+   make changelog
+   ```
+
+### 14.3 贡献指南
+
+1. 提交信息应遵循[约定式提交](https://www.conventionalcommits.org/zh-hans/v1.0.0/)规范：
+   ```
+   <类型>[可选的作用域]: <描述>
+   
+   [可选的正文]
+   
+   [可选的页脚]
+   ```
+
+   类型包括：
+   - **feat**: 新功能
+   - **fix**: 修复问题
+   - **docs**: 文档更改
+   - **style**: 格式变动（不影响代码运行）
+   - **refactor**: 重构
+   - **perf**: 性能优化
+   - **test**: 添加测试
+   - **chore**: 构建过程或工具变动
+
+2. 在打标签前请更新 `.github_changelog_generator` 文件中的 `future-release` 参数。
+
+3. 创建版本标签后，GitHub Actions 会自动生成更新日志并将其包含在发布中。
+
+## 15. 附录
+
+### 15.1 相关技术版本信息
 
 - **macOS**: 15.4 Sequoia (开发环境)
 - **Xcode**: 16.3 (包含Swift 6.1和macOS 15.4 SDK)

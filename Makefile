@@ -1,4 +1,4 @@
-.PHONY: clean dmg check-arch update-homebrew
+.PHONY: clean dmg check-arch update-homebrew changelog
 
 # 变量
 APP_NAME = ConfigForge
@@ -264,6 +264,27 @@ update-homebrew:
 	@rm -rf tmp
 	@echo "✅ Homebrew cask 更新流程完成"
 
+# 生成 CHANGELOG.md
+changelog:
+	@echo "==> 生成 CHANGELOG.md..."
+	@if [ -z "$(GITHUB_TOKEN)" ]; then \
+		echo "❌ 错误: 需要设置 GITHUB_TOKEN 环境变量"; \
+		exit 1; \
+	fi
+
+	@command -v github_changelog_generator > /dev/null 2>&1 || { \
+		echo "==> 安装 github_changelog_generator..."; \
+		gem install github_changelog_generator; \
+	}
+	
+	@if [ -n "$(NEXT_VERSION)" ]; then \
+		github_changelog_generator -u samzong -p ConfigForge --token $(GITHUB_TOKEN) --future-release $(NEXT_VERSION); \
+	else \
+		github_changelog_generator -u samzong -p ConfigForge --token $(GITHUB_TOKEN); \
+	fi
+	
+	@echo "✅ CHANGELOG.md 已生成"
+
 # 帮助命令
 help:
 	@echo "可用命令:"
@@ -272,5 +293,6 @@ help:
 	@echo "  make version         - 显示版本信息"
 	@echo "  make check-arch      - 检查应用架构兼容性"
 	@echo "  make update-homebrew - 更新 Homebrew cask (需要 GH_PAT)"
+	@echo "  make changelog       - 生成 CHANGELOG.md (需要 GITHUB_TOKEN)"
 
 .DEFAULT_GOAL := help 

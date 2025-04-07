@@ -1,7 +1,7 @@
 # ConfigForge
 
 <p align="center">
-  <img src="ConfigForge/Assets.xcassets/AppIcon.appiconset/icon_128x128_1x.png" alt="ConfigForge Logo" width="200">
+  <img src="ConfigForge/Assets.xcassets/Logo.imageset/logo.png" alt="ConfigForge Logo" width="200">
 </p>
 
 <p align="center">
@@ -17,6 +17,8 @@
 ## 简介
 
 ConfigForge 是一款专为 macOS 用户设计的开源 SSH 配置管理工具，提供简洁直观的图形界面来管理 `~/.ssh/config` 文件。使用 ConfigForge，您可以轻松查看、搜索、编辑和管理 SSH 配置，避免直接编辑文本文件的繁琐和错误风险。
+
+![screenshot](screenshot.png)
 
 作为一个完全开源的项目，ConfigForge 尊重用户的隐私和自由，所有代码公开透明，确保您的 SSH 配置安全可靠。
 

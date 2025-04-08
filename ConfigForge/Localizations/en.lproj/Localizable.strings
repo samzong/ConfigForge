@@ -19,6 +19,9 @@
 /* Sidebar */
 "sidebar.search" = "Search hosts";
 "sidebar.add.host" = "Add Host";
+"sidebar.add.context" = "Add Context";
+"sidebar.add.cluster" = "Add Cluster";
+"sidebar.add.user" = "Add User";
 
 /* Host List */
 "host.new" = "new-host";
@@ -69,4 +72,63 @@
 "message.error.export.failed" = "Failed to export backup: %@";
 "message.error.import.failed" = "Failed to import backup: %@";
 "message.error.backup.not.selected" = "No backup file selected";
-"message.error.invalid.format" = "Invalid configuration format. Some entries may not be parsed correctly."; 
+"message.error.invalid.format" = "Invalid configuration format. Some entries may not be parsed correctly.";
+
+/* Kubernetes UI */
+"kubernetes.context.edit" = "Edit Context: %@";
+"kubernetes.context.name" = "Context Name";
+"kubernetes.context.cluster" = "Cluster";
+"kubernetes.context.user" = "User";
+"kubernetes.context.namespace" = "Namespace";
+"kubernetes.context.namespace.optional" = "Namespace (optional)";
+"kubernetes.context.view.cluster.details" = "View/Edit Cluster Details";
+"kubernetes.context.view.user.details" = "View/Edit User Details";
+
+"kubernetes.cluster.edit" = "Edit Cluster: %@";
+"kubernetes.cluster.name" = "Cluster Name";
+"kubernetes.cluster.server" = "Server URL";
+"kubernetes.cluster.server.placeholder" = "https://<server-address>:<port>";
+"kubernetes.cluster.ca" = "Certificate Authority Data (Base64)";
+"kubernetes.cluster.ca.empty" = "No certificate data set";
+"kubernetes.cluster.security" = "Security Options";
+"kubernetes.cluster.skip.tls" = "Skip TLS Certificate Verification";
+
+"kubernetes.user.edit" = "Edit User: %@";
+"kubernetes.user.name" = "User Name";
+"kubernetes.user.token.auth" = "Bearer Token Authentication";
+"kubernetes.user.token.empty" = "No token set";
+"kubernetes.user.cert.auth" = "Client Certificate Authentication";
+"kubernetes.user.client.cert" = "Client Certificate (Base64)";
+"kubernetes.user.client.cert.empty" = "No client certificate set";
+"kubernetes.user.client.key" = "Client Key (Base64)";
+"kubernetes.user.client.key.empty" = "No client key set";
+
+"kubernetes.config.saved" = "Configuration saved";
+
+"kubernetes.panel.cluster.details" = "Cluster Details";
+"kubernetes.panel.user.details" = "User Details";
+"kubernetes.panel.not.found.cluster" = "Cluster details not found";
+"kubernetes.panel.not.found.user" = "User details not found";
+
+"error.binding.context" = "Error: Cannot find editor binding for selected Context.";
+"error.binding.cluster" = "Error: Cannot find editor binding for selected Cluster.";
+"error.binding.user" = "Error: Cannot find editor binding for selected User.";
+"error.editor.unknown" = "Cannot display editor for selected item.";
+
+/* Kubernetes Detail Panels */
+"kubernetes.cluster.details.title" = "Cluster Details: %@";
+"kubernetes.cluster.name.label" = "Cluster Name:";
+"kubernetes.cluster.server.label" = "Server URL:";
+"kubernetes.cluster.ca.label" = "Certificate Authority Data (Base64):";
+"kubernetes.cluster.skip.tls.verification" = "Skip TLS Certificate Verification";
+"button.done" = "Done";
+"kubernetes.user.details.title" = "User Details: %@";
+"kubernetes.user.name.label" = "User Name:";
+"kubernetes.user.token.label" = "Token:";
+"kubernetes.user.client.cert.label" = "Client Certificate Data (Base64):";
+"kubernetes.user.client.key.label" = "Client Key Data (Base64):";
+"kubernetes.context.cluster.user.format" = "Cluster: %@ | User: %@";
+"kubernetes.context.namespace.format" = "Namespace: %@";
+"kubernetes.user.auth.token" = "Auth: Token";
+"kubernetes.user.auth.cert" = "Auth: Client Cert";
+"kubernetes.user.auth.other" = "Auth: Other/Unknown"; 

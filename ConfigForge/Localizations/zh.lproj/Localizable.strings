@@ -20,6 +20,11 @@
 "sidebar.search" = "搜索主机";
 "sidebar.add.host" = "添加主机";
 
+/* Sidebar Kubernetes */
+"sidebar.add.context" = "添加 Context";
+"sidebar.add.cluster" = "添加集群";
+"sidebar.add.user" = "添加用户";
+
 /* Host List */
 "host.new" = "new-host";
 "host.enter.name" = "请输入主机名";
@@ -69,4 +74,63 @@
 "message.error.export.failed" = "无法导出备份: %@";
 "message.error.import.failed" = "无法导入备份: %@";
 "message.error.backup.not.selected" = "未选择备份文件";
-"message.error.invalid.format" = "配置文件格式无效。某些条目可能无法正确解析。"; 
+"message.error.invalid.format" = "配置文件格式无效。某些条目可能无法正确解析。";
+
+/* Kubernetes UI */
+"kubernetes.context.edit" = "编辑 Context: %@";
+"kubernetes.context.name" = "Context 名称";
+"kubernetes.context.cluster" = "集群";
+"kubernetes.context.user" = "用户";
+"kubernetes.context.namespace" = "命名空间";
+"kubernetes.context.namespace.optional" = "命名空间 (可选)";
+"kubernetes.context.view.cluster.details" = "查看/编辑集群详情";
+"kubernetes.context.view.user.details" = "查看/编辑用户详情";
+
+"kubernetes.cluster.edit" = "编辑集群: %@";
+"kubernetes.cluster.name" = "集群名称";
+"kubernetes.cluster.server" = "服务器 URL";
+"kubernetes.cluster.server.placeholder" = "https://<服务器地址>:<端口>";
+"kubernetes.cluster.ca" = "证书颁发机构数据 (Base64)";
+"kubernetes.cluster.ca.empty" = "未设置证书数据";
+"kubernetes.cluster.security" = "安全选项";
+"kubernetes.cluster.skip.tls" = "忽略 TLS 证书验证";
+
+"kubernetes.user.edit" = "编辑用户: %@";
+"kubernetes.user.name" = "用户名称";
+"kubernetes.user.token.auth" = "Bearer Token 认证";
+"kubernetes.user.token.empty" = "未设置Token";
+"kubernetes.user.cert.auth" = "客户端证书认证";
+"kubernetes.user.client.cert" = "客户端证书 (Base64)";
+"kubernetes.user.client.cert.empty" = "未设置客户端证书";
+"kubernetes.user.client.key" = "客户端密钥 (Base64)";
+"kubernetes.user.client.key.empty" = "未设置客户端密钥";
+
+"kubernetes.config.saved" = "配置已保存";
+
+"kubernetes.panel.cluster.details" = "集群详情";
+"kubernetes.panel.user.details" = "用户详情";
+"kubernetes.panel.not.found.cluster" = "找不到集群详情";
+"kubernetes.panel.not.found.user" = "找不到用户详情";
+
+"error.binding.context" = "错误：无法找到所选 Context 的编辑器绑定。";
+"error.binding.cluster" = "错误：无法找到所选 Cluster 的编辑器绑定。";
+"error.binding.user" = "错误：无法找到所选 User 的编辑器绑定。";
+"error.editor.unknown" = "无法显示所选条目的编辑器。";
+
+/* Kubernetes Detail Panels */
+"kubernetes.cluster.details.title" = "集群详情: %@";
+"kubernetes.cluster.name.label" = "集群名称:";
+"kubernetes.cluster.server.label" = "服务器 URL:";
+"kubernetes.cluster.ca.label" = "证书颁发机构数据 (Base64):";
+"kubernetes.cluster.skip.tls.verification" = "忽略 TLS 证书验证";
+"button.done" = "完成";
+"kubernetes.user.details.title" = "用户详情: %@";
+"kubernetes.user.name.label" = "用户名称:";
+"kubernetes.user.token.label" = "Token:";
+"kubernetes.user.client.cert.label" = "客户端证书数据 (Base64):";
+"kubernetes.user.client.key.label" = "客户端密钥数据 (Base64):";
+"kubernetes.context.cluster.user.format" = "集群: %@ | 用户: %@";
+"kubernetes.context.namespace.format" = "命名空间: %@";
+"kubernetes.user.auth.token" = "认证: Token";
+"kubernetes.user.auth.cert" = "认证: 客户端证书";
+"kubernetes.user.auth.other" = "认证: 其他/未知"; 

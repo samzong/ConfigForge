@@ -319,9 +319,7 @@ struct ModernEntryEditorView: View {
             let defaultProperties: [String: String] = [
                 "HostName": "",
                 "User": "",
-                "Port": "22",
-                "IdentityFile": "",
-                "PreferredAuthentications": "publickey"
+                "Port": "22"
             ]
             _editedProperties = State(initialValue: defaultProperties)
         } else {

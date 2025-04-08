@@ -14,168 +14,443 @@ struct ErrorMessage: Identifiable {
     let message: String
 }
 
-struct ContentView: View {
-    @StateObject private var viewModel = SSHConfigViewModel()
-    @State private var isShowingRestoreFilePicker = false
-    @State private var isShowingBackupFilePicker = false
+// MARK: - Helper Structs for Refactoring
+
+struct SidebarView: View {
+    @ObservedObject var viewModel: MainViewModel
+    @State private var selectedListIndex: Int?
     
     var body: some View {
-        HStack(spacing: 0) {
-            // 左侧侧边栏
-            VStack(spacing: 0) {
-                // 添加Logo和应用名称以及顶部按钮
-                HStack {
-                    Image("Logo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 40)
-                    Text("ConfigForge")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.primary)
-                    Spacer()
-                    
-                    // 保存按钮
-                    Button(action: {
-                        viewModel.saveConfig()
-                    }) {
-                        Text("app.save".localized)
-                    }
-                    .buttonStyle(BorderedButtonStyle())
-                    .controlSize(.small)
-                    .keyboardShortcut("s", modifiers: .command)
-                    .help("app.save.help".localized)
-                }
-                .padding([.horizontal, .top], 12)
-                .padding(.bottom, 4)
+        // Original Sidebar VStack content goes here
+        VStack(spacing: 0) {
+            // 添加Logo和应用名称以及顶部按钮
+            HStack {
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 40)
+                Text("ConfigForge")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.primary)
+                Spacer()
                 
-                // 搜索区域
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("sidebar.search".localized, text: $viewModel.searchText)
-                        .textFieldStyle(PlainTextFieldStyle())
-                    
-                    if !viewModel.searchText.isEmpty {
-                        Button(action: {
-                            viewModel.searchText = ""
-                        }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.secondary)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                .padding(8)
-                .background(Color(NSColor.textBackgroundColor))
-                .cornerRadius(8)
-                .padding([.horizontal, .top], 8)
-                
-                // 主机列表区域
-                List(viewModel.filteredEntries, selection: Binding(
-                    get: { viewModel.selectedEntry },
-                    set: { newValue in
-                        viewModel.safelySelectEntry(newValue)
-                    }
-                )) { entry in
-                    HostRowView(entry: entry)
-                        .tag(entry)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                viewModel.deleteEntry(id: entry.id)
-                            } label: {
-                                Label("app.delete".localized, systemImage: "trash")
-                            }
-                        }
-                }
-                .listStyle(.sidebar)
-                
-                Divider()
-                
-                // 底部添加按钮
+                // 保存按钮
                 Button(action: {
-                    let newHostString = "host.new".localized
+                    viewModel.saveCurrentConfig()
+                }) {
+                    Text("app.save".cfLocalized)
+                }
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.small)
+                .keyboardShortcut("s", modifiers: .command)
+                .help("app.save.help".cfLocalized)
+            }
+            .padding([.horizontal, .top], 12)
+            .padding(.bottom, 4)
+            
+            // ---- Top Navigation Picker (SSH / Kubernetes) ----
+            Picker("", selection: $viewModel.selectedConfigurationType) {
+                ForEach(ConfigType.allCases) { type in
+                    Text(type.rawValue.cfLocalized).tag(type)
+                }
+            }
+            .pickerStyle(.segmented) // Use segmented style for top level
+            .padding(.horizontal, 12)
+            .padding(.bottom, 8)
+            // ---- End Top Navigation Picker ----
+            
+            // 搜索区域
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField("sidebar.search".cfLocalized, text: $viewModel.searchText)
+                    .textFieldStyle(PlainTextFieldStyle())
+                
+                if !viewModel.searchText.isEmpty {
+                    Button(action: {
+                        viewModel.searchText = ""
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .padding(8)
+            .background(Color(NSColor.textBackgroundColor))
+            .cornerRadius(8)
+            .padding([.horizontal, .top], 8)
+            
+            // ---- Secondary Kubernetes Picker (Contexts/Clusters/Users) ----
+            if viewModel.selectedConfigurationType == .kubernetes {
+                Picker("", selection: $viewModel.selectedKubernetesObjectType) {
+                    ForEach(KubeObjectType.allCases) { type in
+                        Text(type.rawValue.cfLocalized).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 12)
+                .padding(.top, 4) // Add some space below search bar
+                .padding(.bottom, 8)
+                .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top))) // Optional animation
+            }
+            // ---- End Secondary Kubernetes Picker ----
+            
+            // 主机列表区域
+            List(viewModel.displayedEntries.indices, id: \.self, selection: $selectedListIndex) { index in
+                 // Get entry using index with safety check
+                 if index < viewModel.displayedEntries.count {
+                     let entry = viewModel.displayedEntries[index]
+                     
+                     // Determine which row view to display
+                     if let sshEntry = entry as? SSHConfigEntry {
+                         HostRowView(entry: sshEntry)
+                             .tag(sshEntry.id as AnyHashable)
+                             .contextMenu {
+                                 Button(role: .destructive) {
+                                     viewModel.deleteSshEntry(id: sshEntry.id) // Use specific delete method
+                                 } label: {
+                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                 }
+                             }
+                     } else if let kubeContext = entry as? KubeContext {
+                         KubeContextRowView(context: kubeContext, isCurrent: viewModel.currentKubeContextName == kubeContext.name)
+                             .tag(kubeContext.id as AnyHashable)
+                             .contextMenu {
+                                 // Connect action to ViewModel method
+                                 Button { viewModel.setCurrentKubeContext(name: kubeContext.name) } label: {
+                                     Label("Set as Current Context", systemImage: "star.circle.fill")
+                                 }
+                                  // Disable if already current? Optional UX improvement
+                                 .disabled(viewModel.currentKubeContextName == kubeContext.name) 
+                                 Divider()
+                                 Button(role: .destructive) {
+                                     viewModel.deleteKubeContext(id: kubeContext.id)
+                                 } label: {
+                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                 }
+                             }
+                             .onTapGesture {
+                                 // 强制刷新选择，即使是点击当前已选中的项目
+                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
+                                 if currentlySelectedId == kubeContext.id {
+                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
+                                     viewModel.safelySelectEntry(nil)
+                                     DispatchQueue.main.async {
+                                         viewModel.safelySelectEntry(kubeContext)
+                                     }
+                                 } else {
+                                     viewModel.safelySelectEntry(kubeContext)
+                                 }
+                             }
+                     } else if let kubeCluster = entry as? KubeCluster {
+                         // 使用简单的行视图显示，而不是在边栏嵌入编辑器
+                         KubeClusterRowView(cluster: kubeCluster)
+                             .tag(kubeCluster.id as AnyHashable)
+                             .contextMenu {
+                                 Button(role: .destructive) {
+                                     viewModel.deleteKubeCluster(id: kubeCluster.id)
+                                 } label: {
+                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                 }
+                             }
+                             .onTapGesture {
+                                 // 强制刷新选择，即使是点击当前已选中的项目
+                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
+                                 if currentlySelectedId == kubeCluster.id {
+                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
+                                     viewModel.safelySelectEntry(nil)
+                                     DispatchQueue.main.async {
+                                         viewModel.safelySelectEntry(kubeCluster)
+                                     }
+                                 } else {
+                                     viewModel.safelySelectEntry(kubeCluster)
+                                 }
+                             }
+                     } else if let kubeUser = entry as? KubeUser {
+                         KubeUserRowView(user: kubeUser) // Use existing Row View
+                             .tag(kubeUser.id as AnyHashable)
+                             .contextMenu {
+                                  Button(role: .destructive) {
+                                     viewModel.deleteKubeUser(id: kubeUser.id)
+                                 } label: {
+                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                 }
+                             }
+                             .onTapGesture {
+                                 // 强制刷新选择，即使是点击当前已选中的项目
+                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
+                                 if currentlySelectedId == kubeUser.id {
+                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
+                                     viewModel.safelySelectEntry(nil)
+                                     DispatchQueue.main.async {
+                                         viewModel.safelySelectEntry(kubeUser)
+                                     }
+                                 } else {
+                                     viewModel.safelySelectEntry(kubeUser)
+                                 }
+                             }
+                     } else {
+                         Text("Unknown entry type") 
+                     }
+                 } else {
+                     Text("Loading...") // Placeholder for out-of-bounds index
+                 }
+            }
+            .listStyle(.sidebar)
+            .onChange(of: selectedListIndex) { newIndex in
+                // Sync list index selection TO ViewModel selection
+                let currentlySelectedVMEntryId = viewModel.selectedEntry?.id as? AnyHashable
+                var newEntryToSelect: (any Identifiable)? = nil
+                if let index = newIndex, index >= 0 && index < viewModel.displayedEntries.count {
+                    newEntryToSelect = viewModel.displayedEntries[index]
+                }
+                if currentlySelectedVMEntryId != newEntryToSelect?.id as? AnyHashable {
+                    viewModel.safelySelectEntry(newEntryToSelect)
+                }
+            }
+            // Ensure this observes ID as AnyHashable and uses hashable comparison
+            .onChange(of: viewModel.selectedEntry?.id as? AnyHashable) { selectedIdHashable in 
+                // Sync ViewModel selection TO list index selection
+                let currentlySelectedListIndexEntryId = (selectedListIndex != nil && selectedListIndex! >= 0 && selectedListIndex! < viewModel.displayedEntries.count) ? viewModel.displayedEntries[selectedListIndex!].id as? AnyHashable : nil
+                
+                // Only update List index if the selection ID actually changes
+                if selectedIdHashable != currentlySelectedListIndexEntryId { // Compare hashables
+                    if let idToSelect = selectedIdHashable, // idToSelect is AnyHashable?
+                       let newIndex = viewModel.displayedEntries.firstIndex(where: { ($0.id as? AnyHashable) == idToSelect }) { // Compare hashables in find
+                        selectedListIndex = newIndex
+                    } else {
+                        selectedListIndex = nil // Deselect if ViewModel selection is nil or not found
+                    }
+                }
+            }
+            
+            Divider()
+            
+            // 底部添加按钮
+            Button(action: {
+                switch viewModel.selectedConfigurationType {
+                case .ssh:
+                    // Existing SSH add logic
+                    let newHostString = "host.new".cfLocalized
                     let newEntry = SSHConfigEntry(host: newHostString, properties: [:])
-                    viewModel.entries.append(newEntry)
-                    viewModel.selectedEntry = newEntry
-                    
-                    // 立即进入编辑模式
+                    viewModel.sshEntries.append(newEntry) // Add to sshEntries
+                    viewModel.safelySelectEntry(newEntry)
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             viewModel.isEditing = true
                         }
                     }
-                }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        LocalizedText("sidebar.add.host")
+
+                case .kubernetes:
+                    switch viewModel.selectedKubernetesObjectType {
+                    case .contexts:
+                        viewModel.addKubeContext() 
+                    case .clusters:
+                        viewModel.addKubeCluster() 
+                    case .users:
+                        viewModel.addKubeUser()    
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(8)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
                 }
-                .buttonStyle(PlainButtonStyle())
+            }) {
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text(addButtoText()) 
+                }
+                .frame(maxWidth: .infinity)
                 .padding(8)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
             }
-            .frame(width: 250)
-            
-            // 分隔线
-            Rectangle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(width: 1)
-            
-            // 右侧详情区域
-            ZStack {
-                if let selectedEntry = viewModel.selectedEntry {
-                    ModernEntryEditorView(viewModel: viewModel, entry: selectedEntry)
-                        .id(selectedEntry.id)
-                } else {
-                    EmptyEditorViewModern()
-                }
-            }
-            .frame(maxWidth: .infinity)
+            .buttonStyle(PlainButtonStyle())
+            .padding(8)
         }
+        .frame(width: 250)
+    }
+    
+    // Helper function for dynamic Add button text (Copied from ContentView)
+    private func addButtoText() -> String {
+        switch viewModel.selectedConfigurationType {
+        case .ssh:
+            return "sidebar.add.host".cfLocalized
+        case .kubernetes:
+            switch viewModel.selectedKubernetesObjectType {
+            case .contexts: return "sidebar.add.context".cfLocalized
+            case .clusters: return "sidebar.add.cluster".cfLocalized
+            case .users: return "sidebar.add.user".cfLocalized
+            }
+        }
+    }
+}
+
+struct EditorAreaView: View {
+    @ObservedObject var viewModel: MainViewModel
+    
+    var body: some View {
+        // Original ZStack content for editor area goes here
+        ZStack {
+            if let selectedEntry = viewModel.selectedEntry {
+                // --- Dynamically display the correct editor based on type --- 
+                if let sshEntry = selectedEntry as? SSHConfigEntry {
+                    ModernEntryEditorView(viewModel: viewModel, entry: sshEntry)
+                        .id(sshEntry.id) 
+                } else if let kubeContext = selectedEntry as? KubeContext {
+                     // 实现KubeContextEditorView
+                     if let contextIndex = viewModel.kubeContexts.firstIndex(where: { $0.id == kubeContext.id }) {
+                         KubeContextEditorView(viewModel: viewModel, context: $viewModel.kubeContexts[contextIndex])
+                             .id(kubeContext.id)
+                     } else {
+                         Text("error.binding.context".cfLocalized).foregroundColor(.red)
+                     }
+                } else if let kubeCluster = selectedEntry as? KubeCluster {
+                     // 将KubeClusterEditorView移到主区域显示
+                     if let clusterIndex = viewModel.kubeClusters.firstIndex(where: { $0.id == kubeCluster.id }) {
+                         KubeClusterEditorView(viewModel: viewModel, cluster: $viewModel.kubeClusters[clusterIndex])
+                            .id(kubeCluster.id)
+                     } else {
+                         Text("error.binding.cluster".cfLocalized).foregroundColor(.red)
+                     }
+                } else if let kubeUser = selectedEntry as? KubeUser {
+                    // 实现KubeUserEditorView
+                    if let userIndex = viewModel.kubeUsers.firstIndex(where: { $0.id == kubeUser.id }) {
+                        KubeUserEditorView(viewModel: viewModel, user: $viewModel.kubeUsers[userIndex])
+                            .id(kubeUser.id)
+                    } else {
+                        Text("error.binding.user".cfLocalized).foregroundColor(.red)
+                    }
+                } else {
+                    Text("error.editor.unknown".cfLocalized)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                EmptyEditorViewModern()
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Main Content View (Refactored)
+
+struct ContentView: View {
+    @StateObject private var viewModel = MainViewModel()
+    @State private var isShowingRestoreFilePicker = false
+    @State private var isShowingBackupFilePicker = false
+    
+    var body: some View {
+        // Refactored body using SidebarView and EditorAreaView
+        HStack(spacing: 0) {
+            SidebarView(viewModel: viewModel)
+            
+            Rectangle().fill(Color.gray.opacity(0.2)).frame(width: 1) // Divider
+            
+            EditorAreaView(viewModel: viewModel)
+        }
+        // Apply original modifiers
         .frame(minWidth: 800, minHeight: 500)
         .background(Color(.windowBackgroundColor))
         .fileExporter(
             isPresented: $isShowingBackupFilePicker,
-            document: SSHConfigDocument(configContent: formatConfigContent(viewModel: viewModel)),
-            contentType: .text,
-            defaultFilename: AppConstants.defaultBackupFileName
-        ) { result in
+            document: ConfigDocument(content: formatCurrentConfigContent(viewModel: viewModel), 
+                                     type: ConfigContentType.from(type: viewModel.selectedConfigurationType)),
+            contentType: ConfigContentType.from(type: viewModel.selectedConfigurationType).utType,
+            defaultFilename: defaultBackupFilename(for: viewModel.selectedConfigurationType)
+        ) { [viewModel] result in
             switch result {
             case .success(let url):
-                viewModel.backupConfig(to: url)
+                // Call the appropriate backup method based on selected type
+                switch viewModel.selectedConfigurationType {
+                case .ssh:
+                    viewModel.backupSshConfig(to: url)
+                case .kubernetes:
+                    viewModel.backupKubeConfig(to: url)
+                }
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: viewModel.getMessageHandler())
             }
         }
         .fileImporter(
             isPresented: $isShowingRestoreFilePicker,
-            allowedContentTypes: [.text],
-            allowsMultipleSelection: false
+            allowedContentTypes: ConfigDocument.readableContentTypes // Use types from ConfigDocument
         ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    viewModel.restoreConfig(from: url)
-                }
-            case .failure(let error):
-                ErrorHandler.handle(error, messageHandler: viewModel.getMessageHandler())
-            }
+            // Call the new handler method
+            handleFileImport(result: result)
         }
         .loadingOverlay(isLoading: viewModel.getAsyncUtility().isLoading)
         .messageOverlay(messageHandler: viewModel.getMessageHandler())
     }
     
-    // 在ContentView中创建一个格式化内容的方法
-    private func formatConfigContent(viewModel: SSHConfigViewModel) -> String {
-        // 通过Task运行同步代码以获取格式化内容
-        let content = viewModel.parser.formatConfig(entries: viewModel.entries)
-        return content
+    // MARK: - File Import Handling (NEW METHOD)
+    private func handleFileImport(result: Result<URL, Error>) {
+        // Access viewModel directly as it's a @StateObject in ContentView
+        switch result {
+        case .success(let url):
+            guard url.startAccessingSecurityScopedResource() else {
+                print("Error: Cannot access security scoped resource for import.")
+                viewModel.postMessage("error.cannotAccessImportFile".cfLocalized, type: .error)
+                return
+            }
+            // Call the restore method (using explicit self) within a Task
+            Task {
+                self.viewModel.restoreCurrentConfig(from: url)
+            }
+            url.stopAccessingSecurityScopedResource()
+        case .failure(let error):
+            print("File import error: \(error.localizedDescription)")
+            // Handle cancellation or other errors
+             if error.localizedDescription != "The operation couldn't be completed. (SwiftUI.FileImporterPlatformSupport/EK_DEF_CANCEL error 1.)" {
+                viewModel.postMessage("error.fileImportFailed".cfLocalized(with: error.localizedDescription), type: .error)
+             }
+        }
+    }
+    
+    // Keep helper functions formatCurrentConfigContent and defaultBackupFilename in ContentView
+    // as they relate to the fileExporter which is still attached here.
+    // Remove addButtoText as it was moved to SidebarView.
+
+    // MARK: - Helper Functions (Kept)
+
+    private func formatCurrentConfigContent(viewModel: MainViewModel) -> String {
+        switch viewModel.selectedConfigurationType {
+        case .ssh:
+            let parser = SSHConfigParser() 
+            return parser.formatConfig(entries: viewModel.sshEntries)
+        case .kubernetes:
+            print("Warning: Kubernetes config formatting not implemented, returning placeholder.")
+            // Use ViewModel's direct properties for counts as KubeConfig structure isn't fully known
+            // and these properties are managed directly by the ViewModel.
+            if viewModel.kubeConfig != nil { // Check if config is loaded
+                 // Attempt basic dump (requires a YAML library or manual formatting)
+                 // return KubeConfigFormatter.format(config) // Ideal
+                 return "# Kubernetes config placeholder\napiVersion: v1\nkind: Config\n# Data: \(viewModel.kubeContexts.count) contexts, \(viewModel.kubeClusters.count) clusters, \(viewModel.kubeUsers.count) users" // USE VIEWMODEL PROPERTIES
+            } else {
+                return "# No Kubernetes config loaded"
+            }
+        }
+    }
+    
+    private func defaultBackupFilename(for type: ConfigType) -> String {
+        let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
+                           .replacingOccurrences(of: "/", with: "-")
+                           .replacingOccurrences(of: ":", with: "-")
+                           .replacingOccurrences(of: " ", with: "_")
+        switch type {
+        case .ssh:
+            let baseName = ConfigForgeConstants.defaultBackupFileName 
+            return "\(baseName)_\(timestamp).txt" 
+        case .kubernetes:
+            let baseName = ConfigForgeConstants.defaultKubeBackupFileName 
+            return "\(baseName)_\(timestamp).yaml"
+        }
     }
 }
+
+// Keep HostRowView, MessageBanner, SSHConfigDocument, etc. below ContentView
+// Ensure Kube related RowViews and EditorViews are defined somewhere accessible
+
+// ... (rest of the file: HostRowView, MessageBanner, SSHConfigDocument, EmptyEditorViewModern, ModernEntryEditorView, KubeContextRowView, KubeClusterRowView, KubeUserRowView) ...
 
 // 主机行视图
 struct HostRowView: View {
@@ -213,7 +488,10 @@ struct MessageBanner: View {
                 .foregroundColor(.white)
             
             if message.type != .success {
-                Button(action: onDismiss) {
+                Button(action: {
+                    // 直接调用 dismiss 操作
+                    onDismiss()
+                }) {
                     Image(systemName: "xmark")
                         .font(.system(size: 10, weight: .bold))
                         .foregroundColor(.white.opacity(0.8))
@@ -247,8 +525,8 @@ struct MessageBanner: View {
 }
 
 // 为文件导出器创建一个文档类型
-struct SSHConfigDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.text] }
+struct SSHConfigDocument: FileDocument, Sendable {
+    static let readableContentTypes: [UTType] = [.text]
     
     var configContent: String
     
@@ -300,7 +578,7 @@ struct EmptyEditorViewModern: View {
 
 // 修改条目编辑器视图，统一编辑和非编辑状态下的界面样式
 struct ModernEntryEditorView: View {
-    @ObservedObject var viewModel: SSHConfigViewModel
+    @ObservedObject var viewModel: MainViewModel
     var entry: SSHConfigEntry
     @State private var editedHost: String
     @State private var editedProperties: [String: String]
@@ -308,13 +586,13 @@ struct ModernEntryEditorView: View {
     @State private var isShowingFilePicker = false
     @State private var currentEditingKey = ""
     
-    init(viewModel: SSHConfigViewModel, entry: SSHConfigEntry) {
+    init(viewModel: MainViewModel, entry: SSHConfigEntry) {
         self.viewModel = viewModel
         self.entry = entry
         _editedHost = State(initialValue: entry.host)
         
         // 为新条目添加默认属性
-        let newHostString = "host.new".localized
+        let newHostString = "host.new".cfLocalized
         if entry.properties.isEmpty && entry.host == newHostString {
             let defaultProperties: [String: String] = [
                 "HostName": "",
@@ -342,29 +620,29 @@ struct ModernEntryEditorView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // 主机名配置项
                     configPropertyView(
-                        label: "property.hostname".localized,
+                        label: "property.hostname".cfLocalized,
                         systemImage: "network",
                         value: Binding(
                             get: { editedProperties["HostName"] ?? "" },
                             set: { editedProperties["HostName"] = $0 }
                         ),
-                        placeholder: "property.hostname.placeholder".localized
+                        placeholder: "property.hostname.placeholder".cfLocalized
                     )
                     
                     // 用户名配置项
                     configPropertyView(
-                        label: "property.user".localized,
+                        label: "property.user".cfLocalized,
                         systemImage: "person.fill",
                         value: Binding(
                             get: { editedProperties["User"] ?? "" },
                             set: { editedProperties["User"] = $0 }
                         ),
-                        placeholder: "property.user.placeholder".localized
+                        placeholder: "property.user.placeholder".cfLocalized
                     )
                     
                     // 端口配置项
                     configPropertyView(
-                        label: "property.port".localized,
+                        label: "property.port".cfLocalized,
                         systemImage: "number.circle",
                         value: Binding(
                             get: { editedProperties["Port"] ?? "22" },
@@ -589,14 +867,20 @@ struct ModernEntryEditorView: View {
                     
                     // 保存编辑
                     if entry.host == newHostString { // 新条目
-                        // 移除临时添加的条目
-                        if let index = viewModel.entries.firstIndex(where: { $0.id == entry.id }) {
-                            viewModel.entries.remove(at: index)
+                        // 移除临时添加的条目 (MODIFIED)
+                        if let sshEntry = entry as? SSHConfigEntry, 
+                           let index = viewModel.sshEntries.firstIndex(where: { $0.id == sshEntry.id }) {
+                            viewModel.sshEntries.remove(at: index) // Use sshEntries
                         }
-                        // 使用正式的添加方法
-                        viewModel.addEntry(host: editedHost, properties: editedProperties)
+                        // 使用正式的添加方法 (Assume viewModel.addEntry handles SSH entries)
+                        // Ensure addEntry exists and correctly handles the data
+                        // If addEntry is specifically for SSH, maybe rename for clarity (e.g., addSshEntry)
+                        // We'll assume addEntry is correct for now based on context.
+                         viewModel.addSshEntry(host: editedHost, properties: editedProperties) // Use specific SSH add method
                     } else {
-                        viewModel.updateEntry(id: entry.id, host: editedHost, properties: editedProperties)
+                        // Assume updateEntry handles SSH entries
+                        // If updateEntry is specific, rename (e.g., updateSshEntry)
+                        viewModel.updateSshEntry(id: entry.id, host: editedHost, properties: editedProperties) // Use specific SSH update method
                     }
                     
                     // 使用延迟调用避免在视图更新周期中切换状态
@@ -628,5 +912,60 @@ struct ModernEntryEditorView: View {
         return editedProperties.keys
             .filter { !basicKeys.contains($0) }
             .sorted()
+    }
+}
+
+// MARK: - Placeholder Row Views for Kube Objects (NEW)
+
+struct KubeContextRowView: View {
+    let context: KubeContext
+    let isCurrent: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(context.name)
+                .font(.headline)
+                .fontWeight(isCurrent ? .bold : .regular)
+                .foregroundColor(isCurrent ? .accentColor : .primary)
+            
+            Text("kubernetes.context.cluster.user.format".localized(context.context.cluster, context.context.user))
+                .font(.caption)
+                .foregroundColor(.secondary)
+            if let namespace = context.context.namespace {
+                Text("kubernetes.context.namespace.format".localized(namespace))
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+}
+
+struct KubeClusterRowView: View {
+    let cluster: KubeCluster
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text(cluster.name).font(.headline)
+            Text(cluster.cluster.server).font(.caption).foregroundColor(.secondary)
+        }
+         .padding(.vertical, 2)
+    }
+}
+
+struct KubeUserRowView: View {
+    let user: KubeUser
+    var body: some View {
+        VStack(alignment: .leading) {
+             Text(user.name).font(.headline)
+             // Display some indication of auth method if possible
+             if user.user.token != nil {
+                 Text("kubernetes.user.auth.token".localized).font(.caption).foregroundColor(.secondary)
+             } else if user.user.clientCertificateData != nil {
+                 Text("kubernetes.user.auth.cert".localized).font(.caption).foregroundColor(.secondary)
+             } else {
+                 Text("kubernetes.user.auth.other".localized).font(.caption).foregroundColor(.secondary)
+             }
+        }
+         .padding(.vertical, 2)
     }
 }

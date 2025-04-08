@@ -6,6 +6,10 @@
 	objectVersion = 56;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		173725DB2DA55F3300B1F06E /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 173725DA2DA55F3300B1F06E /* Yams */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		17935F3A2D9D7D410055BABF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -30,38 +34,33 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		17935F2D2D9D7D400055BABF /* ConfigForge */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ConfigForge;
-			sourceTree = "<group>";
-		};
-		17935F3C2D9D7D410055BABF /* ConfigForgeTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ConfigForgeTests;
-			sourceTree = "<group>";
-		};
-		17935F462D9D7D410055BABF /* ConfigForgeUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ConfigForgeUITests;
-			sourceTree = "<group>";
-		};
+		17935F2D2D9D7D400055BABF /* ConfigForge */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForge; sourceTree = "<group>"; };
+		17935F3C2D9D7D410055BABF /* ConfigForgeTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForgeTests; sourceTree = "<group>"; };
+		17935F462D9D7D410055BABF /* ConfigForgeUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForgeUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		17935F282D9D7D400055BABF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
+				173725DB2DA55F3300B1F06E /* Yams in Frameworks */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F362D9D7D410055BABF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F402D9D7D410055BABF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -99,10 +98,15 @@
 			);
 			buildRules = (
 			);
+			dependencies = (
+			);
 			fileSystemSynchronizedGroups = (
 				17935F2D2D9D7D400055BABF /* ConfigForge */,
 			);
 			name = ConfigForge;
+			packageProductDependencies = (
+				173725DA2DA55F3300B1F06E /* Yams */,
+			);
 			productName = ConfigForge;
 			productReference = 17935F2B2D9D7D400055BABF /* ConfigForge.app */;
 			productType = "com.apple.product-type.application";
@@ -124,6 +128,8 @@
 				17935F3C2D9D7D410055BABF /* ConfigForgeTests */,
 			);
 			name = ConfigForgeTests;
+			packageProductDependencies = (
+			);
 			productName = ConfigForgeTests;
 			productReference = 17935F392D9D7D410055BABF /* ConfigForgeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -145,6 +151,8 @@
 				17935F462D9D7D410055BABF /* ConfigForgeUITests */,
 			);
 			name = ConfigForgeUITests;
+			packageProductDependencies = (
+			);
 			productName = ConfigForgeUITests;
 			productReference = 17935F432D9D7D410055BABF /* ConfigForgeUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -173,6 +181,7 @@
 				};
 			};
 			buildConfigurationList = 17935F262D9D7D400055BABF /* Build configuration list for PBXProject "ConfigForge" */;
+			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -183,7 +192,9 @@
 			);
 			mainGroup = 17935F222D9D7D400055BABF;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 90;
+			packageReferences = (
+				173725D92DA55F3300B1F06E /* XCRemoteSwiftPackageReference "Yams" */,
+			);
 			productRefGroup = 17935F2C2D9D7D400055BABF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -198,36 +209,48 @@
 /* Begin PBXResourcesBuildPhase section */
 		17935F292D9D7D400055BABF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F372D9D7D410055BABF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F412D9D7D410055BABF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		17935F272D9D7D400055BABF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F352D9D7D410055BABF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 		17935F3F2D9D7D410055BABF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -245,7 +268,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		17935F4B2D9D7D410055BABF /* Debug configuration for PBXProject "ConfigForge" */ = {
+		17935F4B2D9D7D410055BABF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -310,7 +333,7 @@
 			};
 			name = Debug;
 		};
-		17935F4C2D9D7D410055BABF /* Release configuration for PBXProject "ConfigForge" */ = {
+		17935F4C2D9D7D410055BABF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -368,7 +391,7 @@
 			};
 			name = Release;
 		};
-		17935F4E2D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForge" */ = {
+		17935F4E2D9D7D410055BABF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -382,6 +405,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -397,7 +421,7 @@
 			};
 			name = Debug;
 		};
-		17935F4F2D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForge" */ = {
+		17935F4F2D9D7D410055BABF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -411,6 +435,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -426,7 +451,7 @@
 			};
 			name = Release;
 		};
-		17935F512D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeTests" */ = {
+		17935F512D9D7D410055BABF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -444,7 +469,7 @@
 			};
 			name = Debug;
 		};
-		17935F522D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeTests" */ = {
+		17935F522D9D7D410055BABF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -462,7 +487,7 @@
 			};
 			name = Release;
 		};
-		17935F542D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeUITests" */ = {
+		17935F542D9D7D410055BABF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -479,7 +504,7 @@
 			};
 			name = Debug;
 		};
-		17935F552D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeUITests" */ = {
+		17935F552D9D7D410055BABF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -502,36 +527,59 @@
 		17935F262D9D7D400055BABF /* Build configuration list for PBXProject "ConfigForge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				17935F4B2D9D7D410055BABF /* Debug configuration for PBXProject "ConfigForge" */,
-				17935F4C2D9D7D410055BABF /* Release configuration for PBXProject "ConfigForge" */,
+				17935F4B2D9D7D410055BABF /* Debug */,
+				17935F4C2D9D7D410055BABF /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		17935F4D2D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				17935F4E2D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForge" */,
-				17935F4F2D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForge" */,
+				17935F4E2D9D7D410055BABF /* Debug */,
+				17935F4F2D9D7D410055BABF /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		17935F502D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				17935F512D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeTests" */,
-				17935F522D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeTests" */,
+				17935F512D9D7D410055BABF /* Debug */,
+				17935F522D9D7D410055BABF /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 		17935F532D9D7D410055BABF /* Build configuration list for PBXNativeTarget "ConfigForgeUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				17935F542D9D7D410055BABF /* Debug configuration for PBXNativeTarget "ConfigForgeUITests" */,
-				17935F552D9D7D410055BABF /* Release configuration for PBXNativeTarget "ConfigForgeUITests" */,
+				17935F542D9D7D410055BABF /* Debug */,
+				17935F552D9D7D410055BABF /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		173725D92DA55F3300B1F06E /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		173725DA2DA55F3300B1F06E /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 173725D92DA55F3300B1F06E /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 17935F232D9D7D400055BABF /* Project object */;
 }

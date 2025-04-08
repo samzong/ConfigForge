@@ -20,12 +20,35 @@ enum AppError: LocalizedError, Sendable {
     }
 }
 
+// 消息类型枚举
+enum MessageType: Sendable {
+    case error
+    case success
+    case info
+}
+
+// 可识别的消息结构体
+struct AppMessage: Identifiable, Sendable {
+    let id: UUID
+    let type: MessageType
+    let message: String
+    
+    init(id: UUID = UUID(), type: MessageType, message: String) {
+        self.id = id
+        self.type = type
+        self.message = message
+    }
+}
+
 // 消息处理工具
 @MainActor
 class MessageHandler: ObservableObject {
     @Published var currentMessage: AppMessage?
     private var messageQueue: [AppMessage] = []
     private var isShowingMessage = false
+    
+    // 添加一个可以用来发送消息的闭包属性，支持注入消息发送功能
+    var messagePoster: (@Sendable (String, MessageType) -> Void)?
     
     func show(_ message: String, type: MessageType = .info, duration: TimeInterval = 1.5) {
         let appMessage = AppMessage(type: type, message: message)

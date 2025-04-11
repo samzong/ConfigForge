@@ -11,6 +11,9 @@
 	<key>com.apple.security.files.home-relative-path.read-write</key>
 	<array>
 		<string>/.ssh/</string>
+		<string>/.kube/</string>
 	</array>
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
 </dict>
 </plist>

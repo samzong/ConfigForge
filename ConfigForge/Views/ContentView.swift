@@ -648,7 +648,7 @@ struct ModernEntryEditorView: View {
                             get: { editedProperties["Port"] ?? "22" },
                             set: { editedProperties["Port"] = $0 }
                         ),
-                        placeholder: "property.port.placeholder".localized
+                        placeholder: "property.port.placeholder".cfLocalized
                     )
                     
                     // 身份文件配置项 - 包含文件选择器
@@ -718,7 +718,7 @@ struct ModernEntryEditorView: View {
     // 身份文件视图 - 带文件选择器，同样统一UI样式
     private var identityFileView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("property.identityfile".localized, systemImage: "key.fill")
+            Label("property.identityfile".cfLocalized, systemImage: "key.fill")
                 .font(.headline)
                 .foregroundColor(.primary)
             
@@ -735,7 +735,7 @@ struct ModernEntryEditorView: View {
                     
                     // 编辑状态下的TextField
                     if viewModel.isEditing {
-                        TextField("property.identityfile.placeholder".localized, text: Binding(
+                        TextField("property.identityfile.placeholder".cfLocalized, text: Binding(
                             get: { editedProperties["IdentityFile"] ?? "" },
                             set: { editedProperties["IdentityFile"] = $0 }
                         ))
@@ -745,7 +745,7 @@ struct ModernEntryEditorView: View {
                     } else {
                         // 非编辑状态下的Text
                         let value = editedProperties["IdentityFile"] ?? ""
-                        Text(value.isEmpty ? "property.identityfile.placeholder".localized : value)
+                        Text(value.isEmpty ? "property.identityfile.placeholder".cfLocalized : value)
                             .foregroundColor(value.isEmpty ? .gray.opacity(0.5) : .primary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
@@ -800,11 +800,11 @@ struct ModernEntryEditorView: View {
                 // 使用ZStack保持一致的高度和位置，避免布局跳动
                 ZStack {
                     // 获取本地化的新主机标识
-                    let newHostString = "host.new".localized
+                    let newHostString = "host.new".cfLocalized
                     
                     // 编辑状态时显示TextField
                     if viewModel.isEditing {
-                        TextField("host.enter.name".localized, text: $editedHost)
+                        TextField("host.enter.name".cfLocalized, text: $editedHost)
                             .font(.title2.bold())
                             .textFieldStyle(PlainTextFieldStyle())
                             .frame(maxWidth: 300, minHeight: 40)
@@ -852,6 +852,17 @@ struct ModernEntryEditorView: View {
                 .font(.subheadline)
             }
             
+            // Add the terminal launcher button when not in editing mode
+            if !viewModel.isEditing {
+//                print("🚀 Adding terminal launcher button for entry \(entry.host)")
+                HStack {
+                    TerminalLauncherButton(sshEntry: entry)
+                        .frame(height: 32)
+                        .padding(.vertical, 8)
+                }
+                .padding(.top, 8)
+            }
+            
             Spacer()
             
             // 编辑/保存按钮
@@ -863,7 +874,7 @@ struct ModernEntryEditorView: View {
                     }
                     
                     // 获取本地化的新主机标识
-                    let newHostString = "host.new".localized
+                    let newHostString = "host.new".cfLocalized
                     
                     // 保存编辑
                     if entry.host == newHostString { // 新条目
@@ -893,7 +904,7 @@ struct ModernEntryEditorView: View {
                     }
                 }
             }) {
-                Text(viewModel.isEditing ? "app.save".localized : "app.edit".localized)
+                Text(viewModel.isEditing ? "app.save".cfLocalized : "app.edit".cfLocalized)
                     .frame(minWidth: 80)
             }
             .keyboardShortcut(.return, modifiers: .command)
@@ -928,11 +939,11 @@ struct KubeContextRowView: View {
                 .fontWeight(isCurrent ? .bold : .regular)
                 .foregroundColor(isCurrent ? .accentColor : .primary)
             
-            Text("kubernetes.context.cluster.user.format".localized(context.context.cluster, context.context.user))
+            Text("kubernetes.context.cluster.user.format".cfLocalized(with: context.context.cluster, context.context.user))
                 .font(.caption)
                 .foregroundColor(.secondary)
             if let namespace = context.context.namespace {
-                Text("kubernetes.context.namespace.format".localized(namespace))
+                Text("kubernetes.context.namespace.format".cfLocalized(with: namespace))
                     .font(.caption2)
                     .foregroundColor(.gray)
             }
@@ -959,11 +970,11 @@ struct KubeUserRowView: View {
              Text(user.name).font(.headline)
              // Display some indication of auth method if possible
              if user.user.token != nil {
-                 Text("kubernetes.user.auth.token".localized).font(.caption).foregroundColor(.secondary)
+                 Text("kubernetes.user.auth.token".cfLocalized).font(.caption).foregroundColor(.secondary)
              } else if user.user.clientCertificateData != nil {
-                 Text("kubernetes.user.auth.cert".localized).font(.caption).foregroundColor(.secondary)
+                 Text("kubernetes.user.auth.cert".cfLocalized).font(.caption).foregroundColor(.secondary)
              } else {
-                 Text("kubernetes.user.auth.other".localized).font(.caption).foregroundColor(.secondary)
+                 Text("kubernetes.user.auth.other".cfLocalized).font(.caption).foregroundColor(.secondary)
              }
         }
          .padding(.vertical, 2)

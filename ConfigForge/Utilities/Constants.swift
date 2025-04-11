@@ -15,7 +15,7 @@ enum AppConstants {
     static let defaultBackupFileName = "ssh_config_backup"
     
     // 应用名称
-    static let appName = "app.name".localized
+    static let appName = "app.name".cfLocalized
     
     // 应用版本
     static var appVersion: String {
@@ -24,26 +24,26 @@ enum AppConstants {
     
     // 错误消息
     enum ErrorMessages {
-        static let fileAccessError = "message.error.file.access".localized
-        static let invalidConfigFormat = "message.error.invalid.format".localized
-        static let duplicateHostError = "message.error.duplicate.host".localized
-        static let emptyHostError = "message.error.empty.host".localized
-        static let backupFailed = "message.error.backup.failed".localized
-        static let restoreFailed = "message.error.restore.failed".localized
-        static let invalidPortError = "message.error.invalid.port".localized
-        static let permissionDeniedError = "message.error.permission.denied".localized
-        static let entryNotFoundError = "message.error.entry.not.found".localized
+        static let fileAccessError = "message.error.file.access".cfLocalized
+        static let invalidConfigFormat = "message.error.invalid.format".cfLocalized
+        static let duplicateHostError = "message.error.duplicate.host".cfLocalized
+        static let emptyHostError = "message.error.empty.host".cfLocalized
+        static let backupFailed = "message.error.backup.failed".cfLocalized
+        static let restoreFailed = "message.error.restore.failed".cfLocalized
+        static let invalidPortError = "message.error.invalid.port".cfLocalized
+        static let permissionDeniedError = "message.error.permission.denied".cfLocalized
+        static let entryNotFoundError = "message.error.entry.not.found".cfLocalized
     }
     
     // 成功消息
     enum SuccessMessages {
-        static let configLoaded = "message.success.config.loaded".localized
-        static let configSaved = "message.success.config.saved".localized
-        static let entryAdded = "message.success.entry.added".localized
-        static let entryUpdated = "message.success.entry.updated".localized
-        static let entryDeleted = "message.success.entry.deleted".localized
-        static let configBackedUp = "message.success.config.backup".localized
-        static let configRestored = "message.success.config.restore".localized
+        static let configLoaded = "message.success.config.loaded".cfLocalized
+        static let configSaved = "message.success.config.saved".cfLocalized
+        static let entryAdded = "message.success.entry.added".cfLocalized
+        static let entryUpdated = "message.success.entry.updated".cfLocalized
+        static let entryDeleted = "message.success.entry.deleted".cfLocalized
+        static let configBackedUp = "message.success.config.backup".cfLocalized
+        static let configRestored = "message.success.config.restore".cfLocalized
     }
     
     // 常用的SSH配置属性

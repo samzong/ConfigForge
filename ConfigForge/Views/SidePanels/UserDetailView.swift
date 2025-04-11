@@ -1,113 +1,117 @@
 import SwiftUI
 
 struct UserDetailView: View {
-    // 属性
-    @ObservedObject var viewModel: MainViewModel
+    // 用户对象
     let user: KubeUser
-    
-    // 本地编辑状态
+    // 编辑状态
     @State private var editedToken: String
-    @State private var editedClientCertData: String
-    @State private var editedClientKeyData: String
+    @State private var editedClientCert: String
+    @State private var editedClientKey: String
     
-    // 关闭面板的动作（从父级传递）
-    var onClose: () -> Void
+    // 关闭回调
+    let onClose: () -> Void
     
-    // 初始化方法
-    init(viewModel: MainViewModel, user: KubeUser, onClose: @escaping () -> Void) {
-        self._viewModel = ObservedObject(wrappedValue: viewModel)
+    init(user: KubeUser, onClose: @escaping () -> Void) {
         self.user = user
         self.onClose = onClose
-        
-        // 初始化本地状态
         _editedToken = State(initialValue: user.user.token ?? "")
-        _editedClientCertData = State(initialValue: user.user.clientCertificateData ?? "")
-        _editedClientKeyData = State(initialValue: user.user.clientKeyData ?? "")
+        _editedClientCert = State(initialValue: user.user.clientCertificateData ?? "")
+        _editedClientKey = State(initialValue: user.user.clientKeyData ?? "")
     }
-
+    
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 20) {
+            // 标题
             HStack {
-                Text("kubernetes.user.details.title".localized(user.name))
-                    .font(.title2.bold())
+                Text("kubernetes.user.details.title".cfLocalized(with: user.name))
+                    .font(.title2)
                 Spacer()
-                Button("button.done".localized, action: onClose) // 关闭按钮
+                Button("button.done".cfLocalized, action: onClose) // 关闭按钮
             }
-            Divider().padding(.bottom)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("kubernetes.user.name.label".localized).bold().frame(width: 100, alignment: .trailing)
-                        Text(user.name)
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("kubernetes.user.token.label".localized).bold()
-                        TextEditor(text: $editedToken)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(height: 80)
-                            .border(Color.gray.opacity(0.5), width: 1)
-                            .disableAutocorrection(true)
-                            .onChange(of: editedToken) { newValue in
-                                // 更新视图模型中的数据
-                                if let index = viewModel.kubeUsers.firstIndex(where: { $0.id == user.id }) {
-                                    viewModel.kubeUsers[index].user.token = newValue.isEmpty ? nil : newValue
-                                    viewModel.kubeConfig?.users = viewModel.kubeUsers
-                                    viewModel.saveKubeConfig()
-                                }
-                            }
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("kubernetes.user.client.cert.label".localized).bold()
-                        TextEditor(text: $editedClientCertData)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(height: 120)
-                            .border(Color.gray.opacity(0.5), width: 1)
-                            .disableAutocorrection(true)
-                            .onChange(of: editedClientCertData) { newValue in
-                                // 更新视图模型中的数据
-                                if let index = viewModel.kubeUsers.firstIndex(where: { $0.id == user.id }) {
-                                    viewModel.kubeUsers[index].user.clientCertificateData = newValue.isEmpty ? nil : newValue
-                                    viewModel.kubeConfig?.users = viewModel.kubeUsers
-                                    viewModel.saveKubeConfig()
-                                }
-                            }
-                    }
-                    
-                    VStack(alignment: .leading) {
-                        Text("kubernetes.user.client.key.label".localized).bold()
-                        TextEditor(text: $editedClientKeyData)
-                            .font(.system(.body, design: .monospaced))
-                            .frame(height: 120)
-                            .border(Color.gray.opacity(0.5), width: 1)
-                            .disableAutocorrection(true)
-                            .onChange(of: editedClientKeyData) { newValue in
-                                // 更新视图模型中的数据
-                                if let index = viewModel.kubeUsers.firstIndex(where: { $0.id == user.id }) {
-                                    viewModel.kubeUsers[index].user.clientKeyData = newValue.isEmpty ? nil : newValue
-                                    viewModel.kubeConfig?.users = viewModel.kubeUsers
-                                    viewModel.saveKubeConfig()
-                                }
-                            }
-                    }
+            .padding(.bottom, 8)
+            
+            // 用户名称
+            HStack {
+                Text("kubernetes.user.name.label".cfLocalized).bold().frame(width: 100, alignment: .trailing)
+                Text(user.name)
+                    .foregroundColor(.primary)
+            }
+            
+            // Token
+            VStack(alignment: .leading) {
+                Text("kubernetes.user.token.label".cfLocalized).bold()
+                
+                if editedToken.isEmpty {
+                    Text("kubernetes.user.token.empty".cfLocalized)
+                        .foregroundColor(.secondary)
+                        .italic()
+                        .padding(.top, 4)
+                } else {
+                    TextEditor(text: $editedToken)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(height: 60)
+                        .padding(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(true) // 只读模式
                 }
-                .padding(.vertical)
             }
-
-            Spacer() // 将内容推向顶部
+            
+            // 客户端证书
+            VStack(alignment: .leading) {
+                Text("kubernetes.user.client.cert.label".cfLocalized).bold()
+                
+                if editedClientCert.isEmpty {
+                    Text("kubernetes.user.client.cert.empty".cfLocalized)
+                        .foregroundColor(.secondary)
+                        .italic()
+                        .padding(.top, 4)
+                } else {
+                    TextEditor(text: $editedClientCert)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(height: 100)
+                        .padding(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(true) // 只读模式
+                }
+            }
+            
+            // 客户端密钥
+            VStack(alignment: .leading) {
+                Text("kubernetes.user.client.key.label".cfLocalized).bold()
+                
+                if editedClientKey.isEmpty {
+                    Text("kubernetes.user.client.key.empty".cfLocalized)
+                        .foregroundColor(.secondary)
+                        .italic()
+                        .padding(.top, 4)
+                } else {
+                    TextEditor(text: $editedClientKey)
+                        .font(.system(.body, design: .monospaced))
+                        .frame(height: 100)
+                        .padding(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(true) // 只读模式
+                }
+            }
+                
+            Spacer()
         }
         .padding()
-        .frame(idealWidth: 400) // 建议理想宽度
-        .frame(maxHeight: .infinity, alignment: .topLeading)
-        .background(Color(NSColor.windowBackgroundColor))
+        .frame(width: 500, height: 500)
     }
 }
 
 #Preview {
     struct PreviewWrapper: View {
-        @StateObject var previewViewModel = MainViewModel()
         let previewUser = KubeUser(
             name: "preview-user",
             user: UserDetails(
@@ -119,7 +123,6 @@ struct UserDetailView: View {
 
         var body: some View {
             UserDetailView(
-                viewModel: previewViewModel,
                 user: previewUser,
                 onClose: { print("Close panel") }
             )

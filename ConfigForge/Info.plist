@@ -2,22 +2,37 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>zh</string>
-	</array>
-	<key>CFBundleDisplayName</key>
-	<string>ConfigForge</string>
-	<key>CFBundleName</key>
-	<string>ConfigForge</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.samzong.ConfigForge</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>zh</string>
+    </array>
+    <key>CFBundleDisplayName</key>
+    <string>ConfigForge</string>
+    <key>CFBundleName</key>
+    <string>ConfigForge</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.seimo.ConfigForge</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>ConfigForge needs access to control Terminal or iTerm to open SSH connections and run commands.</string>
+    <key>NSAppleScriptEnabled</key>
+    <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+    <key>NSAppleScript</key>
+    <dict>
+        <key>AppleScriptEnabled</key>
+        <true/>
+        <key>OSAScriptingDefinition</key>
+        <string>ConfigForge.sdef</string>
+    </dict>
+    <key>OSAScriptingDefinition</key>
+    <string>ConfigForge.sdef</string>
 </dict>
 </plist>

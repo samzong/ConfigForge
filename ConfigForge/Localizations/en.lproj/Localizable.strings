@@ -131,4 +131,13 @@
 "kubernetes.context.namespace.format" = "Namespace: %@";
 "kubernetes.user.auth.token" = "Auth: Token";
 "kubernetes.user.auth.cert" = "Auth: Client Cert";
-"kubernetes.user.auth.other" = "Auth: Other/Unknown"; 
+"kubernetes.user.auth.other" = "Auth: Other/Unknown";
+
+/* Terminal Launcher */
+"terminal.open.in" = "Open In";
+"terminal.open.in.terminal" = "Open In Terminal";
+"terminal.open.in.iterm" = "Open In iTerm";
+"terminal.launch.failed.title" = "Failed to Launch Terminal";
+"terminal.launch.failed.message" = "Could not launch SSH connection in %@. Please check your terminal settings and permissions.";
+"terminal.permission.title" = "Terminal Automation Permission";
+"terminal.permission.message" = "ConfigForge needs permission to control %@ to launch SSH connections. You may see a system prompt to allow this."; 

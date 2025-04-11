@@ -25,12 +25,15 @@ ConfigForge 是一款专为 macOS 用户设计的开源配置管理工具，支�
 ## 主要功能
 
 ### SSH 配置管理
+
 - **直观的图形界面**：清晰展示所有 SSH 配置条目
 - **快速搜索与排序**：轻松定位特定的 SSH 连接配置
 - **便捷编辑**：通过表单界面编辑 SSH 配置，无需手动输入复杂语法
 - **基础语法高亮**：提高配置文件的可读性
+- **一键打开终端**：提供快捷的方式一键连接到目标 SSH 主机
 
 ### Kubernetes 配置管理
+
 - **完整 Kubeconfig 支持**：可视化管理 Kubernetes 配置文件
 - **Context 管理**：创建、编辑、删除 Context 以及设置当前活跃的 Context
 - **Cluster 管理**：管理集群配置，包括服务器地址和证书信息
@@ -38,6 +41,7 @@ ConfigForge 是一款专为 macOS 用户设计的开源配置管理工具，支�
 - **跨对象关联**：在 Context 中方便地关联和管理 Cluster 和 User
 
 ### 通用功能
+
 - **备份与恢复**：安全备份和恢复配置文件
 - **通用二进制**：同时支持 Intel 和 Apple Silicon 芯片的 Mac 设备
 - **国际化支持**：提供中文和英文界面
@@ -45,7 +49,7 @@ ConfigForge 是一款专为 macOS 用户设计的开源配置管理工具，支�
 ## 系统要求
 
 - macOS 10.15 Catalina 或更高版本
-- 支持 Intel 和 Apple Silicon (M系列) 芯片架构
+- 支持 Intel 和 Apple Silicon (M 系列) 芯片架构
 
 ## 安装
 
@@ -57,6 +61,7 @@ brew install configforge
 ## 使用方法
 
 ### SSH 配置管理
+
 1. 启动 ConfigForge 应用程序
 2. 在顶部选择器中选择 "SSH" 模式（默认）
 3. 应用会自动加载您的 `~/.ssh/config` 文件内容
@@ -65,6 +70,7 @@ brew install configforge
 6. 编辑配置并保存更改
 
 ### Kubernetes 配置管理
+
 1. 启动 ConfigForge 应用程序
 2. 在顶部选择器中切换到 "Kubernetes" 模式
 3. 应用会自动加载您的 `~/.kube/config` 文件内容
@@ -103,4 +109,4 @@ ConfigForge 需要访问您的 `~/.ssh/config` 和 `~/.kube/config` 文件才能
 
 - 感谢所有开源项目贡献者
 - [Swift](https://swift.org/) 和 [SwiftUI](https://developer.apple.com/xcode/swiftui/) 团队
-- 所有为项目提供反馈和建议的用户 
+- 所有为项目提供反馈和建议的用户

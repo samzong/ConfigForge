@@ -28,20 +28,20 @@ struct ConfigForgeApp: App {
         .commands {
             // 添加菜单命令
             CommandGroup(replacing: .newItem) {
-                Button("sidebar.add.host".localized) {
+                Button("sidebar.add.host".cfLocalized) {
                     NotificationCenter.default.post(name: NSNotification.Name("NewEntry"), object: nil)
                 }
                 .keyboardShortcut("n", modifiers: .command)
             }
             
             // 添加语言切换菜单
-            CommandMenu("app.language".localized) {
-                Button("app.language.english".localized) {
+            CommandMenu("app.language".cfLocalized) {
+                Button("app.language.english".cfLocalized) {
                     appLanguage = "en"
                     restartAppAlert()
                 }
                 
-                Button("app.language.chinese".localized) {
+                Button("app.language.chinese".cfLocalized) {
                     appLanguage = "zh"
                     restartAppAlert()
                 }
@@ -52,9 +52,9 @@ struct ConfigForgeApp: App {
     // 提示用户重启应用以应用语言更改
     private func restartAppAlert() {
         let alert = NSAlert()
-        alert.messageText = "app.language.restart.title".localized
-        alert.informativeText = "app.language.restart.message".localized
-        alert.addButton(withTitle: "app.confirm".localized)
+        alert.messageText = "app.language.restart.title".cfLocalized
+        alert.informativeText = "app.language.restart.message".cfLocalized
+        alert.addButton(withTitle: "app.confirm".cfLocalized)
         alert.runModal()
     }
 }

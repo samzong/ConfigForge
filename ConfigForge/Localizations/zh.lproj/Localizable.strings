@@ -133,4 +133,13 @@
 "kubernetes.context.namespace.format" = "命名空间: %@";
 "kubernetes.user.auth.token" = "认证: Token";
 "kubernetes.user.auth.cert" = "认证: 客户端证书";
-"kubernetes.user.auth.other" = "认证: 其他/未知"; 
+"kubernetes.user.auth.other" = "认证: 其他/未知";
+
+/* Terminal Launcher */
+"terminal.open.in" = "打开于";
+"terminal.open.in.terminal" = "在终端中打开";
+"terminal.open.in.iterm" = "在 iTerm 中打开";
+"terminal.launch.failed.title" = "终端启动失败";
+"terminal.launch.failed.message" = "无法在 %@ 中启动 SSH 连接。请检查您的终端设置和权限。";
+"terminal.permission.title" = "终端自动化权限";
+"terminal.permission.message" = "ConfigForge 需要权限控制 %@ 来启动 SSH 连接。您可能会看到系统提示允许此操作。"; 

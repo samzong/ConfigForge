@@ -31,11 +31,13 @@ class LocalizationManager {
 
 /// 便捷访问本地化字符串的扩展
 extension String {
-    var localized: String {
+    // Renamed to avoid conflict with other extensions
+    var lfLocalized: String {
         return LocalizationManager.localizedString(for: self)
     }
     
-    func localized(_ arguments: CVarArg...) -> String {
+    // Renamed to avoid conflict with other extensions
+    func lfLocalized(_ arguments: CVarArg...) -> String {
         let format = NSLocalizedString(self, bundle: .main, comment: "")
         return String(format: format, arguments: arguments)
     }
@@ -53,9 +55,9 @@ struct LocalizedText: View {
     
     var body: some View {
         if args.isEmpty {
-            Text(key.localized)
+            Text(key.cfLocalized)
         } else {
-            Text(key.localized(args))
+            Text(key.cfLocalized(with: args))
         }
     }
 } 

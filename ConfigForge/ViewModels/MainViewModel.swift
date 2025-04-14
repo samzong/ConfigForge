@@ -93,6 +93,15 @@ class MainViewModel: ObservableObject {
         }
     }
     
+    // MARK: - UI Thread Safety
+    
+    /// Ensures UI updates are performed on the main thread
+    /// - Parameter action: The UI update action to perform
+    @MainActor
+    func updateUIState(action: @escaping () -> Void) {
+        action()
+    }
+    
     // MARK: - Message Posting Helper
     
     /// Posts a message to be displayed to the user.
@@ -101,7 +110,7 @@ class MainViewModel: ObservableObject {
     ///   - type: The type of message (error, success, info).
     func postMessage(_ message: String, type: MessageType) {
         // Ensure this runs on the main thread as it updates a @Published property
-        DispatchQueue.main.async {
+        updateUIState {
              self.appMessage = AppMessage(type: type, message: message)
              // Optionally clear the message after a delay
              // TODO: Implement auto-dismiss logic if desired
@@ -545,7 +554,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedContext = kubeContexts[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedContext)
             }
@@ -596,7 +605,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedCluster = kubeClusters[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedCluster)
             }
@@ -647,7 +656,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedUser = kubeUsers[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedUser)
             }

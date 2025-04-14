@@ -67,7 +67,12 @@ class MainViewModel: ObservableObject {
             if !searchText.isEmpty {
                 filtered = sshEntries.filter { $0.host.localizedCaseInsensitiveContains(searchText) }
             }
-            return filtered.sorted { ($0 as! SSHConfigEntry).host < ($1 as! SSHConfigEntry).host }
+            return filtered.sorted { 
+                guard let entry1 = $0 as? SSHConfigEntry, let entry2 = $1 as? SSHConfigEntry else {
+                    return false
+                }
+                return entry1.host < entry2.host
+            }
 
         case .kubernetes:
             switch selectedKubernetesObjectType {
@@ -76,19 +81,34 @@ class MainViewModel: ObservableObject {
                 if !searchText.isEmpty {
                     filtered = kubeContexts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeContext).name < ($1 as! KubeContext).name }
+                return filtered.sorted { 
+                    guard let ctx1 = $0 as? KubeContext, let ctx2 = $1 as? KubeContext else {
+                        return false
+                    }
+                    return ctx1.name < ctx2.name
+                }
             case .clusters:
                 filtered = kubeClusters
                 if !searchText.isEmpty {
                     filtered = kubeClusters.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeCluster).name < ($1 as! KubeCluster).name }
+                return filtered.sorted { 
+                    guard let cluster1 = $0 as? KubeCluster, let cluster2 = $1 as? KubeCluster else {
+                        return false
+                    }
+                    return cluster1.name < cluster2.name
+                }
             case .users:
                 filtered = kubeUsers
                 if !searchText.isEmpty {
                     filtered = kubeUsers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeUser).name < ($1 as! KubeUser).name }
+                return filtered.sorted { 
+                    guard let user1 = $0 as? KubeUser, let user2 = $1 as? KubeUser else {
+                        return false
+                    }
+                    return user1.name < user2.name
+                }
             }
         }
     }

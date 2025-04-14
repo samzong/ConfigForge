@@ -15,7 +15,7 @@ enum AppConstants {
     static let defaultBackupFileName = "ssh_config_backup"
     
     // 应用名称
-    static let appName = "app.name".cfLocalized
+    static let appName = L10n.App.name
     
     // 应用版本
     static var appVersion: String {
@@ -24,26 +24,26 @@ enum AppConstants {
     
     // 错误消息
     enum ErrorMessages {
-        static let fileAccessError = "message.error.file.access".cfLocalized
-        static let invalidConfigFormat = "message.error.invalid.format".cfLocalized
-        static let duplicateHostError = "message.error.duplicate.host".cfLocalized
-        static let emptyHostError = "message.error.empty.host".cfLocalized
-        static let backupFailed = "message.error.backup.failed".cfLocalized
-        static let restoreFailed = "message.error.restore.failed".cfLocalized
-        static let invalidPortError = "message.error.invalid.port".cfLocalized
-        static let permissionDeniedError = "message.error.permission.denied".cfLocalized
-        static let entryNotFoundError = "message.error.entry.not.found".cfLocalized
+        static let fileAccessError = L10n.Message.Error.File.access
+        static let invalidConfigFormat = L10n.Message.Error.Invalid.format
+        static let duplicateHostError = L10n.Message.Error.Duplicate.host
+        static let emptyHostError = L10n.Message.Error.Empty.host
+        static let backupFailed = L10n.Message.Error.Backup.failed
+        static let restoreFailed = L10n.Message.Error.Restore.failed
+        static let invalidPortError = L10n.Message.Error.Invalid.port
+        static let permissionDeniedError = L10n.Message.Error.Permission.denied
+        static let entryNotFoundError = L10n.Message.Error.Entry.Not.found
     }
     
     // 成功消息
     enum SuccessMessages {
-        static let configLoaded = "message.success.config.loaded".cfLocalized
-        static let configSaved = "message.success.config.saved".cfLocalized
-        static let entryAdded = "message.success.entry.added".cfLocalized
-        static let entryUpdated = "message.success.entry.updated".cfLocalized
-        static let entryDeleted = "message.success.entry.deleted".cfLocalized
-        static let configBackedUp = "message.success.config.backup".cfLocalized
-        static let configRestored = "message.success.config.restore".cfLocalized
+        static let configLoaded = L10n.Message.Success.Config.loaded
+        static let configSaved = L10n.Message.Success.Config.saved
+        static let entryAdded = L10n.Message.Success.Entry.added
+        static let entryUpdated = L10n.Message.Success.Entry.updated
+        static let entryDeleted = L10n.Message.Success.Entry.deleted
+        static let configBackedUp = L10n.Message.Success.Config.backup
+        static let configRestored = L10n.Message.Success.Config.restore
     }
     
     // 常用的SSH配置属性

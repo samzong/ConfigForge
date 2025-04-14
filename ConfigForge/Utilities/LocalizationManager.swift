@@ -30,18 +30,18 @@ class LocalizationManager {
 }
 
 /// 便捷访问本地化字符串的扩展
-extension String {
-    // Renamed to avoid conflict with other extensions
-    var lfLocalized: String {
-        return LocalizationManager.localizedString(for: self)
-    }
-    
-    // Renamed to avoid conflict with other extensions
-    func lfLocalized(_ arguments: CVarArg...) -> String {
-        let format = NSLocalizedString(self, bundle: .main, comment: "")
-        return String(format: format, arguments: arguments)
-    }
-}
+// extension String {
+//    // Renamed to avoid conflict with other extensions
+//    var cfLocalized: String {
+//        return LocalizationManager.localizedString(for: self)
+//    }
+//    
+//    // Renamed to avoid conflict with other extensions
+//    func cfLocalized(with arguments: CVarArg...) -> String {
+//        let format = NSLocalizedString(self, bundle: .main, comment: "")
+//        return String(format: format, arguments: arguments)
+//    }
+// }
 
 /// 本地化文本视图
 struct LocalizedText: View {
@@ -55,9 +55,11 @@ struct LocalizedText: View {
     
     var body: some View {
         if args.isEmpty {
-            Text(key.cfLocalized)
+            let localizedString = NSLocalizedString(key, bundle: .main, comment: "")
+            Text(localizedString)
         } else {
-            Text(key.cfLocalized(with: args))
+            let format = NSLocalizedString(key, bundle: .main, comment: "")
+            Text(String(format: format, arguments: args))
         }
     }
 } 

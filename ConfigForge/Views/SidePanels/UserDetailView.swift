@@ -23,26 +23,26 @@ struct UserDetailView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 标题
             HStack {
-                Text("kubernetes.user.details.title".cfLocalized(with: user.name))
+                Text(L10n.Kubernetes.User.Details.title(user.name))
                     .font(.title2)
                 Spacer()
-                Button("button.done".cfLocalized, action: onClose) // 关闭按钮
+                Button(L10n.Button.done, action: onClose) // 关闭按钮
             }
             .padding(.bottom, 8)
             
             // 用户名称
             HStack {
-                Text("kubernetes.user.name.label".cfLocalized).bold().frame(width: 100, alignment: .trailing)
+                Text(L10n.Kubernetes.User.Name.label).bold().frame(width: 100, alignment: .trailing)
                 Text(user.name)
                     .foregroundColor(.primary)
             }
             
             // Token
             VStack(alignment: .leading) {
-                Text("kubernetes.user.token.label".cfLocalized).bold()
+                Text(L10n.Kubernetes.User.Token.label).bold()
                 
                 if editedToken.isEmpty {
-                    Text("kubernetes.user.token.empty".cfLocalized)
+                    Text(L10n.Kubernetes.User.Token.empty)
                         .foregroundColor(.secondary)
                         .italic()
                         .padding(.top, 4)
@@ -61,10 +61,10 @@ struct UserDetailView: View {
             
             // 客户端证书
             VStack(alignment: .leading) {
-                Text("kubernetes.user.client.cert.label".cfLocalized).bold()
+                Text(L10n.Kubernetes.User.Client.Cert.label).bold()
                 
                 if editedClientCert.isEmpty {
-                    Text("kubernetes.user.client.cert.empty".cfLocalized)
+                    Text(L10n.Kubernetes.User.Client.Cert.empty)
                         .foregroundColor(.secondary)
                         .italic()
                         .padding(.top, 4)
@@ -83,10 +83,10 @@ struct UserDetailView: View {
             
             // 客户端密钥
             VStack(alignment: .leading) {
-                Text("kubernetes.user.client.key.label".cfLocalized).bold()
+                Text(L10n.Kubernetes.User.Client.Key.label).bold()
                 
                 if editedClientKey.isEmpty {
-                    Text("kubernetes.user.client.key.empty".cfLocalized)
+                    Text(L10n.Kubernetes.User.Client.Key.empty)
                         .foregroundColor(.secondary)
                         .italic()
                         .padding(.top, 4)

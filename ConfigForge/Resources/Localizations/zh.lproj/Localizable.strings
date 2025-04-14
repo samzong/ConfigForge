@@ -44,9 +44,7 @@
 "editor.empty.title" = "选择或创建SSH配置";
 "editor.empty.description" = "从左侧列表选择一个条目进行编辑，或点击\"添加主机\"创建新配置";
 
-/* Messages */
-"message.config.loaded" = "配置已成功加载";
-"message.config.saved" = "配置已成功保存";
+/* Messages - Removed duplicates */
 "message.host.added" = "已添加 %@";
 "message.host.updated" = "已更新 %@";
 "message.host.deleted" = "已删除 %@";
@@ -75,6 +73,8 @@
 "message.error.import.failed" = "无法导入备份: %@";
 "message.error.backup.not.selected" = "未选择备份文件";
 "message.error.invalid.format" = "配置文件格式无效。某些条目可能无法正确解析。";
+"error.cannotAccessImportFile" = "无法访问导入文件";
+"error.fileImportFailed" = "无法导入文件: %@";
 
 /* Kubernetes UI */
 "kubernetes.context.edit" = "编辑 Context: %@";

@@ -67,7 +67,12 @@ class MainViewModel: ObservableObject {
             if !searchText.isEmpty {
                 filtered = sshEntries.filter { $0.host.localizedCaseInsensitiveContains(searchText) }
             }
-            return filtered.sorted { ($0 as! SSHConfigEntry).host < ($1 as! SSHConfigEntry).host }
+            return filtered.sorted { 
+                guard let entry1 = $0 as? SSHConfigEntry, let entry2 = $1 as? SSHConfigEntry else {
+                    return false
+                }
+                return entry1.host < entry2.host
+            }
 
         case .kubernetes:
             switch selectedKubernetesObjectType {
@@ -76,21 +81,45 @@ class MainViewModel: ObservableObject {
                 if !searchText.isEmpty {
                     filtered = kubeContexts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeContext).name < ($1 as! KubeContext).name }
+                return filtered.sorted { 
+                    guard let ctx1 = $0 as? KubeContext, let ctx2 = $1 as? KubeContext else {
+                        return false
+                    }
+                    return ctx1.name < ctx2.name
+                }
             case .clusters:
                 filtered = kubeClusters
                 if !searchText.isEmpty {
                     filtered = kubeClusters.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeCluster).name < ($1 as! KubeCluster).name }
+                return filtered.sorted { 
+                    guard let cluster1 = $0 as? KubeCluster, let cluster2 = $1 as? KubeCluster else {
+                        return false
+                    }
+                    return cluster1.name < cluster2.name
+                }
             case .users:
                 filtered = kubeUsers
                 if !searchText.isEmpty {
                     filtered = kubeUsers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
                 }
-                return filtered.sorted { ($0 as! KubeUser).name < ($1 as! KubeUser).name }
+                return filtered.sorted { 
+                    guard let user1 = $0 as? KubeUser, let user2 = $1 as? KubeUser else {
+                        return false
+                    }
+                    return user1.name < user2.name
+                }
             }
         }
+    }
+    
+    // MARK: - UI Thread Safety
+    
+    /// Ensures UI updates are performed on the main thread
+    /// - Parameter action: The UI update action to perform
+    @MainActor
+    func updateUIState(action: @escaping () -> Void) {
+        action()
     }
     
     // MARK: - Message Posting Helper
@@ -101,7 +130,7 @@ class MainViewModel: ObservableObject {
     ///   - type: The type of message (error, success, info).
     func postMessage(_ message: String, type: MessageType) {
         // Ensure this runs on the main thread as it updates a @Published property
-        DispatchQueue.main.async {
+        updateUIState {
              self.appMessage = AppMessage(type: type, message: message)
              // Optionally clear the message after a delay
              // TODO: Implement auto-dismiss logic if desired
@@ -153,7 +182,7 @@ class MainViewModel: ObservableObject {
             case .success(let parsedEntries):
                 self.sshEntries = parsedEntries
                 if !parsedEntries.isEmpty && selectedConfigurationType == .ssh {
-                    messageHandler.show(ConfigForgeConstants.SuccessMessages.configLoaded, type: .success)
+                    messageHandler.show(MessageConstants.SuccessMessages.configLoaded, type: .success)
                 }
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
@@ -169,8 +198,7 @@ class MainViewModel: ObservableObject {
             isLoading = true
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "ViewModel已被释放"])
+                    throw ConfigForgeError.unknown("ViewModel已被释放")
                 }
                 let formattedContent = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
@@ -182,7 +210,7 @@ class MainViewModel: ObservableObject {
             isLoading = false
             switch result {
             case .success:
-                messageHandler.show(ConfigForgeConstants.SuccessMessages.configSaved, type: .success)
+                messageHandler.show(MessageConstants.SuccessMessages.configSaved, type: .success)
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
             }
@@ -192,40 +220,40 @@ class MainViewModel: ObservableObject {
     // 添加新条目
     func addSshEntry(host: String, properties: [String: String]) {
         guard !host.isEmpty else {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.emptyHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
         }
         
         if sshEntries.contains(where: { $0.host == host }) {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.duplicateHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.duplicateHostError, type: .error)
             return
         }
         
         let newEntry = SSHConfigEntry(host: host, properties: properties)
         sshEntries.append(newEntry)
         safelySelectEntry(newEntry)
-        messageHandler.show(ConfigForgeConstants.SuccessMessages.entryAdded, type: .success)
+        messageHandler.show(MessageConstants.SuccessMessages.entryAdded, type: .success)
         saveSshConfig()
     }
     
     // 更新条目
     func updateSshEntry(id: UUID, host: String, properties: [String: String]) {
         guard !host.isEmpty else {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.emptyHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
         }
         
         if let index = sshEntries.firstIndex(where: { $0.id == id }) {
             let otherEntries = sshEntries.filter { $0.id != id }
             if otherEntries.contains(where: { $0.host == host }) {
-                messageHandler.show(ConfigForgeConstants.ErrorMessages.duplicateHostError, type: .error)
+                messageHandler.show(MessageConstants.ErrorMessages.duplicateHostError, type: .error)
                 return
             }
             
             var updatedEntry = SSHConfigEntry(host: host, properties: properties)
             sshEntries[index] = updatedEntry
             safelySelectEntry(updatedEntry)
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.entryUpdated, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.entryUpdated, type: .success)
             saveSshConfig()
         }
     }
@@ -238,7 +266,7 @@ class MainViewModel: ObservableObject {
             if let currentSelection = selectedEntry as? SSHConfigEntry, currentSelection.id == entryToDelete.id {
                 safelySelectEntry(nil)
             }
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.entryDeleted, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.entryDeleted, type: .success)
             saveSshConfig()
         }
     }
@@ -249,8 +277,7 @@ class MainViewModel: ObservableObject {
             isLoading = true
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "ViewModel已被释放"])
+                    throw ConfigForgeError.unknown("ViewModel已被释放")
                 }
                 let content = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
@@ -262,7 +289,7 @@ class MainViewModel: ObservableObject {
             isLoading = false
             switch result {
             case .success:
-                messageHandler.show(ConfigForgeConstants.SuccessMessages.configBackedUp, type: .success)
+                messageHandler.show(MessageConstants.SuccessMessages.configBackedUp, type: .success)
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
             }
@@ -295,7 +322,7 @@ class MainViewModel: ObservableObject {
             self.sshEntries = parsedEntries
             // Optionally re-select the first entry or clear selection
             safelySelectEntry(self.sshEntries.first)
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.configRestored, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.configRestored, type: .success)
         case .failure(let error):
             ErrorHandler.handle(error, messageHandler: messageHandler)
             // Decide on behavior: clear entries, keep old ones, show specific error?
@@ -335,7 +362,7 @@ class MainViewModel: ObservableObject {
             case .failure(let error):
                 // Handle Kubeconfig specific errors gracefully
                 // Use case matching instead of == comparison
-                if case KubeConfigFileManagerError.configFileNotFound = error {
+                if case ConfigForgeError.kubeConfigNotFound = error {
                     self.kubeConfig = KubeConfig(apiVersion: nil, kind: nil, clusters: [], contexts: [], users: [], currentContext: nil)
                     self.kubeContexts = []
                     self.kubeClusters = []
@@ -364,8 +391,7 @@ class MainViewModel: ObservableObject {
             
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self, let config = await self.kubeConfig else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "KubeConfig未加载或已被释放"])
+                    throw ConfigForgeError.configRead("KubeConfig未加载或已被释放")
                 }
                 
                 // 在闭包内创建实例，而不是使用实例变量
@@ -545,7 +571,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedContext = kubeContexts[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedContext)
             }
@@ -596,7 +622,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedCluster = kubeClusters[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedCluster)
             }
@@ -647,7 +673,7 @@ class MainViewModel: ObservableObject {
             // 重新选择更新后的对象，确保视图刷新
             let updatedUser = kubeUsers[index]
             safelySelectEntry(nil) // 先取消选择
-            DispatchQueue.main.async {
+            updateUIState {
                 // 在下一个运行循环中重新选择，确保 UI 有机会更新
                 self.safelySelectEntry(updatedUser)
             }
@@ -740,11 +766,6 @@ class MainViewModel: ObservableObject {
     }
 
     // MARK: - Public Methods - Kubeconfig Backup/Restore
-
-    // REMOVE the old no-argument backup function
-    /*
-    func backupKubeConfig() { ... old code ... } // Ensure this block is removed or commented
-    */
 
     // IMPLEMENT the async backup function that takes a URL
     func backupKubeConfig(to url: URL) {

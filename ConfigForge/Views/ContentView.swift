@@ -427,10 +427,10 @@ struct ContentView: View {
                            .replacingOccurrences(of: " ", with: "_")
         switch type {
         case .ssh:
-            let baseName = ConfigForgeConstants.defaultBackupFileName 
+            let baseName = SSHConfigConstants.defaultBackupFileName 
             return "\(baseName)_\(timestamp).txt" 
         case .kubernetes:
-            let baseName = ConfigForgeConstants.defaultKubeBackupFileName 
+            let baseName = KubeConfigConstants.defaultKubeBackupFileName 
             return "\(baseName)_\(timestamp).yaml"
         }
     }

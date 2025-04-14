@@ -182,7 +182,7 @@ class MainViewModel: ObservableObject {
             case .success(let parsedEntries):
                 self.sshEntries = parsedEntries
                 if !parsedEntries.isEmpty && selectedConfigurationType == .ssh {
-                    messageHandler.show(ConfigForgeConstants.SuccessMessages.configLoaded, type: .success)
+                    messageHandler.show(MessageConstants.SuccessMessages.configLoaded, type: .success)
                 }
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
@@ -210,7 +210,7 @@ class MainViewModel: ObservableObject {
             isLoading = false
             switch result {
             case .success:
-                messageHandler.show(ConfigForgeConstants.SuccessMessages.configSaved, type: .success)
+                messageHandler.show(MessageConstants.SuccessMessages.configSaved, type: .success)
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
             }
@@ -220,40 +220,40 @@ class MainViewModel: ObservableObject {
     // 添加新条目
     func addSshEntry(host: String, properties: [String: String]) {
         guard !host.isEmpty else {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.emptyHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
         }
         
         if sshEntries.contains(where: { $0.host == host }) {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.duplicateHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.duplicateHostError, type: .error)
             return
         }
         
         let newEntry = SSHConfigEntry(host: host, properties: properties)
         sshEntries.append(newEntry)
         safelySelectEntry(newEntry)
-        messageHandler.show(ConfigForgeConstants.SuccessMessages.entryAdded, type: .success)
+        messageHandler.show(MessageConstants.SuccessMessages.entryAdded, type: .success)
         saveSshConfig()
     }
     
     // 更新条目
     func updateSshEntry(id: UUID, host: String, properties: [String: String]) {
         guard !host.isEmpty else {
-            messageHandler.show(ConfigForgeConstants.ErrorMessages.emptyHostError, type: .error)
+            messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
         }
         
         if let index = sshEntries.firstIndex(where: { $0.id == id }) {
             let otherEntries = sshEntries.filter { $0.id != id }
             if otherEntries.contains(where: { $0.host == host }) {
-                messageHandler.show(ConfigForgeConstants.ErrorMessages.duplicateHostError, type: .error)
+                messageHandler.show(MessageConstants.ErrorMessages.duplicateHostError, type: .error)
                 return
             }
             
             var updatedEntry = SSHConfigEntry(host: host, properties: properties)
             sshEntries[index] = updatedEntry
             safelySelectEntry(updatedEntry)
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.entryUpdated, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.entryUpdated, type: .success)
             saveSshConfig()
         }
     }
@@ -266,7 +266,7 @@ class MainViewModel: ObservableObject {
             if let currentSelection = selectedEntry as? SSHConfigEntry, currentSelection.id == entryToDelete.id {
                 safelySelectEntry(nil)
             }
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.entryDeleted, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.entryDeleted, type: .success)
             saveSshConfig()
         }
     }
@@ -289,7 +289,7 @@ class MainViewModel: ObservableObject {
             isLoading = false
             switch result {
             case .success:
-                messageHandler.show(ConfigForgeConstants.SuccessMessages.configBackedUp, type: .success)
+                messageHandler.show(MessageConstants.SuccessMessages.configBackedUp, type: .success)
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
             }
@@ -322,7 +322,7 @@ class MainViewModel: ObservableObject {
             self.sshEntries = parsedEntries
             // Optionally re-select the first entry or clear selection
             safelySelectEntry(self.sshEntries.first)
-            messageHandler.show(ConfigForgeConstants.SuccessMessages.configRestored, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.configRestored, type: .success)
         case .failure(let error):
             ErrorHandler.handle(error, messageHandler: messageHandler)
             // Decide on behavior: clear entries, keep old ones, show specific error?

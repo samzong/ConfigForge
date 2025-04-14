@@ -418,13 +418,17 @@ struct ContentView: View {
             let parser = SSHConfigParser() 
             return parser.formatConfig(entries: viewModel.sshEntries)
         case .kubernetes:
-            print("Warning: Kubernetes config formatting not implemented, returning placeholder.")
-            // Use ViewModel's direct properties for counts as KubeConfig structure isn't fully known
-            // and these properties are managed directly by the ViewModel.
-            if viewModel.kubeConfig != nil { // Check if config is loaded
-                 // Attempt basic dump (requires a YAML library or manual formatting)
-                 // return KubeConfigFormatter.format(config) // Ideal
-                 return "# Kubernetes config placeholder\napiVersion: v1\nkind: Config\n# Data: \(viewModel.kubeContexts.count) contexts, \(viewModel.kubeClusters.count) clusters, \(viewModel.kubeUsers.count) users" // USE VIEWMODEL PROPERTIES
+            if let kubeConfig = viewModel.kubeConfig {
+                let parser = KubeConfigParser()
+                let result = parser.encode(config: kubeConfig)
+                switch result {
+                case .success(let yamlString):
+                    return yamlString
+                case .failure(let error):
+                    print("Error formatting Kubernetes config: \(error.localizedDescription)")
+                    // Return a formatted error message as fallback
+                    return "# Error formatting Kubernetes config: \(error.localizedDescription)\n# Data summary: \(viewModel.kubeContexts.count) contexts, \(viewModel.kubeClusters.count) clusters, \(viewModel.kubeUsers.count) users"
+                }
             } else {
                 return "# No Kubernetes config loaded"
             }

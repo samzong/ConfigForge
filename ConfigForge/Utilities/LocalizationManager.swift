@@ -32,12 +32,12 @@ class LocalizationManager {
 /// 便捷访问本地化字符串的扩展
 extension String {
     // Renamed to avoid conflict with other extensions
-    var lfLocalized: String {
+    var cfLocalized: String {
         return LocalizationManager.localizedString(for: self)
     }
     
     // Renamed to avoid conflict with other extensions
-    func lfLocalized(_ arguments: CVarArg...) -> String {
+    func cfLocalized(with arguments: CVarArg...) -> String {
         let format = NSLocalizedString(self, bundle: .main, comment: "")
         return String(format: format, arguments: arguments)
     }

@@ -43,8 +43,6 @@
 "editor.empty.description" = "Select an item from the list on the left, or click \"Add Host\" to create a new configuration";
 
 /* Messages */
-"message.config.loaded" = "Configuration loaded successfully";
-"message.config.saved" = "Configuration saved successfully";
 "message.host.added" = "Added %@";
 "message.host.updated" = "Updated %@";
 "message.host.deleted" = "Deleted %@";
@@ -73,6 +71,8 @@
 "message.error.import.failed" = "Failed to import backup: %@";
 "message.error.backup.not.selected" = "No backup file selected";
 "message.error.invalid.format" = "Invalid configuration format. Some entries may not be parsed correctly.";
+"error.cannotAccessImportFile" = "Cannot access import file";
+"error.fileImportFailed" = "Failed to import file: %@";
 
 /* Kubernetes UI */
 "kubernetes.context.edit" = "Edit Context: %@";

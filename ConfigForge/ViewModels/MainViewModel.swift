@@ -741,11 +741,6 @@ class MainViewModel: ObservableObject {
 
     // MARK: - Public Methods - Kubeconfig Backup/Restore
 
-    // REMOVE the old no-argument backup function
-    /*
-    func backupKubeConfig() { ... old code ... } // Ensure this block is removed or commented
-    */
-
     // IMPLEMENT the async backup function that takes a URL
     func backupKubeConfig(to url: URL) {
         Task {

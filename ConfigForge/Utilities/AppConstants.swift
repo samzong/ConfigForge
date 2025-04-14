@@ -35,28 +35,4 @@ struct ConfigForgeConstants {
         static let fileImportFailed = "error.fileImportFailed".cfLocalized
          // Add Kube specific errors if needed
     }
-    
-    struct InfoMessages {
-        static let kubeSaveNotImplemented = "msg.kubeSaveNotImplemented".cfLocalized
-        static let kubeRestoreNotImplemented = "msg.kubeRestoreNotImplemented".cfLocalized
-    }
-    
-     struct ButtonLabels {
-        static let addHost = "button.addHost".cfLocalized
-        static let addContext = "button.addContext".cfLocalized
-        static let addCluster = "button.addCluster".cfLocalized
-        static let addUser = "button.addUser".cfLocalized
-    }
-}
-
-// Helper for localization (if not already defined elsewhere)
-extension String {
-    var cfLocalized: String {
-        // Basic implementation - replace with your actual localization setup
-        return NSLocalizedString(self, comment: "")
-    }
-    
-    func cfLocalized(with arguments: CVarArg...) -> String {
-        return String(format: cfLocalized, arguments: arguments)
-    }
 } 

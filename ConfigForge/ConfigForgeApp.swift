@@ -13,10 +13,10 @@ struct ConfigForgeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(content: {
             ContentView()
                 .frame(minWidth: 800, minHeight: 600)
-        }
+        })
         .windowStyle(.hiddenTitleBar) // 可选：使用更现代的窗口样式
         .commands {
             // 添加菜单命令

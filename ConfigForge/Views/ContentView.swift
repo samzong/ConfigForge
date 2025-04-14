@@ -131,17 +131,7 @@ struct SidebarView: View {
                                  }
                              }
                              .onTapGesture {
-                                 // 强制刷新选择，即使是点击当前已选中的项目
-                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
-                                 if currentlySelectedId == kubeContext.id {
-                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
-                                     viewModel.safelySelectEntry(nil)
-                                     DispatchQueue.main.async {
-                                         viewModel.safelySelectEntry(kubeContext)
-                                     }
-                                 } else {
-                                     viewModel.safelySelectEntry(kubeContext)
-                                 }
+                                 handleItemTapGesture(entry: kubeContext)
                              }
                      } else if let kubeCluster = entry as? KubeCluster {
                          // 使用简单的行视图显示，而不是在边栏嵌入编辑器
@@ -155,17 +145,7 @@ struct SidebarView: View {
                                  }
                              }
                              .onTapGesture {
-                                 // 强制刷新选择，即使是点击当前已选中的项目
-                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
-                                 if currentlySelectedId == kubeCluster.id {
-                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
-                                     viewModel.safelySelectEntry(nil)
-                                     DispatchQueue.main.async {
-                                         viewModel.safelySelectEntry(kubeCluster)
-                                     }
-                                 } else {
-                                     viewModel.safelySelectEntry(kubeCluster)
-                                 }
+                                 handleItemTapGesture(entry: kubeCluster)
                              }
                      } else if let kubeUser = entry as? KubeUser {
                          KubeUserRowView(user: kubeUser) // Use existing Row View
@@ -178,17 +158,7 @@ struct SidebarView: View {
                                  }
                              }
                              .onTapGesture {
-                                 // 强制刷新选择，即使是点击当前已选中的项目
-                                 let currentlySelectedId = viewModel.selectedEntry?.id as? String
-                                 if currentlySelectedId == kubeUser.id {
-                                     // 如果点击当前选中项，先取消选择再重新选择，强制刷新
-                                     viewModel.safelySelectEntry(nil)
-                                     DispatchQueue.main.async {
-                                         viewModel.safelySelectEntry(kubeUser)
-                                     }
-                                 } else {
-                                     viewModel.safelySelectEntry(kubeUser)
-                                 }
+                                 handleItemTapGesture(entry: kubeUser)
                              }
                      } else {
                          Text("Unknown entry type") 
@@ -268,6 +238,21 @@ struct SidebarView: View {
             .padding(8)
         }
         .frame(width: 250)
+    }
+    
+    // Extracted reusable function to handle item tap gestures
+    private func handleItemTapGesture<T: Identifiable>(entry: T) {
+        // 强制刷新选择，即使是点击当前已选中的项目
+        let currentlySelectedId = viewModel.selectedEntry?.id as? String
+        if currentlySelectedId == entry.id as? String {
+            // 如果点击当前选中项，先取消选择再重新选择，强制刷新
+            viewModel.safelySelectEntry(nil)
+            DispatchQueue.main.async {
+                viewModel.safelySelectEntry(entry)
+            }
+        } else {
+            viewModel.safelySelectEntry(entry)
+        }
     }
     
     // Helper function for dynamic Add button text (Copied from ContentView)

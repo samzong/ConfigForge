@@ -1,4 +1,4 @@
-.PHONY: clean dmg check-arch update-homebrew
+.PHONY: clean dmg check-arch update-homebrew swiftgen
 
 # 变量
 APP_NAME = ConfigForge
@@ -19,13 +19,18 @@ HOMEBREW_TAP_REPO = homebrew-tap
 CASK_FILE = Casks/configforge.rb
 BRANCH_NAME = update-configforge-$(CLEAN_VERSION)
 
+# 运行 SwiftGen 生成本地化代码
+swiftgen:
+	@echo "==> 运行 SwiftGen 生成类型安全的本地化代码..."
+	swiftgen
+
 # 清理构建产物
 clean:
 	rm -rf $(BUILD_DIR)
 	xcodebuild clean -scheme $(APP_NAME)
 
 # 构建 x86_64 (Intel)
-build-x86_64:
+build-x86_64: swiftgen
 	@echo "==> 构建 x86_64 架构的应用..."
 	xcodebuild clean archive \
 		-project $(APP_NAME).xcodeproj \
@@ -41,7 +46,7 @@ build-x86_64:
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
 # 构建 arm64 (Apple Silicon)
-build-arm64:
+build-arm64: swiftgen
 	@echo "==> 构建 arm64 架构的应用..."
 	xcodebuild clean archive \
 		-project $(APP_NAME).xcodeproj \
@@ -272,5 +277,6 @@ help:
 	@echo "  make version         - 显示版本信息"
 	@echo "  make check-arch      - 检查应用架构兼容性"
 	@echo "  make update-homebrew - 更新 Homebrew cask (需要 GH_PAT)"
+	@echo "  make swiftgen        - 运行 SwiftGen 生成类型安全的本地化代码"
 
 .DEFAULT_GOAL := help 

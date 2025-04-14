@@ -25,7 +25,7 @@ struct KubeUserEditorView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 顶部标题和编辑按钮
             HStack {
-                Text("kubernetes.user.edit".cfLocalized(with: user.name))
+                Text(L10n.Kubernetes.User.edit(user.name))
                     .font(.title2.bold())
                 Spacer()
                 
@@ -40,7 +40,7 @@ struct KubeUserEditorView: View {
                         isEditing.toggle()
                     }
                 }) {
-                    Text(isEditing ? "app.save".cfLocalized : "app.edit".cfLocalized)
+                    Text(isEditing ? L10n.App.save : L10n.App.edit)
                         .frame(minWidth: 80)
                 }
                 .keyboardShortcut(.return, modifiers: .command)
@@ -53,12 +53,12 @@ struct KubeUserEditorView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // User 名称
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("kubernetes.user.name".cfLocalized, systemImage: "person.fill")
+                        Label(L10n.Kubernetes.User.name, systemImage: "person.fill")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         if isEditing {
-                            TextField("kubernetes.user.name".cfLocalized, text: $editedName)
+                            TextField(L10n.Kubernetes.User.name, text: $editedName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding()
                                 .background(Color.secondary.opacity(0.05))
@@ -102,13 +102,13 @@ struct KubeUserEditorView: View {
         Group {
             // 证书认证
             VStack(alignment: .leading, spacing: 8) {
-                Label("kubernetes.user.cert.auth".cfLocalized, systemImage: "shield.fill")
+                Label(L10n.Kubernetes.User.Cert.auth, systemImage: "shield.fill")
                     .font(.headline)
                     .foregroundColor(.primary)
                 
                 // 客户端证书
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("kubernetes.user.client.cert".cfLocalized)
+                    Text(L10n.Kubernetes.User.Client.cert)
                         .font(.subheadline)
                     
                     if isEditing {
@@ -125,7 +125,7 @@ struct KubeUserEditorView: View {
                             .cornerRadius(8)
                     } else {
                         ScrollView {
-                            Text(editedClientCert.isEmpty ? "kubernetes.user.client.cert.empty".cfLocalized : editedClientCert)
+                            Text(editedClientCert.isEmpty ? L10n.Kubernetes.User.Client.Cert.empty : editedClientCert)
                                 .font(.system(.body, design: .monospaced))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -138,7 +138,7 @@ struct KubeUserEditorView: View {
                 
                 // 客户端密钥
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("kubernetes.user.client.key".cfLocalized)
+                    Text(L10n.Kubernetes.User.Client.key)
                         .font(.subheadline)
                     
                     if isEditing {
@@ -155,7 +155,7 @@ struct KubeUserEditorView: View {
                             .cornerRadius(8)
                     } else {
                         ScrollView {
-                            Text(editedClientKey.isEmpty ? "kubernetes.user.client.key.empty".cfLocalized : editedClientKey)
+                            Text(editedClientKey.isEmpty ? L10n.Kubernetes.User.Client.Key.empty : editedClientKey)
                                 .font(.system(.body, design: .monospaced))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }

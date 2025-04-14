@@ -38,12 +38,12 @@ struct SidebarView: View {
                 Button(action: {
                     viewModel.saveCurrentConfig()
                 }) {
-                    Text("app.save".cfLocalized)
+                    Text(L10n.App.save)
                 }
                 .buttonStyle(BorderedButtonStyle())
                 .controlSize(.small)
                 .keyboardShortcut("s", modifiers: .command)
-                .help("app.save.help".cfLocalized)
+                .help(L10n.App.Save.help)
             }
             .padding([.horizontal, .top], 12)
             .padding(.bottom, 4)
@@ -51,7 +51,7 @@ struct SidebarView: View {
             // ---- Top Navigation Picker (SSH / Kubernetes) ----
             Picker("", selection: $viewModel.selectedConfigurationType) {
                 ForEach(ConfigType.allCases) { type in
-                    Text(type.rawValue.cfLocalized).tag(type)
+                    Text(NSLocalizedString(type.rawValue, bundle: .main, comment: "")).tag(type)
                 }
             }
             .pickerStyle(.segmented) // Use segmented style for top level
@@ -63,7 +63,7 @@ struct SidebarView: View {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                TextField("sidebar.search".cfLocalized, text: $viewModel.searchText)
+                TextField(L10n.Sidebar.search, text: $viewModel.searchText)
                     .textFieldStyle(PlainTextFieldStyle())
                 
                 if !viewModel.searchText.isEmpty {
@@ -85,7 +85,7 @@ struct SidebarView: View {
             if viewModel.selectedConfigurationType == .kubernetes {
                 Picker("", selection: $viewModel.selectedKubernetesObjectType) {
                     ForEach(KubeObjectType.allCases) { type in
-                        Text(type.rawValue.cfLocalized).tag(type)
+                        Text(NSLocalizedString(type.rawValue, bundle: .main, comment: "")).tag(type)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -110,7 +110,7 @@ struct SidebarView: View {
                                  Button(role: .destructive) {
                                      viewModel.deleteSshEntry(id: sshEntry.id) // Use specific delete method
                                  } label: {
-                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                     Label(L10n.App.delete, systemImage: "trash")
                                  }
                              }
                      } else if let kubeContext = entry as? KubeContext {
@@ -127,7 +127,7 @@ struct SidebarView: View {
                                  Button(role: .destructive) {
                                      viewModel.deleteKubeContext(id: kubeContext.id)
                                  } label: {
-                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                     Label(L10n.App.delete, systemImage: "trash")
                                  }
                              }
                              .onTapGesture {
@@ -141,7 +141,7 @@ struct SidebarView: View {
                                  Button(role: .destructive) {
                                      viewModel.deleteKubeCluster(id: kubeCluster.id)
                                  } label: {
-                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                     Label(L10n.App.delete, systemImage: "trash")
                                  }
                              }
                              .onTapGesture {
@@ -154,7 +154,7 @@ struct SidebarView: View {
                                   Button(role: .destructive) {
                                      viewModel.deleteKubeUser(id: kubeUser.id)
                                  } label: {
-                                     Label("app.delete".cfLocalized, systemImage: "trash")
+                                     Label(L10n.App.delete, systemImage: "trash")
                                  }
                              }
                              .onTapGesture {
@@ -202,7 +202,7 @@ struct SidebarView: View {
                 switch viewModel.selectedConfigurationType {
                 case .ssh:
                     // Existing SSH add logic
-                    let newHostString = "host.new".cfLocalized
+                    let newHostString = L10n.Host.new
                     let newEntry = SSHConfigEntry(host: newHostString, properties: [:])
                     viewModel.sshEntries.append(newEntry) // Add to sshEntries
                     viewModel.safelySelectEntry(newEntry)
@@ -259,12 +259,12 @@ struct SidebarView: View {
     private func addButtoText() -> String {
         switch viewModel.selectedConfigurationType {
         case .ssh:
-            return "sidebar.add.host".cfLocalized
+            return L10n.Sidebar.Add.host
         case .kubernetes:
             switch viewModel.selectedKubernetesObjectType {
-            case .contexts: return "sidebar.add.context".cfLocalized
-            case .clusters: return "sidebar.add.cluster".cfLocalized
-            case .users: return "sidebar.add.user".cfLocalized
+            case .contexts: return L10n.Sidebar.Add.context
+            case .clusters: return L10n.Sidebar.Add.cluster
+            case .users: return L10n.Sidebar.Add.user
             }
         }
     }
@@ -287,7 +287,7 @@ struct EditorAreaView: View {
                          KubeContextEditorView(viewModel: viewModel, context: $viewModel.kubeContexts[contextIndex])
                              .id(kubeContext.id)
                      } else {
-                         Text("error.binding.context".cfLocalized).foregroundColor(.red)
+                         Text(L10n.Error.Binding.context).foregroundColor(.red)
                      }
                 } else if let kubeCluster = selectedEntry as? KubeCluster {
                      // 将KubeClusterEditorView移到主区域显示
@@ -295,7 +295,7 @@ struct EditorAreaView: View {
                          KubeClusterEditorView(viewModel: viewModel, cluster: $viewModel.kubeClusters[clusterIndex])
                             .id(kubeCluster.id)
                      } else {
-                         Text("error.binding.cluster".cfLocalized).foregroundColor(.red)
+                         Text(L10n.Error.Binding.cluster).foregroundColor(.red)
                      }
                 } else if let kubeUser = selectedEntry as? KubeUser {
                     // 实现KubeUserEditorView
@@ -303,10 +303,10 @@ struct EditorAreaView: View {
                         KubeUserEditorView(viewModel: viewModel, user: $viewModel.kubeUsers[userIndex])
                             .id(kubeUser.id)
                     } else {
-                        Text("error.binding.user".cfLocalized).foregroundColor(.red)
+                        Text(L10n.Error.Binding.user).foregroundColor(.red)
                     }
                 } else {
-                    Text("error.editor.unknown".cfLocalized)
+                    Text(L10n.Error.Editor.unknown)
                         .foregroundColor(.secondary)
                 }
             } else {
@@ -374,7 +374,7 @@ struct ContentView: View {
         case .success(let url):
             guard url.startAccessingSecurityScopedResource() else {
                 print("Error: Cannot access security scoped resource for import.")
-                viewModel.postMessage("error.cannotAccessImportFile".cfLocalized, type: .error)
+                viewModel.postMessage(L10n.Error.cannotAccessImportFile, type: .error)
                 return
             }
             // Call the restore method (using explicit self) within a Task
@@ -386,7 +386,7 @@ struct ContentView: View {
             print("File import error: \(error.localizedDescription)")
             // Handle cancellation or other errors
              if error.localizedDescription != "The operation couldn't be completed. (SwiftUI.FileImporterPlatformSupport/EK_DEF_CANCEL error 1.)" {
-                viewModel.postMessage("error.fileImportFailed".cfLocalized(with: error.localizedDescription), type: .error)
+                viewModel.postMessage(L10n.Error.fileImportFailed(error.localizedDescription), type: .error)
              }
         }
     }
@@ -581,7 +581,7 @@ struct ModernEntryEditorView: View {
         _editedHost = State(initialValue: entry.host)
         
         // 为新条目添加默认属性
-        let newHostString = "host.new".cfLocalized
+        let newHostString = L10n.Host.new
         if entry.properties.isEmpty && entry.host == newHostString {
             let defaultProperties: [String: String] = [
                 "HostName": "",
@@ -609,35 +609,35 @@ struct ModernEntryEditorView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // 主机名配置项
                     configPropertyView(
-                        label: "property.hostname".cfLocalized,
+                        label: L10n.Property.hostname,
                         systemImage: "network",
                         value: Binding(
                             get: { editedProperties["HostName"] ?? "" },
                             set: { editedProperties["HostName"] = $0 }
                         ),
-                        placeholder: "property.hostname.placeholder".cfLocalized
+                        placeholder: L10n.Property.Hostname.placeholder
                     )
                     
                     // 用户名配置项
                     configPropertyView(
-                        label: "property.user".cfLocalized,
+                        label: L10n.Property.user,
                         systemImage: "person.fill",
                         value: Binding(
                             get: { editedProperties["User"] ?? "" },
                             set: { editedProperties["User"] = $0 }
                         ),
-                        placeholder: "property.user.placeholder".cfLocalized
+                        placeholder: L10n.Property.User.placeholder
                     )
                     
                     // 端口配置项
                     configPropertyView(
-                        label: "property.port".cfLocalized,
+                        label: L10n.Property.port,
                         systemImage: "number.circle",
                         value: Binding(
                             get: { editedProperties["Port"] ?? "22" },
                             set: { editedProperties["Port"] = $0 }
                         ),
-                        placeholder: "property.port.placeholder".cfLocalized
+                        placeholder: L10n.Property.Port.placeholder
                     )
                     
                     // 身份文件配置项 - 包含文件选择器
@@ -707,7 +707,7 @@ struct ModernEntryEditorView: View {
     // 身份文件视图 - 带文件选择器，同样统一UI样式
     private var identityFileView: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("property.identityfile".cfLocalized, systemImage: "key.fill")
+            Label(L10n.Property.identityfile, systemImage: "key.fill")
                 .font(.headline)
                 .foregroundColor(.primary)
             
@@ -724,7 +724,7 @@ struct ModernEntryEditorView: View {
                     
                     // 编辑状态下的TextField
                     if viewModel.isEditing {
-                        TextField("property.identityfile.placeholder".cfLocalized, text: Binding(
+                        TextField(L10n.Property.Identityfile.placeholder, text: Binding(
                             get: { editedProperties["IdentityFile"] ?? "" },
                             set: { editedProperties["IdentityFile"] = $0 }
                         ))
@@ -734,7 +734,7 @@ struct ModernEntryEditorView: View {
                     } else {
                         // 非编辑状态下的Text
                         let value = editedProperties["IdentityFile"] ?? ""
-                        Text(value.isEmpty ? "property.identityfile.placeholder".cfLocalized : value)
+                        Text(value.isEmpty ? L10n.Property.Identityfile.placeholder : value)
                             .foregroundColor(value.isEmpty ? .gray.opacity(0.5) : .primary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
@@ -789,11 +789,11 @@ struct ModernEntryEditorView: View {
                 // 使用ZStack保持一致的高度和位置，避免布局跳动
                 ZStack {
                     // 获取本地化的新主机标识
-                    let newHostString = "host.new".cfLocalized
+                    let newHostString = L10n.Host.new
                     
                     // 编辑状态时显示TextField
                     if viewModel.isEditing {
-                        TextField("host.enter.name".cfLocalized, text: $editedHost)
+                        TextField(L10n.Host.Enter.name, text: $editedHost)
                             .font(.title2.bold())
                             .textFieldStyle(PlainTextFieldStyle())
                             .frame(maxWidth: 300, minHeight: 40)
@@ -863,7 +863,7 @@ struct ModernEntryEditorView: View {
                     }
                     
                     // 获取本地化的新主机标识
-                    let newHostString = "host.new".cfLocalized
+                    let newHostString = L10n.Host.new
                     
                     // 保存编辑
                     if entry.host == newHostString { // 新条目
@@ -893,7 +893,7 @@ struct ModernEntryEditorView: View {
                     }
                 }
             }) {
-                Text(viewModel.isEditing ? "app.save".cfLocalized : "app.edit".cfLocalized)
+                Text(viewModel.isEditing ? L10n.App.save : L10n.App.edit)
                     .frame(minWidth: 80)
             }
             .keyboardShortcut(.return, modifiers: .command)
@@ -928,11 +928,11 @@ struct KubeContextRowView: View {
                 .fontWeight(isCurrent ? .bold : .regular)
                 .foregroundColor(isCurrent ? .accentColor : .primary)
             
-            Text("kubernetes.context.cluster.user.format".cfLocalized(with: context.context.cluster, context.context.user))
+            Text(L10n.Kubernetes.Context.Cluster.User.format(context.context.cluster, context.context.user))
                 .font(.caption)
                 .foregroundColor(.secondary)
             if let namespace = context.context.namespace {
-                Text("kubernetes.context.namespace.format".cfLocalized(with: namespace))
+                Text(L10n.Kubernetes.Context.Namespace.format(namespace))
                     .font(.caption2)
                     .foregroundColor(.gray)
             }
@@ -959,11 +959,11 @@ struct KubeUserRowView: View {
              Text(user.name).font(.headline)
              // Display some indication of auth method if possible
              if user.user.token != nil {
-                 Text("kubernetes.user.auth.token".cfLocalized).font(.caption).foregroundColor(.secondary)
+                 Text(L10n.Kubernetes.User.Auth.token).font(.caption).foregroundColor(.secondary)
              } else if user.user.clientCertificateData != nil {
-                 Text("kubernetes.user.auth.cert".cfLocalized).font(.caption).foregroundColor(.secondary)
+                 Text(L10n.Kubernetes.User.Auth.cert).font(.caption).foregroundColor(.secondary)
              } else {
-                 Text("kubernetes.user.auth.other".cfLocalized).font(.caption).foregroundColor(.secondary)
+                 Text(L10n.Kubernetes.User.Auth.other).font(.caption).foregroundColor(.secondary)
              }
         }
          .padding(.vertical, 2)

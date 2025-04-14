@@ -32,23 +32,23 @@ struct ClusterDetailView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 标题
             HStack {
-                Text("kubernetes.cluster.details.title".cfLocalized(with: cluster.name))
+                Text(L10n.Kubernetes.Cluster.Details.title(cluster.name))
                     .font(.title2)
                 Spacer()
-                Button("button.done".cfLocalized, action: onClose) // 关闭按钮
+                Button(L10n.Button.done, action: onClose) // 关闭按钮
             }
             .padding(.bottom, 8)
             
             // 集群名称
             HStack {
-                Text("kubernetes.cluster.name.label".cfLocalized).bold().frame(width: 100, alignment: .trailing)
+                Text(L10n.Kubernetes.Cluster.Name.label).bold().frame(width: 100, alignment: .trailing)
                 Text(cluster.name)
                     .foregroundColor(.primary)
             }
             
             // 服务器地址
             HStack(alignment: .top) {
-                Text("kubernetes.cluster.server.label".cfLocalized).bold()
+                Text(L10n.Kubernetes.Cluster.Server.label).bold()
                      .frame(width: 100, alignment: .trailing) 
                 VStack(alignment: .leading) {
                     TextField("", text: $editedServer)
@@ -61,7 +61,7 @@ struct ClusterDetailView: View {
             // 证书数据
             VStack(alignment: .leading) {
                 HStack {
-                    Text("kubernetes.cluster.ca.label".cfLocalized).bold()
+                    Text(L10n.Kubernetes.Cluster.Ca.label).bold()
                           .frame(width: 100, alignment: .trailing)
                     Spacer()
                 }
@@ -78,7 +78,7 @@ struct ClusterDetailView: View {
             }
             
             // TLS设置
-            Toggle("kubernetes.cluster.skip.tls.verification".cfLocalized, isOn: $editedSkipTls)
+            Toggle(L10n.Kubernetes.Cluster.Skip.Tls.verification, isOn: $editedSkipTls)
                 .disabled(true) // 只读模式
                 .padding(.top, 8)
                 

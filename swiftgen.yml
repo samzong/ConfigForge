@@ -1,0 +1,9 @@
+strings:
+  inputs: 
+    - ConfigForge/Resources/Localizations/en.lproj/Localizable.strings
+  outputs:
+    - templateName: structured-swift5
+      output: ConfigForge/Generated/Strings.swift
+      params:
+        enumName: L10n
+        publicAccess: true 

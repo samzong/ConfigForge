@@ -21,7 +21,7 @@ struct ConfigForgeApp: App {
         .commands {
             // 添加菜单命令
             CommandGroup(replacing: .newItem) {
-                Button("sidebar.add.host".cfLocalized) {
+                Button(L10n.Sidebar.Add.host) {
                     NotificationCenter.default.post(name: NSNotification.Name("NewEntry"), object: nil)
                 }
                 .keyboardShortcut("n", modifiers: .command)

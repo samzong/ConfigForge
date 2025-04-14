@@ -49,7 +49,7 @@ struct KubeContextEditorView: View {
             VStack(alignment: .leading, spacing: 15) {
                 // 顶部标题和编辑按钮
                 HStack {
-                    Text("kubernetes.context.edit".cfLocalized(with: context.name))
+                    Text(L10n.Kubernetes.Context.edit(context.name))
                         .font(.title2.bold())
                     Spacer()
                     
@@ -70,7 +70,7 @@ struct KubeContextEditorView: View {
                             isEditing.toggle()
                         }
                     }) {
-                        Text(isEditing ? "app.save".cfLocalized : "app.edit".cfLocalized)
+                        Text(isEditing ? L10n.App.save : L10n.App.edit)
                             .frame(minWidth: 80)
                     }
                     .keyboardShortcut(.return, modifiers: .command)
@@ -81,10 +81,10 @@ struct KubeContextEditorView: View {
                 
                 // context名称区域
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("kubernetes.context.name".cfLocalized)
+                    Text(L10n.Kubernetes.Context.name)
                         .font(.headline)
                     
-                    TextField("kubernetes.context.name".cfLocalized, text: $editedName)
+                    TextField(L10n.Kubernetes.Context.name, text: $editedName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disabled(!isEditing)
                         .onChange(of: editedName) { newValue in
@@ -98,12 +98,12 @@ struct KubeContextEditorView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         // 集群选择器
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("kubernetes.context.cluster".cfLocalized)
+                            Text(L10n.Kubernetes.Context.cluster)
                                 .font(.headline)
                             
                             if isEditing {
                                 HStack {
-                                    Picker("kubernetes.context.cluster".cfLocalized, selection: $editedCluster) {
+                                    Picker(L10n.Kubernetes.Context.cluster, selection: $editedCluster) {
                                         ForEach(viewModel.kubeClusters, id: \.name) { cluster in
                                             Text(cluster.name).tag(cluster.name)
                                         }
@@ -123,7 +123,7 @@ struct KubeContextEditorView: View {
                                             .foregroundColor(.accentColor)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    .help("kubernetes.context.view.cluster.details".cfLocalized)
+                                    .help(L10n.Kubernetes.Context.View.Cluster.details)
                                 }
                             } else {
                                 HStack {
@@ -143,19 +143,19 @@ struct KubeContextEditorView: View {
                                             .foregroundColor(.accentColor)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    .help("kubernetes.context.view.cluster.details".cfLocalized)
+                                    .help(L10n.Kubernetes.Context.View.Cluster.details)
                                 }
                             }
                         }
                         
                         // 用户选择器
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("kubernetes.context.user".cfLocalized)
+                            Text(L10n.Kubernetes.Context.user)
                                 .font(.headline)
                             
                             if isEditing {
                                 HStack {
-                                    Picker("kubernetes.context.user".cfLocalized, selection: $editedUser) {
+                                    Picker(L10n.Kubernetes.Context.user, selection: $editedUser) {
                                         ForEach(viewModel.kubeUsers, id: \.name) { user in
                                             Text(user.name).tag(user.name)
                                         }
@@ -175,7 +175,7 @@ struct KubeContextEditorView: View {
                                             .foregroundColor(.accentColor)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    .help("kubernetes.context.view.user.details".cfLocalized)
+                                    .help(L10n.Kubernetes.Context.View.User.details)
                                 }
                             } else {
                                 HStack {
@@ -195,17 +195,17 @@ struct KubeContextEditorView: View {
                                             .foregroundColor(.accentColor)
                                     }
                                     .buttonStyle(BorderlessButtonStyle())
-                                    .help("kubernetes.context.view.user.details".cfLocalized)
+                                    .help(L10n.Kubernetes.Context.View.User.details)
                                 }
                             }
                         }
                         
                         // Namespace输入框
                         VStack(alignment: .leading, spacing: 5) {
-                            Text("kubernetes.context.namespace".cfLocalized)
+                            Text(L10n.Kubernetes.Context.namespace)
                                 .font(.headline)
                             
-                            TextField("kubernetes.context.namespace.optional".cfLocalized, text: $editedNamespace)
+                            TextField(L10n.Kubernetes.Context.Namespace.optional, text: $editedNamespace)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .disabled(!isEditing)
                         }
@@ -369,7 +369,7 @@ struct ClusterDetailSidePanelView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text("kubernetes.panel.cluster.details".cfLocalized)
+                Text(L10n.Kubernetes.Panel.Cluster.details)
                     .font(.headline)
                 Spacer()
                 Color.clear.frame(width: 24, height: 24) // 平衡布局
@@ -385,7 +385,7 @@ struct ClusterDetailSidePanelView: View {
                     .padding(.top)
             } else {
                 VStack {
-                    Text("kubernetes.panel.not.found.cluster".cfLocalized)
+                    Text(L10n.Kubernetes.Panel.Not.Found.cluster)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -436,7 +436,7 @@ struct UserDetailSidePanelView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Text("kubernetes.panel.user.details".cfLocalized)
+                Text(L10n.Kubernetes.Panel.User.details)
                     .font(.headline)
                 Spacer()
                 Color.clear.frame(width: 24, height: 24) // 平衡布局
@@ -452,7 +452,7 @@ struct UserDetailSidePanelView: View {
                     .padding(.top)
             } else {
                 VStack {
-                    Text("kubernetes.panel.not.found.user".cfLocalized)
+                    Text(L10n.Kubernetes.Panel.Not.Found.user)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

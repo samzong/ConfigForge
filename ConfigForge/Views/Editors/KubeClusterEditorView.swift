@@ -26,7 +26,7 @@ struct KubeClusterEditorView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 顶部标题和编辑按钮
             HStack {
-                Text("kubernetes.cluster.edit".cfLocalized(with: cluster.name))
+                Text(L10n.Kubernetes.Cluster.edit(cluster.name))
                     .font(.title2.bold())
                 Spacer()
                 
@@ -41,7 +41,7 @@ struct KubeClusterEditorView: View {
                         isEditing.toggle()
                     }
                 }) {
-                    Text(isEditing ? "app.save".cfLocalized : "app.edit".cfLocalized)
+                    Text(isEditing ? L10n.App.save : L10n.App.edit)
                         .frame(minWidth: 80)
                 }
                 .keyboardShortcut(.return, modifiers: .command)
@@ -54,12 +54,12 @@ struct KubeClusterEditorView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // 集群名称（可编辑）
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("kubernetes.cluster.name".cfLocalized, systemImage: "tag.fill")
+                        Label(L10n.Kubernetes.Cluster.name, systemImage: "tag.fill")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         if isEditing {
-                            TextField("kubernetes.cluster.name".cfLocalized, text: $editedName)
+                            TextField(L10n.Kubernetes.Cluster.name, text: $editedName)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding()
                                 .background(Color.secondary.opacity(0.05))
@@ -78,12 +78,12 @@ struct KubeClusterEditorView: View {
                     
                     // 服务器 URL
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("kubernetes.cluster.server".cfLocalized, systemImage: "network")
+                        Label(L10n.Kubernetes.Cluster.server, systemImage: "network")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         if isEditing {
-                            TextField("kubernetes.cluster.server.placeholder".cfLocalized, text: $editedServer)
+                            TextField(L10n.Kubernetes.Cluster.Server.placeholder, text: $editedServer)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding()
                                 .background(Color.secondary.opacity(0.05))
@@ -99,7 +99,7 @@ struct KubeClusterEditorView: View {
 
                     // 证书数据
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("kubernetes.cluster.ca".cfLocalized, systemImage: "shield.fill")
+                        Label(L10n.Kubernetes.Cluster.ca, systemImage: "shield.fill")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
@@ -117,7 +117,7 @@ struct KubeClusterEditorView: View {
                                 .cornerRadius(8)
                         } else {
                             ScrollView {
-                                Text(editedCaData.isEmpty ? "kubernetes.cluster.ca.empty".cfLocalized : editedCaData)
+                                Text(editedCaData.isEmpty ? L10n.Kubernetes.Cluster.Ca.empty : editedCaData)
                                     .font(.system(.body, design: .monospaced))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
@@ -130,18 +130,18 @@ struct KubeClusterEditorView: View {
 
                     // TLS验证选项
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("kubernetes.cluster.security".cfLocalized, systemImage: "lock.shield")
+                        Label(L10n.Kubernetes.Cluster.security, systemImage: "lock.shield")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
                         if isEditing {
-                            Toggle("kubernetes.cluster.skip.tls".cfLocalized, isOn: $editedSkipTls)
+                            Toggle(L10n.Kubernetes.Cluster.Skip.tls, isOn: $editedSkipTls)
                                 .padding()
                                 .background(Color.secondary.opacity(0.05))
                                 .cornerRadius(8)
                         } else {
                             HStack {
-                                Text("kubernetes.cluster.skip.tls".cfLocalized)
+                                Text(L10n.Kubernetes.Cluster.Skip.tls)
                                 Spacer()
                                 Image(systemName: editedSkipTls ? "checkmark.square" : "square")
                             }

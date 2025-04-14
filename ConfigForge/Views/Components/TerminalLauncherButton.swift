@@ -28,7 +28,7 @@ struct TerminalLauncherButton: View {
                         Label("权限设置帮助", systemImage: "lock.shield")
                     }
                 } label: {
-                    Label("terminal.open.in".cfLocalized, systemImage: "terminal")
+                    Label(L10n.Terminal.Open.in, systemImage: "terminal")
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)
                         .background(Color.blue)
@@ -42,7 +42,7 @@ struct TerminalLauncherButton: View {
                         Task { await launchSSHInTerminal(terminal: installedTerminals[0]) }
                     }) {
                         let terminalName = installedTerminals[0].name
-                        let buttonText = terminalName == "Terminal" ? "terminal.open.in.terminal".cfLocalized : "terminal.open.in.iterm".cfLocalized
+                        let buttonText = terminalName == "Terminal" ? L10n.Terminal.Open.In.terminal : L10n.Terminal.Open.In.iterm
                         Label(buttonText, systemImage: terminalIconName(for: installedTerminals[0]))
                     }
                     
@@ -57,7 +57,7 @@ struct TerminalLauncherButton: View {
                     }
                 } label: {
                     let terminalName = installedTerminals[0].name
-                    let buttonText = terminalName == "Terminal" ? "terminal.open.in.terminal".cfLocalized : "terminal.open.in.iterm".cfLocalized
+                    let buttonText = terminalName == "Terminal" ? L10n.Terminal.Open.In.terminal : L10n.Terminal.Open.In.iterm
                     
                     Label(buttonText, systemImage: terminalIconName(for: installedTerminals[0]))
                         .padding(.horizontal, 8)
@@ -71,7 +71,7 @@ struct TerminalLauncherButton: View {
                 Button(action: {
                     showingNoTerminalAlert = true
                 }) {
-                    Label("terminal.open.in".cfLocalized, systemImage: "terminal")
+                    Label(L10n.Terminal.Open.in, systemImage: "terminal")
                         .padding(.horizontal, 8)
                         .padding(.vertical, 6)
                         .background(Color.gray)
@@ -134,8 +134,8 @@ struct TerminalLauncherButton: View {
     @MainActor
     private func showPermissionAlert(terminal: TerminalApp) {
         let alert = NSAlert()
-        alert.messageText = "terminal.launch.failed.title".cfLocalized
-        alert.informativeText = String(format: "terminal.launch.failed.message".cfLocalized, terminal.name)
+        alert.messageText = L10n.Terminal.Launch.Failed.title
+        alert.informativeText = L10n.Terminal.Launch.Failed.message(terminal.name)
         alert.addButton(withTitle: "打开系统设置")
         alert.addButton(withTitle: "取消")
         

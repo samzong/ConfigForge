@@ -53,11 +53,11 @@ class AsyncUtility: ObservableObject {
                     try? await Task.sleep(nanoseconds: UInt64(retryDelay * 1_000_000_000))
                     continue
                 }
-                return .failure(error)
+                return .failure(ConfigForgeError.unknown("Maximum retry attempts reached"))
             }
         }
         
-        return .failure(NSError(domain: "AsyncUtility", code: -1, userInfo: [NSLocalizedDescriptionKey: "Maximum retry attempts reached"]))
+        return .failure(ConfigForgeError.unknown("Maximum retry attempts reached"))
     }
     
     // 防抖动执行异步操作

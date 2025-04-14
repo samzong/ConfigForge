@@ -11,15 +11,16 @@ import Foundation
 extension SSHConfigFileManager: @unchecked Sendable {}
 
 class SSHConfigFileManager {
-    private let fileManager = FileManager.default
+    private let fileManager: FileManager
+    private let sshConfigPath: String
     
-    // 获取SSH配置文件路径
-    private var sshConfigPath: String {
-        return AppConstants.sshConfigPath
+    init(fileManager: FileManager = .default) {
+        self.fileManager = fileManager
+        self.sshConfigPath = NSHomeDirectory() + "/.ssh/config"
     }
     
     // 检查文件权限
-    private func checkFileAccess() -> Result<Void, Error> {
+    private func checkFileAccess() -> Result<Void, ConfigForgeError> {
         let sshDirPath = NSHomeDirectory() + "/.ssh"
         
         // 检查.ssh目录是否存在
@@ -27,8 +28,7 @@ class SSHConfigFileManager {
             do {
                 try fileManager.createDirectory(atPath: sshDirPath, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                return .failure(NSError(domain: "com.configforge.error", code: 1, 
-                                      userInfo: [NSLocalizedDescriptionKey: "无法创建.ssh目录: \(error.localizedDescription)"]))
+                return .failure(.fileAccess("无法创建.ssh目录: \(error.localizedDescription)"))
             }
         }
         
@@ -38,20 +38,17 @@ class SSHConfigFileManager {
                 // 创建空的config文件
                 try "".write(toFile: sshConfigPath, atomically: true, encoding: .utf8)
             } catch {
-                return .failure(NSError(domain: "com.configforge.error", code: 2, 
-                                      userInfo: [NSLocalizedDescriptionKey: "无法创建SSH配置文件: \(error.localizedDescription)"]))
+                return .failure(.fileAccess("无法创建SSH配置文件: \(error.localizedDescription)"))
             }
         }
         
         // 检查文件读写权限
         if !fileManager.isReadableFile(atPath: sshConfigPath) {
-            return .failure(NSError(domain: "com.configforge.error", code: 3, 
-                                   userInfo: [NSLocalizedDescriptionKey: "没有SSH配置文件的读取权限"]))
+            return .failure(.fileAccess("没有SSH配置文件的读取权限"))
         }
         
         if !fileManager.isWritableFile(atPath: sshConfigPath) {
-            return .failure(NSError(domain: "com.configforge.error", code: 4, 
-                                   userInfo: [NSLocalizedDescriptionKey: "没有SSH配置文件的写入权限"]))
+            return .failure(.fileAccess("没有SSH配置文件的写入权限"))
         }
         
         return .success(())
@@ -69,7 +66,7 @@ class SSHConfigFileManager {
             let content = try String(contentsOfFile: sshConfigPath, encoding: .utf8)
             return content
         } catch {
-            throw error
+            throw ConfigForgeError.configRead("读取SSH配置文件失败: \(error.localizedDescription)")
         }
     }
     
@@ -111,7 +108,7 @@ class SSHConfigFileManager {
                     print("备份恢复失败: \(error)")
                 }
             }
-            throw error
+            throw ConfigForgeError.configWrite("写入SSH配置文件失败: \(error.localizedDescription)")
         }
     }
     
@@ -128,7 +125,7 @@ class SSHConfigFileManager {
             
             try content.write(to: backupURL, atomically: true, encoding: .utf8)
         } catch {
-            throw error
+            throw ConfigForgeError.configWrite("备份SSH配置文件失败: \(error.localizedDescription)")
         }
     }
     
@@ -137,7 +134,7 @@ class SSHConfigFileManager {
         do {
             return try String(contentsOf: source, encoding: .utf8)
         } catch {
-            throw error
+            throw ConfigForgeError.configRead("从备份恢复SSH配置文件失败: \(error.localizedDescription)")
         }
     }
 }

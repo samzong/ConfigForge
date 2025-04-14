@@ -2,20 +2,31 @@ import Foundation
 import SwiftUI
 
 // 应用错误类型
-enum AppError: LocalizedError, Sendable {
+enum ConfigForgeError: LocalizedError, Sendable {
     case fileAccess(String)
+    case configRead(String)
+    case configWrite(String)
     case parsing(String)
     case validation(String)
     case network(String)
     case unknown(String)
+    // Kubernetes 特定错误
+    case kubeConfigNotFound
+    case kubeConfigParsingFailed(String)
+    case kubeConfigEncodingFailed(String)
     
     var errorDescription: String? {
         switch self {
         case .fileAccess(let message): return "文件访问错误: \(message)"
+        case .configRead(let message): return "配置读取错误: \(message)"
+        case .configWrite(let message): return "配置写入错误: \(message)"
         case .parsing(let message): return "解析错误: \(message)"
         case .validation(let message): return "验证错误: \(message)"
         case .network(let message): return "网络错误: \(message)"
         case .unknown(let message): return "未知错误: \(message)"
+        case .kubeConfigNotFound: return "Kubeconfig 文件未找到"
+        case .kubeConfigParsingFailed(let message): return "Kubeconfig 解析失败: \(message)"
+        case .kubeConfigEncodingFailed(let message): return "Kubeconfig 编码失败: \(message)"
         }
     }
 }
@@ -80,7 +91,7 @@ struct ErrorHandler {
         let message: String
         
         switch error {
-        case let appError as AppError:
+        case let appError as ConfigForgeError:
             message = appError.localizedDescription
         case let nsError as NSError:
             message = nsError.localizedDescription

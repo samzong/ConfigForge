@@ -198,8 +198,7 @@ class MainViewModel: ObservableObject {
             isLoading = true
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "ViewModel已被释放"])
+                    throw ConfigForgeError.unknown("ViewModel已被释放")
                 }
                 let formattedContent = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
@@ -278,8 +277,7 @@ class MainViewModel: ObservableObject {
             isLoading = true
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "ViewModel已被释放"])
+                    throw ConfigForgeError.unknown("ViewModel已被释放")
                 }
                 let content = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
@@ -364,7 +362,7 @@ class MainViewModel: ObservableObject {
             case .failure(let error):
                 // Handle Kubeconfig specific errors gracefully
                 // Use case matching instead of == comparison
-                if case KubeConfigFileManagerError.configFileNotFound = error {
+                if case ConfigForgeError.kubeConfigNotFound = error {
                     self.kubeConfig = KubeConfig(apiVersion: nil, kind: nil, clusters: [], contexts: [], users: [], currentContext: nil)
                     self.kubeContexts = []
                     self.kubeClusters = []
@@ -393,8 +391,7 @@ class MainViewModel: ObservableObject {
             
             let result = await asyncUtility.perform { [weak self] in
                 guard let self = self, let config = await self.kubeConfig else { 
-                    throw NSError(domain: "MainViewModel", code: -1, 
-                                  userInfo: [NSLocalizedDescriptionKey: "KubeConfig未加载或已被释放"])
+                    throw ConfigForgeError.configRead("KubeConfig未加载或已被释放")
                 }
                 
                 // 在闭包内创建实例，而不是使用实例变量

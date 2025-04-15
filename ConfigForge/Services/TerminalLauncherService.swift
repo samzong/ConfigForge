@@ -1,44 +1,5 @@
 import Foundation
 import AppKit
-import Carbon.HIToolbox
-
-// MARK: - Apple Event constants and helpers
-let kASAppleScriptSuite: AEEventClass = 0x61736372 // 'ascr'
-let kASGetPropertyEvent: AEEventID = 0x67657470 // 'getp'
-let kAnyTransaction: AETransactionID = 0
-
-// Helper functions for Apple Events
-extension NSAppleEventDescriptor {
-    static func createAutomationEvent(
-        for app: NSRunningApplication,
-        eventClass: AEEventClass,
-        eventID: AEEventID
-    ) -> NSAppleEventDescriptor {
-        let target = NSAppleEventDescriptor(processIdentifier: app.processIdentifier)
-        return NSAppleEventDescriptor(
-            eventClass: eventClass,
-            eventID: eventID,
-            targetDescriptor: target,
-            returnID: AEReturnID(kAutoGenerateReturnID),
-            transactionID: AETransactionID(kAnyTransaction)
-        )
-    }
-    
-    static func createBundleEvent(
-        bundleIdentifier: String,
-        eventClass: AEEventClass,
-        eventID: AEEventID
-    ) -> NSAppleEventDescriptor {
-        let target = NSAppleEventDescriptor(bundleIdentifier: bundleIdentifier)
-        return NSAppleEventDescriptor(
-            eventClass: eventClass,
-            eventID: eventID,
-            targetDescriptor: target,
-            returnID: AEReturnID(kAutoGenerateReturnID),
-            transactionID: AETransactionID(kAnyTransaction)
-        )
-    }
-}
 
 struct TerminalApp: Sendable {
     let name: String
@@ -50,32 +11,34 @@ struct TerminalApp: Sendable {
     }
 }
 
+// 终端启动服务
 actor TerminalLauncherService {
-    // Available terminal apps
+    // 支持的终端应用
     static let supportedTerminalApps: [TerminalApp] = [
         TerminalApp(name: "Terminal", bundleIdentifier: "com.apple.Terminal"),
         TerminalApp(name: "iTerm", bundleIdentifier: "com.googlecode.iterm2")
     ]
     
-    // Singleton instance for shared access
+    // 单例实例
     static let shared = TerminalLauncherService()
     
-    private init() {
-        // 在初始化时触发权限检查 (移除引用)
-    }
+    // 权限状态
+    private var permissionRequested = false
     
-    // Get installed terminal apps
+    private init() {}
+    
+    // 获取已安装的终端应用
     func getInstalledTerminalApps() async -> [TerminalApp] {
         var result: [TerminalApp] = []
         
         for app in Self.supportedTerminalApps {
-            // Check using standard NSWorkspace method first
+            // 使用标准 NSWorkspace 方法检查
             let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleIdentifier)
             let isInstalled = url != nil
             
-            // Try alternative methods for Terminal.app which is often in System Applications
+            // 对 Terminal.app 尝试备用方法，它通常在系统应用程序中
             if !isInstalled && app.bundleIdentifier == "com.apple.Terminal" {
-                // Try looking in standard locations
+                // 在标准位置查找
                 let standardPaths = [
                     "/System/Applications/Utilities/Terminal.app",
                     "/Applications/Utilities/Terminal.app"
@@ -96,7 +59,7 @@ actor TerminalLauncherService {
         return result
     }
     
-    // Launch SSH connection in terminal
+    // 启动 SSH 连接
     func launchSSH(host: String, username: String?, port: String?, identityFile: String?, terminal: TerminalApp) async -> Bool {
         // 构建完整的SSH命令
         var sshCommand = "ssh"
@@ -125,13 +88,12 @@ actor TerminalLauncherService {
         return await launchTerminalWithCommand(terminal: terminal, command: sshCommand)
     }
     
-    // Internal method to launch terminal with a command
+    // 内部方法，使用命令启动终端
     private func launchTerminalWithCommand(terminal: TerminalApp, command: String) async -> Bool {
+        // 构建 AppleScript 脚本
         let script: String
-        
         switch terminal.bundleIdentifier {
         case "com.apple.Terminal":
-            // AppleScript for Terminal
             script = """
             tell application "Terminal"
                 if not (exists window 1) then
@@ -141,9 +103,7 @@ actor TerminalLauncherService {
                 do script "\(command)" in window 1
             end tell
             """
-            
         case "com.googlecode.iterm2":
-            // AppleScript for iTerm2
             script = """
             tell application "iTerm"
                 activate
@@ -154,7 +114,6 @@ actor TerminalLauncherService {
                         end tell
                     end tell
                 else
-                    -- 如果没有窗口，创建一个新窗口
                     create window with default profile
                     tell current window
                         tell current session
@@ -164,30 +123,100 @@ actor TerminalLauncherService {
                 end if
             end tell
             """
-            
         default:
             return false
         }
         
+        // 首先尝试 NSAppleScript 执行
         var error: NSDictionary?
         if let appleScript = NSAppleScript(source: script) {
             _ = appleScript.executeAndReturnError(&error)
             
             if let error = error {
-                // 检查具体错误码
-                if let errorNumber = error["NSAppleScriptErrorNumber"] as? Int {
-                    // 1743和1744是常见的权限错误
-                    if errorNumber == -1743 || errorNumber == -1744 {
-                        print("🔑 检测到权限错误")
-                    }
+                // 检查权限错误
+                if let errorNumber = error["NSAppleScriptErrorNumber"] as? Int, 
+                   (errorNumber == -1743 || errorNumber == -1744) {
+                    // 权限错误，尝试通过 osascript 执行
+                    return await executeWithOsascript(script: script)
                 }
-                
                 return false
             }
-            
             return true
         }
         
-        return false
+        // 如果 NSAppleScript 创建失败，尝试 osascript
+        return await executeWithOsascript(script: script)
+    }
+    
+    // 使用 osascript 命令执行
+    private func executeWithOsascript(script: String) async -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script]
+        
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = pipe
+        
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus == 0
+        } catch {
+            return false
+        }
+    }
+    
+    // 主动触发 AppleScript 权限请求
+    func requestAutomationPermission(for terminal: TerminalApp) async {
+        if permissionRequested { return }
+        
+        // 使用更强力的命令触发权限请求
+        let script: String
+        switch terminal.bundleIdentifier {
+        case "com.apple.Terminal":
+            script = """
+            tell application "Terminal"
+                do script "echo 'ConfigForge testing permission'"
+                delay 1
+                activate
+            end tell
+            """
+        case "com.googlecode.iterm2":
+            script = """
+            tell application "iTerm"
+                activate
+                if exists current window then
+                    tell current window
+                        tell current session
+                            write text "echo 'ConfigForge testing permission'"
+                        end tell
+                    end tell
+                else
+                    create window with default profile
+                    tell current window
+                        tell current session
+                            write text "echo 'ConfigForge testing permission'"
+                        end tell
+                    end tell
+                end if
+            end tell
+            """
+        default:
+            return
+        }
+        
+        // 尝试执行权限请求
+        var error: NSDictionary?
+        if let appleScript = NSAppleScript(source: script) {
+            _ = appleScript.executeAndReturnError(&error)
+            
+            // 如果失败，尝试 osascript
+            if error != nil {
+                _ = await executeWithOsascript(script: script)
+            }
+        }
+        
+        permissionRequested = true
     }
 }

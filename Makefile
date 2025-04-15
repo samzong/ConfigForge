@@ -1,4 +1,4 @@
-.PHONY: clean dmg check-arch update-homebrew swiftgen
+.PHONY: clean dmg check-arch update-homebrew swiftgen install
 
 # 变量
 APP_NAME = ConfigForge
@@ -8,6 +8,13 @@ ARM64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.xcarchive
 X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.dmg
 ARM64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.dmg
 DMG_VOLUME_NAME = \"$(APP_NAME)\"
+
+# 签名变量
+ifeq ($(CI_BUILD),true)
+    CODE_SIGN_IDENTITY = "Developer ID Application"
+else
+    CODE_SIGN_IDENTITY = "-"
+endif
 
 # 版本信息
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
@@ -38,8 +45,7 @@ build-x86_64: swiftgen
 		-configuration Release \
 		-archivePath $(X86_64_ARCHIVE_PATH) \
 		CODE_SIGN_STYLE=Manual \
-		CODE_SIGN_IDENTITY="-" \
-		DEVELOPMENT_TEAM="" \
+		CODE_SIGN_IDENTITY=$(CODE_SIGN_IDENTITY) \
 		CURRENT_PROJECT_VERSION=$(VERSION) \
 		MARKETING_VERSION=$(VERSION) \
 		ARCHS="x86_64" \
@@ -54,8 +60,7 @@ build-arm64: swiftgen
 		-configuration Release \
 		-archivePath $(ARM64_ARCHIVE_PATH) \
 		CODE_SIGN_STYLE=Manual \
-		CODE_SIGN_IDENTITY="-" \
-		DEVELOPMENT_TEAM="" \
+		CODE_SIGN_IDENTITY=$(CODE_SIGN_IDENTITY) \
 		CURRENT_PROJECT_VERSION=$(VERSION) \
 		MARKETING_VERSION=$(VERSION) \
 		ARCHS="arm64" \
@@ -76,9 +81,9 @@ dmg: build-x86_64 build-arm64
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/x86_64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-x86_64/"
 	
-	# 对 x86_64 应用进行自签名
-	@echo "==> 对 x86_64 应用进行自签名..."
-	codesign --force --deep --sign - "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app"
+	# 对 x86_64 应用进行签名
+	@echo "==> 对 x86_64 应用进行签名..."
+	codesign --force --deep --sign $(CODE_SIGN_IDENTITY) "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app"
 	
 	# 创建指向 Applications 文件夹的符号链接
 	ln -s /Applications "$(BUILD_DIR)/tmp-x86_64/Applications"
@@ -105,9 +110,9 @@ dmg: build-x86_64 build-arm64
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/arm64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-arm64/"
 	
-	# 对 arm64 应用进行自签名
-	@echo "==> 对 arm64 应用进行自签名..."
-	codesign --force --deep --sign - "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app"
+	# 对 arm64 应用进行签名
+	@echo "==> 对 arm64 应用进行签名..."
+	codesign --force --deep --sign $(CODE_SIGN_IDENTITY) "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app"
 	
 	# 创建指向 Applications 文件夹的符号链接
 	ln -s /Applications "$(BUILD_DIR)/tmp-arm64/Applications"
@@ -128,7 +133,7 @@ dmg: build-x86_64 build-arm64
 	@echo "    - x86_64 版本: $(X86_64_DMG_PATH)"
 	@echo "    - arm64 版本: $(ARM64_DMG_PATH)"
 	@echo ""
-	@echo "注意: 这些应用使用了自签名，用户首次运行时可能需要在系统偏好设置中手动允许运行。"
+	@echo "注意: 这些应用$(if $(filter true,$(CI_BUILD)),,使用了自签名，用户首次运行时可能需要在系统偏好设置中手动允许运行)。"
 
 # 检查架构兼容性
 check-arch:
@@ -269,6 +274,73 @@ update-homebrew:
 	@rm -rf tmp
 	@echo "✅ Homebrew cask 更新流程完成"
 
+# 安装应用到当前系统 (基于当前架构)
+install: swiftgen
+	@echo "==> 确定当前架构..."
+	@ARCH=$$(uname -m); \
+	if [ "$$ARCH" = "x86_64" ]; then \
+		echo "==> 检测到 x86_64 架构，构建 x86_64 版本..."; \
+		make build-x86_64; \
+		echo "==> 导出 x86_64 归档..."; \
+		xcodebuild -exportArchive \
+			-archivePath $(X86_64_ARCHIVE_PATH) \
+			-exportPath $(BUILD_DIR)/x86_64 \
+			-exportOptionsPlist exportOptions.plist; \
+		echo "==> 安装 x86_64 版本到 /Applications..."; \
+		sudo cp -r "$(BUILD_DIR)/x86_64/$(APP_NAME).app" "/Applications/"; \
+		echo "==> 对安装的应用进行自签名..."; \
+		sudo codesign --force --deep --sign - "/Applications/$(APP_NAME).app"; \
+		echo "✅ $(APP_NAME) 已安装到 /Applications"; \
+	elif [ "$$ARCH" = "arm64" ]; then \
+		echo "==> 检测到 arm64 架构，构建 arm64 版本..."; \
+		make build-arm64; \
+		echo "==> 导出 arm64 归档..."; \
+		xcodebuild -exportArchive \
+			-archivePath $(ARM64_ARCHIVE_PATH) \
+			-exportPath $(BUILD_DIR)/arm64 \
+			-exportOptionsPlist exportOptions.plist; \
+		echo "==> 安装 arm64 版本到 /Applications..."; \
+		sudo cp -r "$(BUILD_DIR)/arm64/$(APP_NAME).app" "/Applications/"; \
+		echo "==> 对安装的应用进行自签名..."; \
+		sudo codesign --force --deep --sign - "/Applications/$(APP_NAME).app"; \
+		echo "✅ $(APP_NAME) 已安装到 /Applications"; \
+	else \
+		echo "❌ 不支持的架构: $$ARCH"; \
+		exit 1; \
+	fi
+	@echo "==> 清理临时文件..."
+	@rm -rf $(BUILD_DIR)/x86_64 $(BUILD_DIR)/arm64
+	@echo "==> 您现在可以从 /Applications 运行 $(APP_NAME)"
+
+# 步骤1：归档
+archive-release:
+	xcodebuild -project $(APP_NAME).xcodeproj \
+		-scheme $(APP_NAME) \
+		-configuration Release \
+		archive \
+		-archivePath $(BUILD_DIR)/$(APP_NAME)-Release.xcarchive
+
+# 步骤2：导出 .app
+export-release: archive-release
+	xcodebuild -exportArchive \
+		-archivePath $(BUILD_DIR)/$(APP_NAME)-Release.xcarchive \
+		-exportPath $(BUILD_DIR)/release \
+		-exportOptionsPlist exportOptions.plist
+
+# 步骤3：检查签名
+check-signature: export-release
+	codesign -dv --verbose=4 $(BUILD_DIR)/release/$(APP_NAME).app
+
+# 一键命令
+build-and-check: check-signature
+
+# 运行 Release 版本
+run-release:
+	@echo "==> 关闭已运行的 $(APP_NAME) 应用..."
+	@-pkill -x $(APP_NAME) || true
+	@echo "==> 启动 $(BUILD_DIR)/release/$(APP_NAME).app ..."
+	open "$(BUILD_DIR)/release/$(APP_NAME).app"
+
 # 帮助命令
 help:
 	@echo "可用命令:"
@@ -278,5 +350,11 @@ help:
 	@echo "  make check-arch      - 检查应用架构兼容性"
 	@echo "  make update-homebrew - 更新 Homebrew cask (需要 GH_PAT)"
 	@echo "  make swiftgen        - 运行 SwiftGen 生成类型安全的本地化代码"
+	@echo "  make install         - 安装应用到当前系统 (基于当前架构)"
+	@echo "  make archive-release   - 归档 Release 版本"
+	@echo "  make export-release    - 导出 Release 版本"
+	@echo "  make check-signature - 检查签名"
+	@echo "  make build-and-check - 一键命令"
+	@echo "  make run-release       - 运行 Release 版本"
 
 .DEFAULT_GOAL := help 

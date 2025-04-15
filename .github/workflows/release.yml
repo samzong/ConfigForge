@@ -22,28 +22,12 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Setup Certificate
-        run: |
-          echo "==> Setting code signing certificate..."
-          #Create a temporary keychain
-          security create-keychain -p "" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "" build.keychain
-          
-          #Decode and import certificate
-          echo '${{ secrets.CERTIFICATE_P12 }}' | base64 --decode > certificate.p12
-          security import certificate.p12 -k build.keychain -P '${{ secrets.CERTIFICATE_PASSWORD }}' -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
-          
-          #Set environment variable to tell Makefile to use the CI environment variable
-          echo "CI_BUILD=true" >> $GITHUB_ENV
-      
       - name: Install SwiftGen
         run: brew install swiftgen
 
       - name: Build Packages
         run: |
-          make VERSION=${{ env.VERSION }} CI_BUILD=true dmg
+          make VERSION=${{ env.VERSION }} dmg
 
       - name: Verify Architecture Support
         run: |

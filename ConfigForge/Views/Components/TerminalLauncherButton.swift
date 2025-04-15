@@ -4,6 +4,12 @@ struct TerminalLauncherButton: View {
     let sshEntry: SSHConfigEntry
     @State private var installedTerminals: [TerminalApp] = []
     @State private var showingNoTerminalAlert = false
+    @State private var showingPermissionAlert = false
+    @State private var currentTerminal: TerminalApp?
+    
+    // 使用 @AppStorage 存储权限请求状态
+    @AppStorage("ConfigForge.DidRequestTerminalPermission") 
+    private var didRequestPermission: Bool = false
     
     var body: some View {
         Group {
@@ -17,51 +23,24 @@ struct TerminalLauncherButton: View {
                             Label(terminal.name, systemImage: terminalIconName(for: terminal))
                         }
                     }
-                    
-                    Divider()
-                    
-                    Button(action: {
-                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }) {
-                        Label("权限设置帮助", systemImage: "lock.shield")
-                    }
                 } label: {
                     Label(L10n.Terminal.Open.in, systemImage: "terminal")
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(6)
                 }
             } else if installedTerminals.count == 1 {
                 // If only one terminal is available, show direct button
-                Menu {
-                    Button(action: {
-                        Task { await launchSSHInTerminal(terminal: installedTerminals[0]) }
-                    }) {
-                        let terminalName = installedTerminals[0].name
-                        let buttonText = terminalName == "Terminal" ? L10n.Terminal.Open.In.terminal : L10n.Terminal.Open.In.iterm
-                        Label(buttonText, systemImage: terminalIconName(for: installedTerminals[0]))
-                    }
-                    
-                    Divider()
-                    
-                    Button(action: {
-                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    }) {
-                        Label("权限设置帮助", systemImage: "lock.shield")
-                    }
-                } label: {
+                Button(action: {
+                    Task { await launchSSHInTerminal(terminal: installedTerminals[0]) }
+                }) {
                     let terminalName = installedTerminals[0].name
-                    let buttonText = terminalName == "Terminal" ? L10n.Terminal.Open.In.terminal : L10n.Terminal.Open.In.iterm
-                    
-                    Label(buttonText, systemImage: terminalIconName(for: installedTerminals[0]))
+                    Label(terminalName, systemImage: terminalIconName(for: installedTerminals[0]))
+                        .frame(minWidth: 80)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(6)
@@ -73,7 +52,7 @@ struct TerminalLauncherButton: View {
                 }) {
                     Label(L10n.Terminal.Open.in, systemImage: "terminal")
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                         .background(Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(6)
@@ -92,11 +71,24 @@ struct TerminalLauncherButton: View {
             Task {
                 // Get installed terminals
                 installedTerminals = await TerminalLauncherService.shared.getInstalledTerminalApps()
-                
-                if installedTerminals.isEmpty {
-                    // No terminal apps were detected. Terminal launcher button will be shown as disabled.
-                }
             }
+        }
+        .alert(isPresented: $showingPermissionAlert) {
+            Alert(
+                title: Text(L10n.Terminal.Launch.Failed.title),
+                message: Text(currentTerminal != nil ? L10n.Terminal.Launch.Failed.message(currentTerminal!.name) : "无法启动终端"),
+                primaryButton: .default(Text("打开系统设置")) {
+                    openPrivacySettings()
+                },
+                secondaryButton: .cancel(Text("取消"))
+            )
+        }
+    }
+    
+    // 打开隐私设置
+    private func openPrivacySettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+            NSWorkspace.shared.open(url)
         }
     }
     
@@ -113,6 +105,12 @@ struct TerminalLauncherButton: View {
     }
     
     private func launchSSHInTerminal(terminal: TerminalApp) async {
+        // 首次使用或重启后请求权限
+        if !didRequestPermission {
+            await TerminalLauncherService.shared.requestAutomationPermission(for: terminal)
+            didRequestPermission = true
+        }
+        
         // 获取SSH条目的详细信息
         let hostname = sshEntry.hostname.isEmpty ? sshEntry.host : sshEntry.hostname
         
@@ -126,24 +124,9 @@ struct TerminalLauncherButton: View {
         )
         
         if !success {
-            await showPermissionAlert(terminal: terminal) // Assume failure is likely due to permissions
-        }
-    }
-    
-    // 显示权限错误提示
-    @MainActor
-    private func showPermissionAlert(terminal: TerminalApp) {
-        let alert = NSAlert()
-        alert.messageText = L10n.Terminal.Launch.Failed.title
-        alert.informativeText = L10n.Terminal.Launch.Failed.message(terminal.name)
-        alert.addButton(withTitle: "打开系统设置")
-        alert.addButton(withTitle: "取消")
-        
-        let response = alert.runModal()
-        if response == .alertFirstButtonReturn {
-            // 打开系统设置
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-                NSWorkspace.shared.open(url)
+            await MainActor.run {
+                currentTerminal = terminal
+                showingPermissionAlert = true
             }
         }
     }

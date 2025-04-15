@@ -37,6 +37,9 @@ jobs:
           
           #Set environment variable to tell Makefile to use the CI environment variable
           echo "CI_BUILD=true" >> $GITHUB_ENV
+      
+      - name: Install SwiftGen
+        run: brew install swiftgen
 
       - name: Build Packages
         run: |

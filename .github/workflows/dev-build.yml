@@ -23,6 +23,9 @@ jobs:
         GIT_COMMIT=$(git rev-parse --short HEAD)
         echo "VERSION=Dev-${GIT_COMMIT}" >> $GITHUB_ENV
 
+    - name: Install SwiftGen
+      run: brew install swiftgen
+
     - name: Build and Package
       run: |
         make VERSION=${{ env.VERSION }} dmg

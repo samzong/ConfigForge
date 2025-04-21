@@ -1,0 +1,24 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Kubernetes Configuration Management
+
+This module handles the management of Kubernetes configurations (`~/.kube/config` file).
+
+## Key Components
+
+### Models
+- [KubeConfigModels.swift](mdc:ConfigForge/Models/KubeConfigModels.swift) - Data models for Kubernetes configurations
+
+### Services
+- [KubeConfigFileManager.swift](mdc:ConfigForge/Services/KubeConfigFileManager.swift) - Handles reading/writing Kubernetes config files
+- [KubeConfigParser.swift](mdc:ConfigForge/Services/KubeConfigParser.swift) - Parses Kubernetes config file format
+
+### Data Flow
+1. Kubernetes config is loaded from disk via `KubeConfigFileManager`
+2. Raw file content is parsed by `KubeConfigParser` into Kubernetes model objects
+3. The `MainViewModel` manages these configurations and user interactions
+4. The UI displays different aspects (Contexts, Clusters, Users) based on user selection
+5. When changes are made, the configurations are converted back to YAML and saved

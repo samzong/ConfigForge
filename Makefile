@@ -1,8 +1,10 @@
-.PHONY: clean dmg check-arch update-homebrew swiftgen install
+.PHONY: clean dmg check-arch update-homebrew swiftgen install install-cli-local
 
 # 变量
 APP_NAME = ConfigForge
+CLI_NAME = cf
 BUILD_DIR = build
+CLI_BUILD_DIR = CLI/.build
 X86_64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.xcarchive
 ARM64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.xcarchive
 X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.dmg
@@ -21,6 +23,10 @@ GIT_COMMIT = $(shell git rev-parse --short HEAD)
 VERSION ?= $(if $(CI_BUILD),$(shell git describe --tags --always),Dev-$(shell git rev-parse --short HEAD))
 CLEAN_VERSION = $(shell echo $(VERSION) | sed 's/^v//')
 
+# CLI 相关变量
+CLI_INSTALL_PATH = /usr/local/bin
+APP_CLI_PATH = $(BUILD_DIR)/app/$(APP_NAME).app/Contents/Resources/bin
+
 # Homebrew 相关变量
 HOMEBREW_TAP_REPO = homebrew-tap
 CASK_FILE = Casks/configforge.rb
@@ -34,7 +40,20 @@ swiftgen:
 # 清理构建产物
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf $(CLI_BUILD_DIR)
 	xcodebuild clean -scheme $(APP_NAME)
+
+# 构建 CLI
+build-cli:
+	@echo "==> 构建 CLI..."
+	cd CLI && swift build -c release
+
+# 为本地开发安装 CLI (需要 sudo)
+install-cli-local: build-cli
+	@echo "==> 安装 CLI 到 $(CLI_INSTALL_PATH)..."
+	@sudo mkdir -p $(CLI_INSTALL_PATH)
+	@sudo cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
+	@echo "==> CLI 已安装到 $(CLI_INSTALL_PATH)/$(CLI_NAME)"
 
 # 构建 x86_64 (Intel)
 build-x86_64: swiftgen
@@ -67,7 +86,7 @@ build-arm64: swiftgen
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
 # 创建 DMG (构建 x86_64 和 arm64 版本)
-dmg: build-x86_64 build-arm64
+dmg: build-x86_64 build-arm64 build-cli
 	# 导出 x86_64 归档
 	xcodebuild -exportArchive \
 		-archivePath $(X86_64_ARCHIVE_PATH) \
@@ -80,6 +99,10 @@ dmg: build-x86_64 build-arm64
 	
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/x86_64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-x86_64/"
+	
+	# 添加 CLI 到应用程序包内
+	mkdir -p "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app/Contents/Resources/bin"
+	cp -f "$(CLI_BUILD_DIR)/release/$(CLI_NAME)" "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app/Contents/Resources/bin/"
 	
 	# 对 x86_64 应用进行签名
 	@echo "==> 对 x86_64 应用进行签名..."
@@ -109,6 +132,10 @@ dmg: build-x86_64 build-arm64
 	
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/arm64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-arm64/"
+	
+	# 添加 CLI 到应用程序包内
+	mkdir -p "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app/Contents/Resources/bin"
+	cp -f "$(CLI_BUILD_DIR)/release/$(CLI_NAME)" "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app/Contents/Resources/bin/"
 	
 	# 对 arm64 应用进行签名
 	@echo "==> 对 arm64 应用进行签名..."
@@ -344,17 +371,18 @@ run-release:
 # 帮助命令
 help:
 	@echo "可用命令:"
-	@echo "  make clean           - 清理构建产物"
-	@echo "  make dmg             - 创建 DMG 安装包 (Intel 和 Apple Silicon)"
-	@echo "  make version         - 显示版本信息"
-	@echo "  make check-arch      - 检查应用架构兼容性"
-	@echo "  make update-homebrew - 更新 Homebrew cask (需要 GH_PAT)"
-	@echo "  make swiftgen        - 运行 SwiftGen 生成类型安全的本地化代码"
-	@echo "  make install         - 安装应用到当前系统 (基于当前架构)"
-	@echo "  make archive-release   - 归档 Release 版本"
-	@echo "  make export-release    - 导出 Release 版本"
-	@echo "  make check-signature - 检查签名"
-	@echo "  make build-and-check - 一键命令"
-	@echo "  make run-release       - 运行 Release 版本"
+	@echo "  make clean               - Clean build artifacts"
+	@echo "  make dmg                 - Create DMG Installer Package (Intel and Apple Silicon)"
+	@echo "  make version             - Display version information"
+	@echo "  make check-arch          - Check application architecture compatibility"
+	@echo "  make update-homebrew     - Update Homebrew cask (requires GH_PAT)"
+	@echo "  make swiftgen            - Run SwiftGen to generate type-safe localized code"
+	@echo "  make install             - Install the app to the current system (based on the current architecture)"
+	@echo "  make archive-release     - Archive the Release version"
+	@echo "  make export-release      - Export the Release version"
+	@echo "  make check-signature     - Check signature"
+	@echo "  make build-and-check     - One-click command"
+	@echo "  make run-release         - Run the Release version"
+	@echo "  make install-cli-local   - Install CLI to local"
 
 .DEFAULT_GOAL := help 

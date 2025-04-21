@@ -2,7 +2,7 @@
 
 ## 1. 项目概述
 
-ConfigForge 是一个专为 macOS 用户设计的开源 SSH 配置管理工具，旨在提供简洁直观的图形界面来管理 `~/.ssh/config` 文件。该应用程序使用 SwiftUI 构建，为用户提供现代化的 macOS 原生体验，使用户能够更高效、更安全地管理他们的 SSH 配置。
+ConfigForge 是一个专为 macOS 用户设计的开源 SSH 配置管理工具，旨在提供简洁直观的图形界面来管理 `~/.ssh/config` 文件。该应用程序使用 SwiftUI 构建，为用户提供现代化的 macOS 原生体验，使用户能够更高效、更安全地管理他们的 SSH 配置。此外，ConfigForge 还提供命令行界面 (CLI)，让用户可以在终端中快速管理和使用 SSH 与 Kubernetes 配置。
 
 作为一个完全开源的项目，ConfigForge 尊重用户的隐私和自由，所有代码公开透明，社区贡献者可以审查和改进。应用发布通过 Homebrew ，不会上架到 MacOS 的 App store.
 
@@ -21,6 +21,7 @@ ConfigForge 是一个专为 macOS 用户设计的开源 SSH 配置管理工具�
 - **编程语言**: Swift 6.1
 - **UI 框架**: SwiftUI 6.1
 - **应用程序架构**: MVVM (Model-View-ViewModel)
+- **命令行工具**: Swift Argument Parser
 - **文件处理**: Foundation Framework
 - **持久化存储**: FileManager, UserDefaults
 - **测试框架**: XCTest
@@ -30,7 +31,7 @@ ConfigForge 是一个专为 macOS 用户设计的开源 SSH 配置管理工具�
 
 ### 3.1 架构概览
 
-ConfigForge 采用 MVVM (Model-View-ViewModel) 架构模式，确保业务逻辑和 UI 的分离，提高代码的可测试性和可维护性。
+ConfigForge 采用 MVVM (Model-View-ViewModel) 架构模式，确保业务逻辑和 UI 的分离，提高代码的可测试性和可维护性。CLI 部分采用命令式架构，与主应用共享核心服务和模型。
 
 ```
 ┌────────────┐    ┌────────────┐    ┌────────────┐
@@ -46,14 +47,22 @@ ConfigForge 采用 MVVM (Model-View-ViewModel) 架构模式，确保业务逻辑
        │             │             │             │
        │  Services   │             │   SwiftUI   │
        │             │             │             │
-       └─────────────┘             └─────────────┘
+       └─────┬───────┘             └─────────────┘
+             │
+             ▼
+      ┌─────────────┐
+      │             │
+      │     CLI     │
+      │             │
+      └─────────────┘
 ```
 
 ### 3.2 核心组件
 
 1. **模型层 (Model)**:
    - 定义数据结构和业务规则
-   - 表示 SSH 配置条目的结构
+   - 表示 SSH 和 Kubernetes 配置条目的结构
+   - 在 GUI 和 CLI 之间共享
 
 2. **视图层 (View)**:
    - 使用 SwiftUI 构建用户界面
@@ -69,6 +78,12 @@ ConfigForge 采用 MVVM (Model-View-ViewModel) 架构模式，确保业务逻辑
    - 处理文件读写操作
    - 提供配置解析和验证功能
    - 实现备份和恢复逻辑
+   - 为 GUI 和 CLI 提供共享功能
+
+5. **命令行界面 (CLI)**:
+   - 提供终端交互功能
+   - 使用 Argument Parser 处理命令和参数
+   - 通过共享服务层访问相同的数据
 
 ## 4. 模块设计
 
@@ -181,63 +196,74 @@ struct ContentView: View {
 }
 ```
 
-#### 4.5.2 列表视图
+### 4.6 命令行界面模块
+
+使用 Swift Argument Parser 实现的命令行工具。
 
 ```swift
-// EntryListView.swift
-struct EntryListView: View {
-    @ObservedObject var viewModel: SSHConfigViewModel
-    
-    var body: some View {
-        List(viewModel.filteredEntries, selection: $viewModel.selectedEntry) { entry in
-            Text(entry.host)
-                .contextMenu {
-                    Button("删除", role: .destructive) {
-                        // 确认删除操作
-                    }
-                }
-        }
-        .searchable(text: $viewModel.searchText, prompt: "搜索 Host")
-    }
+// main.swift
+@main
+struct ConfigForgeCLI: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "cf",
+        abstract: "ConfigForge CLI - Manage SSH and Kubernetes configurations",
+        version: "1.0.0",
+        subcommands: [
+            SSHCommand.self,
+            KubeCommand.self
+        ],
+        defaultSubcommand: SSHCommand.self
+    )
+}
+
+// SSHCommand.swift
+struct SSHCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "ssh",
+        abstract: "Manage SSH configurations",
+        subcommands: [
+            SSHListCommand.self,
+            SSHConnectCommand.self
+        ],
+        defaultSubcommand: SSHListCommand.self
+    )
+}
+
+// KubeCommand.swift
+struct KubeCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "kube",
+        abstract: "Manage Kubernetes configurations",
+        subcommands: [
+            KubeListCommand.self,
+            KubeContextCommand.self,
+            KubeCurrentCommand.self
+        ],
+        defaultSubcommand: KubeListCommand.self
+    )
 }
 ```
 
-#### 4.5.3 编辑器视图
+### 4.7 CLI 服务模块
+
+为命令行工具提供核心功能的服务类。
 
 ```swift
-// EntryEditorView.swift
-struct EntryEditorView: View {
-    @ObservedObject var viewModel: SSHConfigViewModel
-    var entry: SSHConfigEntry
-    @State private var editedHost: String
-    @State private var editedProperties: [String: String]
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            // 编辑器控件
-            EditorControls(isEditing: $viewModel.isEditing)
-            
-            // 主机名称编辑
-            HostEditor(host: $editedHost, isEditing: viewModel.isEditing)
-            
-            // 属性编辑
-            PropertiesEditor(properties: $editedProperties, isEditing: viewModel.isEditing)
-            
-            Spacer()
-        }
-        .padding()
-        .toolbar {
-            ToolbarItem {
-                Button(viewModel.isEditing ? "保存" : "编辑") {
-                    if viewModel.isEditing {
-                        // 保存编辑
-                        viewModel.updateEntry(id: entry.id, host: editedHost, properties: editedProperties)
-                    }
-                    viewModel.isEditing.toggle()
-                }
-            }
-        }
-    }
+// CLISSHConfigFileManager.swift
+class CLISSHConfigFileManager {
+    func getAllHosts() -> [SSHConfigEntry]
+    func readConfigFile() -> String
+}
+
+// CLIKubeConfigFileManager.swift
+class CLIKubeConfigFileManager {
+    func getKubeConfig() -> KubeConfig
+    func switchContext(to contextName: String)
+}
+
+// CLITerminalService.swift
+class CLITerminalService {
+    func connectToSSHHost(host: String)
 }
 ```
 
@@ -248,17 +274,14 @@ struct EntryEditorView: View {
 1. 应用程序启动时，`SSHConfigViewModel` 调用 `loadConfig()`
 2. `loadConfig()` 通过 `SSHConfigFileManager` 读取 `~/.ssh/config` 文件
 3. 读取的内容传递给 `SSHConfigParser` 进行解析
-4. 解析后的 `[SSHConfigEntry]` 保存到 `SSHConfigViewModel.entries`
-5. `ContentView` 通过 `@StateObject` 观察 `SSHConfigViewModel` 的变化并更新 UI
 
-### 5.2 保存配置流程
+### 5.2 CLI 命令执行流程
 
-1. 用户编辑完成并点击"保存"
-2. `EntryEditorView` 调用 `viewModel.updateEntry()`
-3. `updateEntry()` 更新 `ViewModel` 中的 `entries` 数组
-4. `ViewModel` 调用 `saveConfig()` 方法
-5. `saveConfig()` 使用 `SSHConfigParser` 将 `entries` 格式化为文本
-6. 格式化后的文本通过 `SSHConfigFileManager` 写入到 `~/.ssh/config` 文件
+1. 用户在终端中输入 `cf` 命令
+2. `ConfigForgeCLI` 解析命令参数
+3. 根据子命令调用相应的服务类
+4. 服务类处理命令并返回结果
+5. 结果在终端中显示
 
 ## 6. 开发环境设置
 

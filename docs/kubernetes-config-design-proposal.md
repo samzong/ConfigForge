@@ -1,55 +1,50 @@
-# Kubernetes Configuration Management Proposal
+# Kubernetes 配置管理提案
 
-## 1. Introduction
+## 1. 简介
 
-### 1.1 Problem Statement
+### 1.1 问题陈述
 
-The current Kubernetes configuration management design segments configurations into clusters, users, and contexts within a single `.kube/config` file. This approach presents several challenges:
+当前的 Kubernetes 配置管理设计将配置分割为单个 `.kube/config` 文件中的集群、用户和上下文。这种方法带来了几个挑战：
 
-- The `.kube/config` file becomes unwieldy with numerous entries
-- Maintenance of individual components (clusters, users, contexts) is cumbersome
-- Most kubeconfig files are distributed as complete YAML documents, making the current segmented approach counter-intuitive
-- No clear way to manage multiple environments or projects
+- `.kube/config` 文件随着众多条目变得难以管理
+- 维护单个组件（集群、用户、上下文）很麻烦
+- 大多数 kubeconfig 文件都是作为完整的 YAML 文档分发的，使得当前的分段方法不直观
+- 没有明确的方法来管理多个环境或项目
 
-### 1.2 Proposed Solution
+### 1.2 提议的解决方案
 
-We propose a shift to a file-based management approach where:
-- Complete kubeconfig files are stored separately in a dedicated directory (`~/.kube/configs/`).
-- ConfigForge manages switching between these configurations by overwriting the main `~/.kube/config` file.
-- Basic file validation is performed during discovery.
-- A simple backup mechanism (`~/.kube/config.bak`) preserves the previous configuration.
+我们建议转向基于文件的管理方法，其中：
+- 完整的 kubeconfig 文件单独存储在专用目录 (`~/.kube/configs/`) 中。
+- ConfigForge 通过覆盖主 `~/.kube/config` 文件来管理这些配置之间的切换。
+- 在发现过程中执行基本的文件验证。
+- 简单的备份机制 (`~/.kube/config.bak`) 保存先前的配置。
 
-This approach aims to simplify management for users dealing with multiple complete kubeconfig files, reducing the need to manually edit the main `~/.kube/config`.
+这种方法旨在简化处理多个完整 kubeconfig 文件的用户的管理，减少手动编辑主 `~/.kube/config` 的需求。
 
-## 2. Design Goals and Principles
+## 2. 设计目标和原则
 
-### 2.1 Key Goals
+### 2.1 主要目标
 
-- **Simplify Configuration Management**: Eliminate the need to manually edit the `.kube/config` file
-- **Improve Organization**: Provide intuitive ways to categorize and find configurations
-- **Enhance User Experience**: Make configuration switching seamless and visual
-- **Preserve Compatibility**: Maintain backward compatibility with existing tools
-- **Enable Advanced Features**: Support metadata, templates, and dependencies
+- **简化配置管理**：消除手动编辑 `.kube/config` 文件的需求
+- **改善组织**：提供直观的方式来分类和查找配置
+- **增强用户体验**：使配置切换无缝和可视化
 
-### 2.2 Design Principles
+### 2.2 设计原则
 
-- **File-Based Approach**: Store each configuration as an intact file
-- **Atomic Operations**: Ensure configuration switching is reliable and recoverable
-- **File System Discovery**: Rely on direct directory scanning for configuration discovery.
-- **Overwrite with Backup**: Configuration switching involves overwriting the main config file after creating a backup.
-- **Security-First**: Implement appropriate safeguards for sensitive information.
-- **Progressive Enhancement**: Build core functionality first, then add advanced features like automatic splitting or advanced metadata.
+- **基于文件的方法**：将每个配置存储为完整的文件
+- **原子操作**：确保配置切换是可靠和可恢复的
+- **文件系统发现**：依赖直接目录扫描进行配置发现
+- **覆盖并备份**：配置切换涉及在创建备份后覆盖主配置文件
 
-## 3. Architecture Overview
+## 3. 架构概述
 
-### 3.1 System Components
+### 3.1 系统组件
 
 ```
 ┌─────────────────┐      ┌─────────────────┐
 │                 │      │                 │
-│  Configuration  │◄────►│ Configuration   │
-│  Repository     │      │ Switcher        │
-│ (`~/.kube/configs/`)│      │ (incl. Backup)  │
+│  配置库         │◄────►│ 配置切换器      │
+│ (`~/.kube/configs/`)│      │ (包括备份)      │
 │                 │      │                 │
 └────────┬────────┘      └────────┬────────┘
          │                        │
@@ -57,486 +52,112 @@ This approach aims to simplify management for users dealing with multiple comple
          ▼                        ▼
 ┌─────────────────┐      ┌─────────────────┐
 │                 │      │                 │
-│  File System    │      │  Active Config  │
-│  Service        │      │ (`~/.kube/config`)│
-│ (Read/Write/List)│      │                 │
+│  文件系统       │      │  活动配置       │
+│  服务           │      │ (`~/.kube/config`)│
+│ (读/写/列表)    │      │                 │
 │                 │      │                 │
 └─────────────────┘      └─────────────────┘
 ```
 
-### 3.2 Component Descriptions
+### 3.2 组件描述
 
-1.  **Configuration Repository**: Represents the `~/.kube/configs/` directory where individual kubeconfig files are stored. Discovery involves listing files in this directory.
-2.  **Configuration Switcher**: Handles the process of activating a selected configuration. This involves:
-    *   Reading the current `~/.kube/config`.
-    *   Writing its content to `~/.kube/config.bak`.
-    *   Reading the selected file from `~/.kube/configs/`.
-    *   Writing its content to `~/.kube/config`.
-3.  **File System Service**: Handles low-level file operations: reading directory contents, reading file contents, writing file contents, and basic validation (e.g., attempting to parse).
-4.  **Active Config**: The `~/.kube/config` file, which is actively managed (overwritten) by ConfigForge during switching.
+1.  **配置库**：代表存储单个 kubeconfig 文件的 `~/.kube/configs/` 目录。发现涉及列出此目录中的文件。
+2.  **配置切换器**：处理激活所选配置的过程。这涉及：
+    *   读取当前的 `~/.kube/config`。
+    *   将其内容写入 `~/.kube/config.bak`。
+    *   从 `~/.kube/configs/` 读取所选文件。
+    *   将其内容写入 `~/.kube/config`。
+3.  **文件系统服务**：处理底层文件操作：读取目录内容，读取文件内容，写入文件内容和基本验证（例如，尝试解析）。
+4.  **活动配置**：`~/.kube/config` 文件，在切换过程中由 ConfigForge 主动管理（覆盖）。
 
-## 4. File Organization Structure
+## 4. 文件组织结构
 
 ```
 ~/.kube/
-├── config                 # Active configuration file, managed by ConfigForge
-├── config.bak             # Backup of the previous active config file
-└── configs/               # Directory containing individual kubeconfig files
+├── config                 # 活动配置文件，由 ConfigForge 管理
+├── config.bak             # 先前活动配置文件的备份
+└── configs/               # 包含单个 kubeconfig 文件的目录
     ├── prod-cluster-a.yaml
     ├── dev-cluster-b.yaml
     └── staging-cluster-c.yaml
-    # Users can organize files within this directory as they see fit (e.g., using subdirectories),
-    # but ConfigForge V1 primarily lists files directly within `configs/`.
 ```
 
-## 5. Core Model Design (Simplified)
+## 7. 用户界面设计
 
-Given the removal of central metadata, the core models are simplified. The primary "model" becomes the file path itself, potentially augmented with validation status.
+### 7.2 配置列表
 
-```swift
-// Represents a discovered configuration file
-struct DiscoveredKubeConfig {
-    let path: URL // Full path to the file in ~/.kube/configs/
-    var isValid: Bool? // Optional: Result of validation check
-    var lastModified: Date? // Optional: File modification date for sorting
-    // Basic name derived from filename
-    var displayName: String {
-        path.lastPathComponent
-    }
-}
-```
+侧边栏列出发现的 Kubernetes 配置，包括活动配置和来自 `configs/` 目录的文件。
 
-### 5.1 Core Services (Revised)
+**主要功能：**
+- 显示活动的 `~/.kube/config`（明确标记）。
+- 列出 `~/.kube/configs/` 中的所有文件。
+- 指示验证状态（例如，标记无效/无法解析的文件）。
+- 提供一个"添加"按钮，在 `~/.kube/configs/` 中创建新的空配置文件。
+- 包含用于文件管理和激活的上下文菜单操作。
+- 如果未找到配置，则显示空状态消息。
 
-```swift
-// Manages discovery, validation, and switching
-protocol KubeConfigManager {
-    // Discovers config files in ~/.kube/configs/
-    // Optionally performs validation during discovery
-    func listAvailableConfigs(validate: Bool) -> Result<[DiscoveredKubeConfig], Error>
+### 7.4 配置编辑器
 
-    // Switches the active config to the one at the given path
-    // Handles backup to config.bak and writing to config
-    func switchActiveConfig(to configPath: URL) -> Result<Void, Error>
+显示所选配置文件（活动 `config` 或 `configs/` 中的文件）的内容。默认为只读模式。
 
-    // Reads the content of a specific config file
-    func readConfigContent(at path: URL) -> Result<String, Error>
+**主要功能：**
+- **默认只读**：默认情况下在不可编辑的查看器中显示 YAML 内容。
+- **语法高亮**：查看器和编辑器都必须支持 YAML 语法高亮。
+- **显式编辑模式**："编辑"按钮切换到可编辑的文本区域。
+- **保存/取消**：在编辑模式下，"保存"将更改写回文件，"取消"放弃更改。
+- **处理损坏的文件**：允许查看并尝试编辑甚至标记为无效/损坏的文件。
 
-    // Validates the content of a specific config file
-    func validateConfig(at path: URL) -> Result<Bool, Error>
 
-    // Optional: Import a file into the ~/.kube/configs directory
-    func importConfig(from sourcePath: URL) -> Result<URL, Error>
+### 7.8 命令行界面 (CLI) 设计
 
-    // Optional: Export a config file from ~/.kube/configs
-    func exportConfig(at configPath: URL, to destinationPath: URL) -> Result<Void, Error>
-}
+现有的 CLI 命令需要适应新的基于文件的管理模型。
 
-// Lower-level file operations
-protocol FileSystemService {
-    func readFile(path: URL) -> Result<String, Error>
-    func writeFile(path: URL, content: String) -> Result<Void, Error>
-    // Simplified backup: just write content to a fixed backup path
-    func backupActiveConfig(content: String, backupPath: URL) -> Result<Void, Error>
-    func listFiles(directory: URL) -> Result<[URL], Error>
-    func fileExists(at path: URL) -> Bool
-    func getFileAttributes(at path: URL) -> Result<[FileAttributeKey: Any], Error>
-}
-```
+**`configforge kube list` (或 `cf k l`)**
 
-## 6. Feature Improvements
-
-### 6.1 Configuration Management (Revised)
-
-- **Import/Export**: Basic functionality to copy files into/out of the `~/.kube/configs` directory.
-- **Validation**: Check if files in `~/.kube/configs` are parsable as valid KubeConfig YAML upon discovery or on demand. Mark invalid files in the UI.
-- **Backup**: Simple backup of `~/.kube/config` to `~/.kube/config.bak` before overwriting during a switch. Restoration involves manually copying `.bak` back to `config` or using a potential future "undo" feature.
-- **Duplication**: Basic file duplication within `~/.kube/configs`.
-- **Templates**: Deferred.
-
-### 6.2 Metadata Management (Simplified)
-
-- **Basic Identification**: Configurations are identified primarily by their filename.
-- **Organization**: Users manage organization through filenames or subdirectories within `~/.kube/configs/` (though initial UI might just show a flat list).
-- **Search**: Basic search by filename.
-- **Advanced Metadata (Tags, Env, Favs, History)**: Deferred for future consideration.
-
-### 6.3 Configuration Switching (Revised)
-
-- **Overwrite Mechanism**: Switching involves overwriting `~/.kube/config` with the content of the selected file from `~/.kube/configs/`.
-- **Backup**: The previous `~/.kube/config` content is backed up to `~/.kube/config.bak` before the overwrite.
-- **Validation**: Ideally, validate the selected config *before* attempting the switch.
-- **Rollback**: Basic rollback is possible by manually restoring `~/.kube/config.bak`. A dedicated "undo" feature could be added later.
-- **Notifications**: Provide clear visual feedback during the switching process (start, success, failure).
-- **Quick Switching**: UI/Command Palette allows fast selection and activation of configurations listed from `~/.kube/configs/`.
-
-## 7. User Interface Design
-
-### 7.1 Main Interface Layout
-
-```swift
-struct MainView: View {
-    var body: some View {
-        NavigationSplitView {
-            // Left Sidebar: Configuration Browser
-            ConfigurationBrowser()
-        } content: {
-            // Middle Content: Configuration List
-            ConfigurationList()
-        } detail: {
-            // Right Detail: Configuration Editor
-            ConfigurationEditor()
-        }
-        .toolbar {
-            ToolbarItems()
-        }
-    }
-}
-```
-
-### 7.2 Configuration Browser (Left Sidebar - V3.2)
-
-The sidebar lists discovered Kubernetes configurations, including the active one and files from the `configs/` directory.
-
-**Key Features:**
-- Displays the active `~/.kube/config` (clearly marked).
-- Lists all files from `~/.kube/configs/`.
-- Indicates validation status (e.g., marking invalid/unparsable files).
-- Provides a "+" button to create a new empty configuration file in `~/.kube/configs/`.
-- Includes context menu actions for file management and activation.
-- Shows an empty state message if no configurations are found.
-
-```swift
-struct ConfigurationBrowser: View {
-    // ViewModel providing the combined list (active + configs/)
-    @StateObject var viewModel: ConfigBrowserViewModel
-
-    var body: some View {
-        VStack {
-            // Search Bar (Filters viewModel.combinedConfigs)
-            ConfigSearchBar(searchText: $viewModel.searchText)
-
-            // List Area
-            if viewModel.combinedConfigs.isEmpty {
-                 // Empty State View
-                 Text("No Kubernetes configurations found.\nUse '+' to add a new one.")
-                     .foregroundColor(.secondary)
-                     .multilineTextAlignment(.center)
-                     .padding()
-                 Spacer()
-            } else {
-                List(viewModel.filteredConfigs) { configItem in // configItem includes path, active status, valid status
-                    ConfigRow(configItem: configItem) // Row shows name, active/invalid indicators
-                        .contextMenu { /* Context menu defined in ConfigurationList */ }
-                        .onTapGesture { viewModel.selectConfig(configItem) }
-                }
-                .listStyle(SidebarListStyle())
-            }
-
-            // Add Button
-            Button(action: viewModel.createNewConfigFile) { // Prompts for name, creates empty file
-                Label("New Configuration", systemImage: "plus.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .padding()
-        }
-        .toolbar {
-            // Refresh, Open Directory buttons...
-        }
-    }
-}
-```
-
-### 7.3 Configuration List (Middle Content - V3.2)
-
-This view displays the combined list (active config + files from `configs/`) and handles interactions.
-
-```swift
-struct ConfigurationList: View {
-    // ViewModel providing the combined list and handling actions
-    @StateObject var viewModel: ConfigListViewModel
-    @Binding var searchText: String // Bind to search text from Sidebar/Toolbar
-
-    // Filter logic resides in ViewModel or here
-    var filteredConfigs: [CombinedKubeConfigItem] { // CombinedItem includes path, isActive, isValid
-        // ... filtering logic based on searchText (filename) ...
-        return viewModel.combinedConfigs.filter { /* ... */ }
-    }
-
-    var body: some View {
-        List(filteredConfigs) { configItem in
-            ConfigurationListItem(configItem: configItem) // Row shows name, active/invalid indicators
-                .contextMenu {
-                    // Action available only for items from `configs/` directory
-                    if !configItem.isActive {
-                        Button("Set as Active") { viewModel.setActiveConfig(configItem.path) }
-                    }
-                    // Actions available only for items from `configs/` directory
-                    if !configItem.isActive {
-                         Button("Duplicate") { viewModel.duplicateConfig(configItem.path) }
-                         Button("Export") { viewModel.exportConfig(configItem.path) }
-                         Divider()
-                         Button("Delete", role: .destructive) { viewModel.deleteConfig(configItem.path) } // Needs confirmation
-                    } else {
-                         // Actions for the active ~/.kube/config item (e.g., Export)
-                         Button("Export Active Config") { viewModel.exportConfig(configItem.path) }
-                    }
-                    Button("Reveal in Finder") { viewModel.revealInFinder(configItem.path) }
-                }
-                .onTapGesture {
-                     viewModel.selectConfig(configItem) // Selects for editor view
-                }
-        }
-        .toolbar {
-             // Sorting options (name, date modified, active status)
-             // ...
-        }
-    }
-}
-```
-
-### 7.4 Configuration Editor (Right Detail - V3.2)
-
-Displays the content of the selected configuration file (active `config` or a file from `configs/`). Defaults to read-only mode.
-
-**Key Features:**
-- **Read-Only Default:** Shows YAML content in a non-editable viewer by default.
-- **Syntax Highlighting:** Both viewer and editor must support YAML syntax highlighting.
-- **Explicit Edit Mode:** An "Edit" button switches to an editable text area.
-- **Save/Cancel:** In edit mode, "Save" writes changes back to the file, "Cancel" discards them.
-- **Handles Damaged Files:** Allows viewing and attempting to edit even files marked as invalid/damaged.
-
-```swift
-struct KubeConfigFileEditorView: View { // Renamed for clarity
-    // ViewModel holding content, path, edit state, etc.
-    @StateObject var viewModel: KubeConfigEditorViewModel
-    // Local state for edit mode, potentially synced with ViewModel
-    @State private var isEditing = false
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header showing filename, active/invalid status
-            ConfigHeaderView(configInfo: viewModel.configInfo) // Pass path, isActive, isValid
-
-            // YAML Viewer or Editor
-            if isEditing {
-                YAMLEditor(text: $viewModel.editableContent) // Bind to editable buffer
-                    .syntaxHighlighting(.yaml)
-                    .border(Color.accentColor) // Indicate editing
-            } else {
-                YAMLViewer(text: viewModel.currentContent) // Display current file content
-                    .syntaxHighlighting(.yaml)
-            }
-
-            // Action Toolbar
-            HStack {
-                // Optional: Validate button (checks YAML syntax)
-                Button("Validate Syntax") { viewModel.validateSyntax() }
-
-                Spacer()
-
-                if isEditing {
-                    Button("Cancel") {
-                        viewModel.discardChanges() // Reset editableContent
-                        isEditing = false
-                    }
-                    Button("Save") {
-                        // Attempt save, handle success/failure
-                        if viewModel.saveChanges() {
-                            isEditing = false
-                        } else {
-                            // Show error to user
-                        }
-                    }
-                    .keyboardShortcut("s", modifiers: .command) // Standard save shortcut
-                } else {
-                    Button("Edit") {
-                        viewModel.prepareForEditing() // Load content into editable buffer
-                        isEditing = true
-                    }
-                }
-            }
-            .padding()
-            .background(.bar) // Toolbar background
-        }
-        .toolbar { // Main window toolbar items
-            ToolbarItemGroup {
-                 // Activate button, disabled if already active or if it's the ~/.kube/config item
-                Button("Set as Active") { viewModel.setActive() }
-                    .disabled(viewModel.configInfo.isActive || viewModel.configInfo.path == AppConstants.kubeConfigPath)
-
-                Button("Export") { viewModel.exportConfig() }
-
-                Menu {
-                    // Duplicate/Delete only available for files in configs/
-                    if viewModel.configInfo.path != AppConstants.kubeConfigPath {
-                        Button("Duplicate") { viewModel.duplicateConfig() }
-                        Button("Delete", role: .destructive) { viewModel.deleteConfig() } // Needs confirmation
-                    }
-                    Button("Reveal in Finder") { viewModel.revealInFinder() }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
-    }
-}
-```
-
-### 7.5 Quick Switcher (Command Palette)
-
-```swift
-struct QuickSwitcher: View {
-    @State private var searchText = ""
-    
-    var body: some View {
-        VStack {
-            // Search Input
-            SearchField("Search configurations...", text: $searchText)
-            
-            // Results List
-            List {
-                // Recent Configurations
-                Section("Recent") {
-                    ForEach(recentConfigs) { config in
-                        QuickSwitcherItem(config: config)
-                    }
-                }
-                
-                // Search Results
-                Section("Results") {
-                    ForEach(searchResults) { config in
-                        QuickSwitcherItem(config: config)
-                    }
-                }
-                
-                // Quick Actions
-                Section("Actions") {
-                    Button("Create New Configuration") { /* ... */ }
-                    Button("Import Configuration") { /* ... */ }
-                    Button("Open Active Configuration") { /* ... */ }
-                }
-            }
-        }
-        .frame(width: 600, height: 400)
-        .background(Material.regular)
-    }
-}
-```
-
-### 7.6 Import Wizard (Deferred)
-
-Dedicated import functionality (file picker, paste text) is deferred in V3.2. Initial population relies on users manually placing files in `~/.kube/configs/` or using the "New Configuration" (+) button.
-
-### 7.7 Dependency View (Removed/Deferred)
-
-Dependency management is removed in this simplified version.
-
-### 7.8 Command Line Interface (CLI) Design (V3.2)
-
-The existing CLI commands need to be adapted to the new file-based management model.
-
-**`configforge kube list` (or `cf k ls`)**
-
-*   **Functionality:** Lists available Kubernetes configurations.
-*   **Implementation:**
-    *   Scans the `~/.kube/configs/` directory for configuration files (e.g., `.yaml`, `.kubeconfig`).
-    *   Reads the content of the active `~/.kube/config` file.
-    *   Compares the content of `~/.kube/config` with each file in `~/.kube/configs/` to identify which one is currently active. (Note: This requires reading all files and might be slow for many large files. A future optimization might involve storing the active filename somewhere upon switching).
-    *   Outputs a list of filenames found in `~/.kube/configs/`.
-    *   Clearly marks the currently active configuration in the list (e.g., `* active-config.yaml (active)`).
-    *   Optionally (e.g., with a `-v` or `--validate` flag), attempts to parse each listed file and indicates if it's valid or potentially damaged.
-*   **Example Output:**
+*   **功能：** 列出可用的 Kubernetes 配置。
+*   **实现：**
+    *   扫描 `~/.kube/configs/` 目录中的配置文件（例如 `.yaml`、`.kubeconfig`）。
+    *   读取活动 `~/.kube/config` 文件的内容。
+    *   将 `~/.kube/config` 的内容与 `~/.kube/configs/` 中的每个文件进行比较，以确定哪个当前是活动的。（注：这需要读取所有文件，对于许多大文件可能会很慢。未来的优化可能涉及在切换时将活动文件名存储在某处）。
+    *   输出在 `~/.kube/configs/` 中找到的文件名列表。
+    *   在列表中清楚地标记当前活动的配置（例如，`* active-config.yaml (active)`）。
+    *   可选地（例如，使用 `-v` 或 `--validate` 标志），尝试解析每个列出的文件，并指示它是否有效或可能损坏。
+*   **示例输出：**
     ```
-    Available Kubernetes Configurations:
+    可用的 Kubernetes 配置：
       dev-cluster.yaml
-    * prod-cluster.yaml (active)
-      staging-cluster.yaml [invalid]
+    * prod-cluster.yaml (活动)
+      staging-cluster.yaml [无效]
     ```
 
-**`configforge kube set <filename>` (or `cf k set <filename>`)**
+**`configforge kube set <filename>` (或 `cf k set <filename>`)**
 
-*   **Functionality:** Sets the specified configuration file as the active one.
-*   **Parameter:** `<filename>` - The name of the file within the `~/.kube/configs/` directory (e.g., `dev-cluster.yaml`).
-*   **Implementation:**
-    *   Verifies that the specified `<filename>` exists within `~/.kube/configs/`.
-    *   Reads the current content of `~/.kube/config`.
-    *   Writes this content to `~/.kube/config.bak` (overwriting the previous backup).
-    *   Reads the content of `~/.kube/configs/<filename>`.
-    *   Writes this content to `~/.kube/config` (overwriting the active config).
-    *   Prints a confirmation message (e.g., "Switched active Kubernetes configuration to <filename>").
-*   **Note:** This command *replaces* the old logic of calling `kubectl config use-context`.
+*   **功能：** 将指定的配置文件设置为活动配置。
+*   **参数：** `<filename>` - `~/.kube/configs/` 目录中的文件名（例如 `dev-cluster.yaml`）。
+*   **实现：**
+    *   验证指定的 `<filename>` 存在于 `~/.kube/configs/` 中。
+    *   读取 `~/.kube/config` 的当前内容。
+    *   将此内容写入 `~/.kube/config.bak`（覆盖先前的备份）。
+    *   读取 `~/.kube/configs/<filename>` 的内容。
+    *   将此内容写入 `~/.kube/config`（覆盖活动配置）。
+    *   打印确认消息（例如，"已将活动 Kubernetes 配置切换为 <filename>"）。
+*   **注意：** 此命令*替换*了调用 `kubectl config use-context` 的旧逻辑。
 
-**`configforge kube current` (or `cf k current`)**
+**`configforge kube current` (或 `cf k current`)**
 
-*   **Functionality:** Shows information about the currently active configuration.
-*   **Implementation Options:**
-    *   **Option A (Preferred but potentially slow):** Read `~/.kube/config` and compare its content against files in `~/.kube/configs/` to determine and print the matching filename.
-    *   **Option B (Simpler fallback):** Read `~/.kube/config` and print the value of its internal `current-context` field. This requires clear documentation that it shows the *internal* context, not the active *file*.
-    *   **Option C (Hybrid):** Attempt Option A. If a matching file is found, print its name. Also print the internal `current-context` from `~/.kube/config`.
-*   **Decision:** Initially implement Option C for the most information, clearly labeling both the inferred active file (if found) and the internal context.
-*   **Example Output (Option C):**
+*   **功能：** 显示有关当前活动配置的信息。
+*   **实现选项：**
+    *   **选项 A（首选但可能较慢）：** 读取 `~/.kube/config` 并将其内容与 `~/.kube/configs/` 中的文件进行比较，以确定并打印匹配的文件名。
+    *   **选项 B（更简单的回退）：** 读取 `~/.kube/config` 并打印其内部 `current-context` 字段的值。这需要明确记录它显示的是*内部*上下文，而不是活动*文件*。
+    *   **选项 C（混合）：** 尝试选项 A。如果找到匹配的文件，打印其名称。还打印 `~/.kube/config` 中的内部 `current-context`。
+*   **决定：** 最初实现选项 C 以获取最多信息，清楚地标记推断出的活动文件（如果找到）和内部上下文。
+*   **示例输出（选项 C）：**
     ```
-    Active Configuration File: prod-cluster.yaml (inferred)
-    Internal Current Context: admin@prod-cluster
+    活动配置文件：prod-cluster.yaml（推断）
+    内部当前上下文：admin@prod-cluster
     ```
-    or if file match fails:
+    或者如果文件匹配失败：
     ```
-    Active Configuration File: Unknown (content does not match any file in ~/.kube/configs/)
-    Internal Current Context: admin@prod-cluster
+    活动配置文件：未知（内容与 ~/.kube/configs/ 中的任何文件都不匹配）
+    内部当前上下文：admin@prod-cluster
     ```
-
-## 8. Implementation Plan (Revised)
-
-### 8.1 Phase 1: Core V3 Functionality
-
-- Implement file structure (`~/.kube/configs/`, `~/.kube/config`, `~/.kube/config.bak`).
-- Implement discovery: Scan `~/.kube/configs/`, display list.
-- Implement validation: Parse files during discovery/on demand, mark invalid ones.
-- Implement switching: Backup `config` to `config.bak`, overwrite `config` with selected file content.
-- Build fundamental UI: List view, basic editor/viewer, context menus for switching/actions.
-
-### 8.2 Phase 2: Basic Enhancements
-
-- Implement basic import/export/duplicate/delete file operations.
-- Add basic filename search and sorting (name, date).
-- Refine UI/UX based on initial feedback.
-- Improve error handling and notifications.
-
-### 8.3 Phase 3: Advanced Capabilities (Future)
-
-- Re-evaluate adding metadata features (tags, environments, etc.).
-- Implement automatic splitting of existing multi-context `~/.kube/config` files.
-- Add templating features.
-- Implement more robust backup/restore or versioning.
-- Consider dependency management if needed.
-
-## 9. Future Considerations
-
-### 9.1 Potential Enhancements (Revised)
-
-- **Automatic Splitting**: Implement the deferred feature to split existing multi-context files on first run.
-- **Metadata Layer**: Add optional metadata storage (e.g., sidecar files, embedded comments) for richer organization and search.
-- **Cloud Sync/Team Sharing**: Explore options for sharing/syncing the `~/.kube/configs` directory.
-- **Version Control Integration**: Integrate with Git for tracking changes to configurations.
-- **Direct Cluster Integration**: Fetch/update configurations directly from clusters.
-- **Enhanced Backup/Restore**: Implement multiple backups or version history instead of a single `.bak` file.
-
-### 9.2 Security Considerations
-
-- **Credential Protection**: Secure storage of sensitive authentication data
-- **Access Control**: Limit access to production configurations
-- **Encryption**: Encrypt configuration files at rest
-- **Audit Logging**: Track configuration changes and usage
-
-### 9.3 Performance Optimization
-
-- **Caching**: Implement caching for frequently accessed configurations
-- **Lazy Loading**: Load configuration details only when needed
-- **Background Processing**: Handle validation and other operations asynchronously
-
-## 10. Conclusion (Revised)
-
-This revised design proposal focuses on a streamlined, file-based system for managing multiple Kubernetes configurations. By storing individual configurations in `~/.kube/configs/` and managing the active `~/.kube/config` via an overwrite-with-backup mechanism, it directly addresses the user need for simpler handling of complete kubeconfig files.
-
-While deferring advanced metadata and automatic splitting features, this V3 approach provides core functionality for discovery, validation, and switching, offering immediate improvements over manual management of a single, complex `~/.kube/config` file. The implementation plan prioritizes delivering this core value quickly, with clear paths for future enhancements.

@@ -40,6 +40,13 @@ ConfigForge 是一款专为 macOS 用户设计的开源配置管理工具，支�
 - **User 管理**：管理用户认证信息，支持 Token 和证书认证
 - **跨对象关联**：在 Context 中方便地关联和管理 Cluster 和 User
 
+### 命令行工具 (CLI)
+
+- **SSH 操作**：在终端中列出、连接 SSH 主机
+- **Kubernetes 管理**：快速查看和切换 Kubernetes 上下文
+- **与桌面应用无缝集成**：CLI 与桌面应用程序共享配置
+- **易于使用**：简洁的命令结构，内置帮助信息
+
 ### 通用功能
 
 - **备份与恢复**：安全备份和恢复配置文件
@@ -53,14 +60,30 @@ ConfigForge 是一款专为 macOS 用户设计的开源配置管理工具，支�
 
 ## 安装
 
+### 使用 Homebrew 安装（推荐）
+
 ```bash
 brew tap samzong/tap
 brew install configforge
 ```
 
+通过 Homebrew 安装后，桌面应用将安装到 Applications 文件夹，CLI 工具 `cf` 会自动添加到您的 PATH 中。
+
+### 手动安装
+
+1. 从 [Releases](https://github.com/samzong/ConfigForge/releases) 页面下载最新的 DMG 文件
+2. 打开 DMG 文件并将 ConfigForge 应用拖动到 Applications 文件夹
+3. 首次运行时，系统可能会提示"无法验证开发者"，请在系统偏好设置中允许运行
+
+要手动安装 CLI 工具，请运行以下命令：
+
+```bash
+sudo ln -sf /Applications/ConfigForge.app/Contents/Resources/bin/cf /usr/local/bin/cf
+```
+
 ## 使用方法
 
-### SSH 配置管理
+### SSH 配置管理 (GUI)
 
 1. 启动 ConfigForge 应用程序
 2. 在顶部选择器中选择 "SSH" 模式（默认）
@@ -69,7 +92,7 @@ brew install configforge
 5. 选择一个条目查看详细配置，或添加新条目
 6. 编辑配置并保存更改
 
-### Kubernetes 配置管理
+### Kubernetes 配置管理 (GUI)
 
 1. 启动 ConfigForge 应用程序
 2. 在顶部选择器中切换到 "Kubernetes" 模式
@@ -78,6 +101,32 @@ brew install configforge
 5. 使用左侧列表浏览、搜索对应的配置条目
 6. 选择一个条目查看详细信息，或添加新条目
 7. 右键点击 Context 可以将其设置为当前活跃的 Context
+
+### 命令行工具 (CLI)
+
+安装 ConfigForge 后，您可以使用 `cf` 命令行工具：
+
+```bash
+# 列出所有 SSH 主机
+cf ssh list
+
+# 连接到指定的 SSH 主机
+cf ssh connect dev-server
+
+# 列出所有 Kubernetes 上下文
+cf kube list
+
+# 切换到指定的 Kubernetes 上下文
+cf kube context production
+
+# 显示当前 Kubernetes 上下文
+cf kube current
+
+# 查看帮助
+cf help
+```
+
+详细的 CLI 使用说明请参考 [CLI/README.md](CLI/README.md)。
 
 ## 权限说明
 
@@ -109,4 +158,5 @@ ConfigForge 需要访问您的 `~/.ssh/config` 和 `~/.kube/config` 文件才能
 
 - 感谢所有开源项目贡献者
 - [Swift](https://swift.org/) 和 [SwiftUI](https://developer.apple.com/xcode/swiftui/) 团队
+- [Swift Argument Parser](https://github.com/apple/swift-argument-parser) 用于 CLI 开发
 - 所有为项目提供反馈和建议的用户

@@ -1,0 +1,68 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# User Interface Structure
+
+ConfigForge uses SwiftUI for its interface, with a split-view design that provides an intuitive way to manage configuration files.
+
+## Main UI Components
+
+- [ContentView.swift](mdc:ConfigForge/Views/ContentView.swift) - Main container view that orchestrates the overall layout using HStack
+- [Components/SidebarView.swift](mdc:ConfigForge/Views/Components/SidebarView.swift) - The left sidebar showing configuration entries with search and filtering
+- [Components/EditorAreaView.swift](mdc:ConfigForge/Views/Components/EditorAreaView.swift) - The right detail area for viewing and editing selected entries
+- [Components/TerminalLauncherButton.swift](mdc:ConfigForge/Views/Components/TerminalLauncherButton.swift) - Button for launching terminal connections
+- [Components/MessageBanner.swift](mdc:ConfigForge/Views/Components/MessageBanner.swift) - Notification system for user feedback
+- [Components/EmptyEditorViewModern.swift](mdc:ConfigForge/Views/Components/EmptyEditorViewModern.swift) - Placeholder when no entry is selected
+
+## Editor Components
+
+- [Editors/ModernEntryEditorView.swift](mdc:ConfigForge/Views/Editors/ModernEntryEditorView.swift) - Form editor for SSH entries
+- [Editors/KubeContextEditorView.swift](mdc:ConfigForge/Views/Editors/KubeContextEditorView.swift) - Editor for Kubernetes contexts 
+- [Editors/KubeClusterEditorView.swift](mdc:ConfigForge/Views/Editors/KubeClusterEditorView.swift) - Editor for Kubernetes clusters
+- [Editors/KubeUserEditorView.swift](mdc:ConfigForge/Views/Editors/KubeUserEditorView.swift) - Editor for Kubernetes users
+
+## UI Layout and Hierarchy
+
+1. The app uses a horizontal split layout (HStack) with sidebar and detail areas divided by a subtle divider
+2. **Top Section**:
+   - App logo and title
+   - Save button for quick access
+   - Configuration type selector (SSH/Kubernetes)
+   - Search bar for filtering entries
+   - Secondary selector for Kubernetes objects (Contexts/Clusters/Users) when in Kubernetes mode
+
+3. **Sidebar Section**:
+   - List of entries based on selected configuration type
+   - Context menus for quick actions (delete, set current context)
+   - Support for keyboard shortcuts and selection
+   - Add button at the bottom for creating new entries
+
+4. **Detail Section**:
+   - Form-based editors specific to each entry type
+   - Edit/Save buttons to toggle edit mode
+   - Property editors with appropriate input validation
+   - One-click terminal launcher for SSH connections
+
+## Interaction Patterns
+
+1. **Configuration Switching**:
+   - Top segmented control toggles between SSH and Kubernetes modes
+   - UI adapts dynamically based on the selected mode
+   - Secondary selector appears only in Kubernetes mode
+
+2. **Entry Selection**:
+   - Clicking an entry in the sidebar displays it in the detail area
+   - Two-way binding ensures sidebar selection and view model selection stay in sync
+   - Context menus provide quick access to common operations
+
+3. **File Operations**:
+   - Backup/restore functionality via macOS file dialogs
+   - Auto-saving with user confirmation
+   - Error handling with user feedback via message banners
+
+4. **Appearance**:
+   - Supports both light and dark mode via SwiftUI's automatic adaptation
+   - Uses system colors for consistent macOS native look and feel
+   - Responsive design with minimum window size constraints

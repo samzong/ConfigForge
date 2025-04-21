@@ -61,6 +61,10 @@ Package.pins
 Package.resolved
 .netrc
 
+# CLI build directories
+CLI/.build/
+CLI/.swiftpm/
+
 # CocoaPods (如果使用)
 Pods/
 Podfile.lock

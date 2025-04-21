@@ -1,0 +1,34 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Development Workflow
+
+This document describes the development workflow for ConfigForge.
+
+## Project Setup
+
+- The project is built using Swift and SwiftUI
+- Built with Xcode and Swift Package Manager
+- Supports macOS 10.15 Catalina and later versions
+
+## Build Process
+
+- [Makefile](mdc:Makefile) - Contains build commands and automation
+- [Package.resolved](mdc:Package.resolved) - Dependencies managed by Swift Package Manager
+- [.github/](mdc:.github) - CI/CD workflows and GitHub templates
+
+## Documentation
+
+- [README.md](mdc:README.md) - Project overview and user documentation
+- [DEVELOPMENT.md](mdc:DEVELOPMENT.md) - Technical documentation for developers
+- [TODO.md](mdc:TODO.md) - Current roadmap and future enhancement plans
+
+## Development Guidelines
+
+1. Follow the MVVM architecture pattern
+2. Use SwiftUI for UI components
+3. Maintain backward compatibility with macOS 10.15+
+4. Implement proper error handling and user feedback
+5. Ensure all file operations have appropriate permission handling

@@ -188,14 +188,16 @@ struct KubeClusterEditorView: View {
             return
         }
         
-        // 使用ViewModel的方法来更新集群，同时处理相关上下文的更新
-        viewModel.updateKubeCluster(
-            id: cluster.id,
-            name: editedName,
+        // 直接更新绑定的 cluster 对象
+        cluster.name = editedName
+        cluster.cluster = ClusterDetails(
             server: editedServer,
             certificateAuthorityData: editedCaData.isEmpty ? nil : editedCaData,
             insecureSkipTlsVerify: editedSkipTls
         )
+        
+        // 通知用户更新成功
+        viewModel.postMessage("集群信息已更新", type: .success)
     }
 }
 

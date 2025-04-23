@@ -10,10 +10,10 @@ struct KubeContextEditorView: View {
     @State private var selectedUserName: String
     // 移除@State，这些是计算属性
     private var selectedCluster: KubeCluster? {
-        viewModel.kubeClusters.first { $0.name == selectedClusterName }
+        viewModel.kubeConfig?.safeClusters.first { $0.name == selectedClusterName }
     }
     private var selectedUser: KubeUser? {
-        viewModel.kubeUsers.first { $0.name == selectedUserName }
+        viewModel.kubeConfig?.safeUsers.first { $0.name == selectedUserName }
     }
     
     // 本地编辑状态
@@ -104,7 +104,7 @@ struct KubeContextEditorView: View {
                             if isEditing {
                                 HStack {
                                     Picker(L10n.Kubernetes.Context.cluster, selection: $editedCluster) {
-                                        ForEach(viewModel.kubeClusters, id: \.name) { cluster in
+                                        ForEach(viewModel.kubeConfig?.safeClusters ?? [], id: \.name) { cluster in
                                             Text(cluster.name).tag(cluster.name)
                                         }
                                     }
@@ -156,7 +156,7 @@ struct KubeContextEditorView: View {
                             if isEditing {
                                 HStack {
                                     Picker(L10n.Kubernetes.Context.user, selection: $editedUser) {
-                                        ForEach(viewModel.kubeUsers, id: \.name) { user in
+                                        ForEach(viewModel.kubeConfig?.safeUsers ?? [], id: \.name) { user in
                                             Text(user.name).tag(user.name)
                                         }
                                     }
@@ -295,14 +295,16 @@ struct KubeContextEditorView: View {
             return
         }
         
-        // 使用ViewModel的方法来更新上下文
-        viewModel.updateKubeContext(
-            id: context.id,
-            name: editedName,
+        // 直接更新绑定的context对象
+        context.name = editedName
+        context.context = ContextDetails(
             cluster: editedCluster,
             user: editedUser,
             namespace: editedNamespace.isEmpty ? nil : editedNamespace
         )
+        
+        // 通知用户更新成功
+        viewModel.postMessage("上下文信息已更新", type: .success)
     }
     
     // 隐藏所有侧滑面板
@@ -341,16 +343,30 @@ struct ClusterDetailSidePanelView: View {
     let onDismiss: () -> Void
     
     private var cluster: KubeCluster? {
-        viewModel.kubeClusters.first { $0.id == clusterId }
+        viewModel.kubeConfig?.safeClusters.first { $0.name == clusterId }
     }
     
     private var clusterBinding: Binding<KubeCluster>? {
-        guard let index = viewModel.kubeClusters.firstIndex(where: { $0.id == clusterId }) else {
+        guard let kubeConfig = viewModel.kubeConfig,
+              let index = kubeConfig.safeClusters.firstIndex(where: { $0.name == clusterId }) else {
             return nil
         }
+        
+        // 创建一个复合绑定，通过kubeConfig间接绑定到clusters数组中的元素
         return Binding(
-            get: { viewModel.kubeClusters[index] },
-            set: { viewModel.kubeClusters[index] = $0 }
+            get: { kubeConfig.safeClusters[index] },
+            set: { newValue in
+                // 创建clusters的可变副本
+                var clusters = kubeConfig.safeClusters
+                clusters[index] = newValue
+                // 更新kubeConfig
+                var updatedConfig = kubeConfig
+                updatedConfig.clusters = clusters
+                // 赋值回viewModel
+                self.viewModel.kubeConfig = updatedConfig
+                // 可能需要保存更改
+                self.viewModel.saveKubeConfig()
+            }
         )
     }
     
@@ -408,16 +424,30 @@ struct UserDetailSidePanelView: View {
     let onDismiss: () -> Void
     
     private var user: KubeUser? {
-        viewModel.kubeUsers.first { $0.id == userId }
+        viewModel.kubeConfig?.safeUsers.first { $0.name == userId }
     }
     
     private var userBinding: Binding<KubeUser>? {
-        guard let index = viewModel.kubeUsers.firstIndex(where: { $0.id == userId }) else {
+        guard let kubeConfig = viewModel.kubeConfig,
+              let index = kubeConfig.safeUsers.firstIndex(where: { $0.name == userId }) else {
             return nil
         }
+        
+        // 创建一个复合绑定，通过kubeConfig间接绑定到users数组中的元素
         return Binding(
-            get: { viewModel.kubeUsers[index] },
-            set: { viewModel.kubeUsers[index] = $0 }
+            get: { kubeConfig.safeUsers[index] },
+            set: { newValue in
+                // 创建users的可变副本
+                var users = kubeConfig.safeUsers
+                users[index] = newValue
+                // 更新kubeConfig
+                var updatedConfig = kubeConfig
+                updatedConfig.users = users
+                // 赋值回viewModel
+                self.viewModel.kubeConfig = updatedConfig
+                // 可能需要保存更改
+                self.viewModel.saveKubeConfig()
+            }
         )
     }
     
@@ -494,8 +524,16 @@ struct UserDetailSidePanelView: View {
             )
             
             // 添加到预览视图模型中
-            previewViewModel.kubeClusters = [cluster]
-            previewViewModel.kubeUsers = [user]
+            let previewConfig = KubeConfig(
+                apiVersion: "v1",
+                kind: "Config",
+                preferences: nil,
+                clusters: [cluster],
+                contexts: [previewContext],
+                users: [user],
+                currentContext: previewContext.name
+            )
+            previewViewModel.kubeConfig = previewConfig
         }
 
         var body: some View {

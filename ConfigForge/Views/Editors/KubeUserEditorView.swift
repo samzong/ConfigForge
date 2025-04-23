@@ -177,14 +177,16 @@ struct KubeUserEditorView: View {
             return
         }
         
-        // 使用ViewModel的方法来更新用户，同时处理相关上下文的更新
-        viewModel.updateKubeUser(
-            id: user.id,
-            name: editedName,
+        // 直接更新绑定的user对象
+        user.name = editedName
+        user.user = UserDetails(
             clientCertificateData: editedClientCert.isEmpty ? nil : editedClientCert,
             clientKeyData: editedClientKey.isEmpty ? nil : editedClientKey,
-            token: nil // 已从UI中移除Token认证
+            token: nil
         )
+        
+        // 通知用户更新成功
+        viewModel.postMessage("用户信息已更新", type: .success)
     }
 }
 

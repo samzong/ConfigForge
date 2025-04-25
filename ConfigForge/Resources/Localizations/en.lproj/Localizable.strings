@@ -9,19 +9,10 @@
 "app.success" = "Success";
 "app.save.help" = "Save current configuration to SSH file";
 
-/* Language */
-"app.language" = "Language";
-"app.language.english" = "English";
-"app.language.chinese" = "Chinese";
-"app.language.restart.title" = "Language Changed";
-"app.language.restart.message" = "Please restart the application for the language change to take effect.";
-
 /* Sidebar */
 "sidebar.search" = "Search hosts";
 "sidebar.add.host" = "Add Host";
-"sidebar.add.context" = "Add Context";
-"sidebar.add.cluster" = "Add Cluster";
-"sidebar.add.user" = "Add User";
+"sidebar.add.config" = "Add Config";
 
 /* Host List */
 "host.new" = "new-host";
@@ -75,63 +66,18 @@
 "error.fileImportFailed" = "Failed to import file: %@";
 
 /* Kubernetes UI */
-"kubernetes.context.edit" = "Edit Context: %@";
-"kubernetes.context.name" = "Context Name";
-"kubernetes.context.cluster" = "Cluster";
-"kubernetes.context.user" = "User";
-"kubernetes.context.namespace" = "Namespace";
-"kubernetes.context.namespace.optional" = "Namespace (optional)";
-"kubernetes.context.view.cluster.details" = "View/Edit Cluster Details";
-"kubernetes.context.view.user.details" = "View/Edit User Details";
-
-"kubernetes.cluster.edit" = "Edit Cluster: %@";
-"kubernetes.cluster.name" = "Cluster Name";
-"kubernetes.cluster.server" = "Server URL";
-"kubernetes.cluster.server.placeholder" = "https://<server-address>:<port>";
-"kubernetes.cluster.ca" = "Certificate Authority Data (Base64)";
-"kubernetes.cluster.ca.empty" = "No certificate data set";
-"kubernetes.cluster.security" = "Security Options";
-"kubernetes.cluster.skip.tls" = "Skip TLS Certificate Verification";
-
-"kubernetes.user.edit" = "Edit User: %@";
-"kubernetes.user.name" = "User Name";
-"kubernetes.user.token.auth" = "Bearer Token Authentication";
-"kubernetes.user.token.empty" = "No token set";
-"kubernetes.user.cert.auth" = "Client Certificate Authentication";
-"kubernetes.user.client.cert" = "Client Certificate (Base64)";
-"kubernetes.user.client.cert.empty" = "No client certificate set";
-"kubernetes.user.client.key" = "Client Key (Base64)";
-"kubernetes.user.client.key.empty" = "No client key set";
-
+"kubernetes.noSelection" = "No Configuration Selected";
+"kubernetes.selectOrCreate" = "Select a configuration from the list or create a new one";
+"kubernetes.createNew" = "Create New Configuration";
+"kubernetes.search" = "Search configurations";
+"kubernetes.config.active" = "Active";
+"kubernetes.config.backup" = "Backup";
 "kubernetes.config.saved" = "Configuration saved";
-
-"kubernetes.panel.cluster.details" = "Cluster Details";
-"kubernetes.panel.user.details" = "User Details";
-"kubernetes.panel.not.found.cluster" = "Cluster details not found";
-"kubernetes.panel.not.found.user" = "User details not found";
-
-"error.binding.context" = "Error: Cannot find editor binding for selected Context.";
-"error.binding.cluster" = "Error: Cannot find editor binding for selected Cluster.";
-"error.binding.user" = "Error: Cannot find editor binding for selected User.";
+"kubernetes.config.delete" = "Delete";
+"kubernetes.config.delete.confirm" = "Are you sure you want to delete this configuration?";
+"kubernetes.config.setActive" = "Set as Active";
 "error.editor.unknown" = "Cannot display editor for selected item.";
-
-/* Kubernetes Detail Panels */
-"kubernetes.cluster.details.title" = "Cluster Details: %@";
-"kubernetes.cluster.name.label" = "Cluster Name:";
-"kubernetes.cluster.server.label" = "Server URL:";
-"kubernetes.cluster.ca.label" = "Certificate Authority Data (Base64):";
-"kubernetes.cluster.skip.tls.verification" = "Skip TLS Certificate Verification";
 "button.done" = "Done";
-"kubernetes.user.details.title" = "User Details: %@";
-"kubernetes.user.name.label" = "User Name:";
-"kubernetes.user.token.label" = "Token:";
-"kubernetes.user.client.cert.label" = "Client Certificate Data (Base64):";
-"kubernetes.user.client.key.label" = "Client Key Data (Base64):";
-"kubernetes.context.cluster.user.format" = "Cluster: %@ | User: %@";
-"kubernetes.context.namespace.format" = "Namespace: %@";
-"kubernetes.user.auth.token" = "Auth: Token";
-"kubernetes.user.auth.cert" = "Auth: Client Cert";
-"kubernetes.user.auth.other" = "Auth: Other/Unknown";
 
 /* Terminal Launcher */
 "terminal.open.in" = "Open In";
@@ -140,4 +86,4 @@
 "terminal.launch.failed.title" = "Failed to Launch Terminal";
 "terminal.launch.failed.message" = "Could not launch SSH connection in %@. Please check your terminal settings and permissions.";
 "terminal.permission.title" = "Terminal Automation Permission";
-"terminal.permission.message" = "ConfigForge needs permission to control %@ to launch SSH connections. You may see a system prompt to allow this."; 
+"terminal.permission.message" = "ConfigForge needs permission to control %@ to launch SSH connections. You may see a system prompt to allow this.";

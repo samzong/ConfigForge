@@ -21,26 +21,12 @@ public enum L10n {
     public static let edit = L10n.tr("Localizable", "app.edit", fallback: "Edit")
     /// Error
     public static let error = L10n.tr("Localizable", "app.error", fallback: "Error")
-    /// Language
-    public static let language = L10n.tr("Localizable", "app.language", fallback: "Language")
     /// General
     public static let name = L10n.tr("Localizable", "app.name", fallback: "ConfigForge")
     /// Save
     public static let save = L10n.tr("Localizable", "app.save", fallback: "Save")
     /// Success
     public static let success = L10n.tr("Localizable", "app.success", fallback: "Success")
-    public enum Language {
-      /// Chinese
-      public static let chinese = L10n.tr("Localizable", "app.language.chinese", fallback: "Chinese")
-      /// English
-      public static let english = L10n.tr("Localizable", "app.language.english", fallback: "English")
-      public enum Restart {
-        /// Please restart the application for the language change to take effect.
-        public static let message = L10n.tr("Localizable", "app.language.restart.message", fallback: "Please restart the application for the language change to take effect.")
-        /// Language Changed
-        public static let title = L10n.tr("Localizable", "app.language.restart.title", fallback: "Language Changed")
-      }
-    }
     public enum Save {
       /// Save current configuration to SSH file
       public static let help = L10n.tr("Localizable", "app.save.help", fallback: "Save current configuration to SSH file")
@@ -65,14 +51,6 @@ public enum L10n {
     public static func fileImportFailed(_ p1: Any) -> String {
       return L10n.tr("Localizable", "error.fileImportFailed", String(describing: p1), fallback: "Failed to import file: %@")
     }
-    public enum Binding {
-      /// Error: Cannot find editor binding for selected Cluster.
-      public static let cluster = L10n.tr("Localizable", "error.binding.cluster", fallback: "Error: Cannot find editor binding for selected Cluster.")
-      /// Error: Cannot find editor binding for selected Context.
-      public static let context = L10n.tr("Localizable", "error.binding.context", fallback: "Error: Cannot find editor binding for selected Context.")
-      /// Error: Cannot find editor binding for selected User.
-      public static let user = L10n.tr("Localizable", "error.binding.user", fallback: "Error: Cannot find editor binding for selected User.")
-    }
     public enum Editor {
       /// Cannot display editor for selected item.
       public static let unknown = L10n.tr("Localizable", "error.editor.unknown", fallback: "Cannot display editor for selected item.")
@@ -89,186 +67,28 @@ public enum L10n {
     }
   }
   public enum Kubernetes {
-    /// Search kubernetes configurations
+    /// Create New Configuration
+    public static let createNew = L10n.tr("Localizable", "kubernetes.createNew", fallback: "Create New Configuration")
+    /// Kubernetes UI
+    public static let noSelection = L10n.tr("Localizable", "kubernetes.noSelection", fallback: "No Configuration Selected")
+    /// Search configurations
     public static let search = L10n.tr("Localizable", "kubernetes.search", fallback: "Search configurations")
-    /// Refresh configurations
-    public static let refresh = L10n.tr("Localizable", "kubernetes.refresh", fallback: "Refresh configurations")
-    /// No configuration selected
-    public static let noSelection = L10n.tr("Localizable", "kubernetes.noSelection", fallback: "No configuration selected")
     /// Select a configuration from the list or create a new one
     public static let selectOrCreate = L10n.tr("Localizable", "kubernetes.selectOrCreate", fallback: "Select a configuration from the list or create a new one")
-    /// Create new configuration
-    public static let createNew = L10n.tr("Localizable", "kubernetes.createNew", fallback: "Create new configuration")
-    public enum Cluster {
-      /// Certificate Authority Data (Base64)
-      public static let ca = L10n.tr("Localizable", "kubernetes.cluster.ca", fallback: "Certificate Authority Data (Base64)")
-      /// Edit Cluster: %@
-      public static func edit(_ p1: Any) -> String {
-        return L10n.tr("Localizable", "kubernetes.cluster.edit", String(describing: p1), fallback: "Edit Cluster: %@")
-      }
-      /// Cluster Name
-      public static let name = L10n.tr("Localizable", "kubernetes.cluster.name", fallback: "Cluster Name")
-      /// Security Options
-      public static let security = L10n.tr("Localizable", "kubernetes.cluster.security", fallback: "Security Options")
-      /// Server URL
-      public static let server = L10n.tr("Localizable", "kubernetes.cluster.server", fallback: "Server URL")
-      public enum Ca {
-        /// No certificate data set
-        public static let empty = L10n.tr("Localizable", "kubernetes.cluster.ca.empty", fallback: "No certificate data set")
-        /// Certificate Authority Data (Base64):
-        public static let label = L10n.tr("Localizable", "kubernetes.cluster.ca.label", fallback: "Certificate Authority Data (Base64):")
-      }
-      public enum Details {
-        /// Kubernetes Detail Panels
-        public static func title(_ p1: Any) -> String {
-          return L10n.tr("Localizable", "kubernetes.cluster.details.title", String(describing: p1), fallback: "Cluster Details: %@")
-        }
-      }
-      public enum Name {
-        /// Cluster Name:
-        public static let label = L10n.tr("Localizable", "kubernetes.cluster.name.label", fallback: "Cluster Name:")
-      }
-      public enum Server {
-        /// Server URL:
-        public static let label = L10n.tr("Localizable", "kubernetes.cluster.server.label", fallback: "Server URL:")
-        /// https://<server-address>:<port>
-        public static let placeholder = L10n.tr("Localizable", "kubernetes.cluster.server.placeholder", fallback: "https://<server-address>:<port>")
-      }
-      public enum Skip {
-        /// Skip TLS Certificate Verification
-        public static let tls = L10n.tr("Localizable", "kubernetes.cluster.skip.tls", fallback: "Skip TLS Certificate Verification")
-        public enum Tls {
-          /// Skip TLS Certificate Verification
-          public static let verification = L10n.tr("Localizable", "kubernetes.cluster.skip.tls.verification", fallback: "Skip TLS Certificate Verification")
-        }
-      }
-    }
     public enum Config {
+      /// Active
+      public static let active = L10n.tr("Localizable", "kubernetes.config.active", fallback: "Active")
+      /// Backup
+      public static let backup = L10n.tr("Localizable", "kubernetes.config.backup", fallback: "Backup")
+      /// Delete
+      public static let delete = L10n.tr("Localizable", "kubernetes.config.delete", fallback: "Delete")
       /// Configuration saved
       public static let saved = L10n.tr("Localizable", "kubernetes.config.saved", fallback: "Configuration saved")
-      /// Active configuration
-      public static let active = L10n.tr("Localizable", "kubernetes.config.active", fallback: "Active configuration")
-      /// Backup configuration
-      public static let backup = L10n.tr("Localizable", "kubernetes.config.backup", fallback: "Backup configuration")
-      /// Set as active configuration
-      public static let setActive = L10n.tr("Localizable", "kubernetes.config.setActive", fallback: "Set as active configuration")
-      /// Duplicate
-      public static let duplicate = L10n.tr("Localizable", "kubernetes.config.duplicate", fallback: "Duplicate")
-      /// Rename
-      public static let rename = L10n.tr("Localizable", "kubernetes.config.rename", fallback: "Rename")
-    }
-    public enum Context {
-      /// Cluster
-      public static let cluster = L10n.tr("Localizable", "kubernetes.context.cluster", fallback: "Cluster")
-      /// Kubernetes UI
-      public static func edit(_ p1: Any) -> String {
-        return L10n.tr("Localizable", "kubernetes.context.edit", String(describing: p1), fallback: "Edit Context: %@")
-      }
-      /// Context Name
-      public static let name = L10n.tr("Localizable", "kubernetes.context.name", fallback: "Context Name")
-      /// Namespace
-      public static let namespace = L10n.tr("Localizable", "kubernetes.context.namespace", fallback: "Namespace")
-      /// User
-      public static let user = L10n.tr("Localizable", "kubernetes.context.user", fallback: "User")
-      public enum Cluster {
-        public enum User {
-          /// Cluster: %@ | User: %@
-          public static func format(_ p1: Any, _ p2: Any) -> String {
-            return L10n.tr("Localizable", "kubernetes.context.cluster.user.format", String(describing: p1), String(describing: p2), fallback: "Cluster: %@ | User: %@")
-          }
-        }
-      }
-      public enum Namespace {
-        /// Namespace: %@
-        public static func format(_ p1: Any) -> String {
-          return L10n.tr("Localizable", "kubernetes.context.namespace.format", String(describing: p1), fallback: "Namespace: %@")
-        }
-        /// Namespace (optional)
-        public static let `optional` = L10n.tr("Localizable", "kubernetes.context.namespace.optional", fallback: "Namespace (optional)")
-      }
-      public enum View {
-        public enum Cluster {
-          /// View/Edit Cluster Details
-          public static let details = L10n.tr("Localizable", "kubernetes.context.view.cluster.details", fallback: "View/Edit Cluster Details")
-        }
-        public enum User {
-          /// View/Edit User Details
-          public static let details = L10n.tr("Localizable", "kubernetes.context.view.user.details", fallback: "View/Edit User Details")
-        }
-      }
-    }
-    public enum Panel {
-      public enum Cluster {
-        /// Cluster Details
-        public static let details = L10n.tr("Localizable", "kubernetes.panel.cluster.details", fallback: "Cluster Details")
-      }
-      public enum Not {
-        public enum Found {
-          /// Cluster details not found
-          public static let cluster = L10n.tr("Localizable", "kubernetes.panel.not.found.cluster", fallback: "Cluster details not found")
-          /// User details not found
-          public static let user = L10n.tr("Localizable", "kubernetes.panel.not.found.user", fallback: "User details not found")
-        }
-      }
-      public enum User {
-        /// User Details
-        public static let details = L10n.tr("Localizable", "kubernetes.panel.user.details", fallback: "User Details")
-      }
-    }
-    public enum User {
-      /// Edit User: %@
-      public static func edit(_ p1: Any) -> String {
-        return L10n.tr("Localizable", "kubernetes.user.edit", String(describing: p1), fallback: "Edit User: %@")
-      }
-      /// User Name
-      public static let name = L10n.tr("Localizable", "kubernetes.user.name", fallback: "User Name")
-      public enum Auth {
-        /// Auth: Client Cert
-        public static let cert = L10n.tr("Localizable", "kubernetes.user.auth.cert", fallback: "Auth: Client Cert")
-        /// Auth: Other/Unknown
-        public static let other = L10n.tr("Localizable", "kubernetes.user.auth.other", fallback: "Auth: Other/Unknown")
-        /// Auth: Token
-        public static let token = L10n.tr("Localizable", "kubernetes.user.auth.token", fallback: "Auth: Token")
-      }
-      public enum Cert {
-        /// Client Certificate Authentication
-        public static let auth = L10n.tr("Localizable", "kubernetes.user.cert.auth", fallback: "Client Certificate Authentication")
-      }
-      public enum Client {
-        /// Client Certificate (Base64)
-        public static let cert = L10n.tr("Localizable", "kubernetes.user.client.cert", fallback: "Client Certificate (Base64)")
-        /// Client Key (Base64)
-        public static let key = L10n.tr("Localizable", "kubernetes.user.client.key", fallback: "Client Key (Base64)")
-        public enum Cert {
-          /// No client certificate set
-          public static let empty = L10n.tr("Localizable", "kubernetes.user.client.cert.empty", fallback: "No client certificate set")
-          /// Client Certificate Data (Base64):
-          public static let label = L10n.tr("Localizable", "kubernetes.user.client.cert.label", fallback: "Client Certificate Data (Base64):")
-        }
-        public enum Key {
-          /// No client key set
-          public static let empty = L10n.tr("Localizable", "kubernetes.user.client.key.empty", fallback: "No client key set")
-          /// Client Key Data (Base64):
-          public static let label = L10n.tr("Localizable", "kubernetes.user.client.key.label", fallback: "Client Key Data (Base64):")
-        }
-      }
-      public enum Details {
-        /// User Details: %@
-        public static func title(_ p1: Any) -> String {
-          return L10n.tr("Localizable", "kubernetes.user.details.title", String(describing: p1), fallback: "User Details: %@")
-        }
-      }
-      public enum Name {
-        /// User Name:
-        public static let label = L10n.tr("Localizable", "kubernetes.user.name.label", fallback: "User Name:")
-      }
-      public enum Token {
-        /// Bearer Token Authentication
-        public static let auth = L10n.tr("Localizable", "kubernetes.user.token.auth", fallback: "Bearer Token Authentication")
-        /// No token set
-        public static let empty = L10n.tr("Localizable", "kubernetes.user.token.empty", fallback: "No token set")
-        /// Token:
-        public static let label = L10n.tr("Localizable", "kubernetes.user.token.label", fallback: "Token:")
+      /// Set as Active
+      public static let setActive = L10n.tr("Localizable", "kubernetes.config.setActive", fallback: "Set as Active")
+      public enum Delete {
+        /// Are you sure you want to delete this configuration?
+        public static let confirm = L10n.tr("Localizable", "kubernetes.config.delete.confirm", fallback: "Are you sure you want to delete this configuration?")
       }
     }
   }
@@ -399,13 +219,13 @@ public enum L10n {
     }
   }
   public enum Sidebar {
-    /// Search
-    public static let search = L10n.tr("Localizable", "sidebar.search", fallback: "Search")
+    /// Sidebar
+    public static let search = L10n.tr("Localizable", "sidebar.search", fallback: "Search hosts")
     public enum Add {
-      /// Add host
-      public static let host = L10n.tr("Localizable", "sidebar.add.host", fallback: "Add host")
-      /// Add configuration
-      public static let config = L10n.tr("Localizable", "sidebar.add.config", fallback: "Add configuration")
+      /// Add Config
+      public static let config = L10n.tr("Localizable", "sidebar.add.config", fallback: "Add Config")
+      /// Add Host
+      public static let host = L10n.tr("Localizable", "sidebar.add.host", fallback: "Add Host")
     }
   }
   public enum Terminal {

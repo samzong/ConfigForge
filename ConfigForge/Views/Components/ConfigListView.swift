@@ -3,63 +3,74 @@ import SwiftUI
 /// 配置文件列表视图，显示所有发现的 Kubernetes 配置文件
 struct ConfigListView: View {
     @ObservedObject var viewModel: MainViewModel
-    @State private var selectedConfigFileIndex: Int?
+    @State private var selectedConfigFileId: String?
+    
+    var body: some View {
+        ConfigListContent(
+            viewModel: viewModel,
+            selectedConfigFileId: $selectedConfigFileId
+        )
+    }
+}
+
+/// 配置文件列表内容视图
+private struct ConfigListContent: View {
+    @ObservedObject var viewModel: MainViewModel
+    @Binding var selectedConfigFileId: String?
     
     var body: some View {
         VStack(spacing: 0) {
-            // 移除了标题栏
-            // 移除了搜索框，使用 SidebarView 中的通用搜索框
-            
             if viewModel.isLoadingConfigFiles {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if viewModel.displayedConfigFiles.isEmpty {
+                EmptyConfigView(viewModel: viewModel)
             } else {
-                if viewModel.displayedConfigFiles.isEmpty {
-                    EmptyConfigView(viewModel: viewModel)
-                } else {
-                    // 配置文件列表 - 使用 .sidebar 样式与 SSH 一致
-                    List(viewModel.displayedConfigFiles.indices, id: \.self, selection: $selectedConfigFileIndex) { index in
-                        if index < viewModel.displayedConfigFiles.count {
-                            let configFile = viewModel.displayedConfigFiles[index]
-                            
-                            ConfigFileRow(configFile: configFile, 
-                                         isSelected: viewModel.selectedConfigFile?.id == configFile.id,
-                                         isActive: configFile.fileType == .active)
-                                .tag(configFile.id as AnyHashable)
-                                .contextMenu {
-                                    // 保持与 SSH 一致的上下文菜单样式
-                                    Button(action: {
-                                        viewModel.activateConfigFile(configFile)
-                                    }) {
-                                        Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
-                                    }
-                                    .disabled(configFile.fileType == .active || configFile.status != .valid)
-                                    
-                                    Divider()
-                                    
-                                    // 已移除重命名选项，与 SSH 行为保持一致
-                                    
-                                    Button(role: .destructive, action: {
-                                        viewModel.promptForDeleteConfigFile(configFile)
-                                    }) {
-                                        Label(L10n.App.delete, systemImage: "trash")
-                                    }
-                                    .disabled(configFile.fileType == .active || configFile.fileType == .backup)
-                                }
-                        } else {
-                            Text("Loading...")
-                        }
-                    }
-                    .listStyle(.sidebar)
-                    .onChange(of: selectedConfigFileIndex) { newIndex in
-                        // 与 SSH 使用相同的选择逻辑
-                        if let index = newIndex, index >= 0 && index < viewModel.displayedConfigFiles.count {
-                            let configFile = viewModel.displayedConfigFiles[index]
-                            viewModel.selectConfigFile(configFile)
-                        }
-                    }
-                    // 与 SSH 一致的视觉样式
-                }
+                configFilesList
+            }
+        }
+    }
+    
+    private var configFilesList: some View {
+        List(viewModel.displayedConfigFiles, id: \.id, selection: $selectedConfigFileId) { configFile in
+            ConfigFileRow(
+                configFile: configFile, 
+                isSelected: viewModel.selectedConfigFile?.id == configFile.id,
+                isActive: configFile.fileType == .active
+            )
+            .tag(configFile.id)
+            .contextMenu {
+                configFileContextMenu(for: configFile)
+            }
+        }
+        .listStyle(.sidebar)
+        .onChange(of: selectedConfigFileId, perform: handleSelectionChange)
+    }
+    
+    private func configFileContextMenu(for configFile: KubeConfigFile) -> some View {
+        Group {
+            Button(action: {
+                viewModel.activateConfigFile(configFile)
+            }) {
+                Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
+            }
+            .disabled(configFile.fileType == .active || configFile.status != .valid)
+            
+            Divider()
+            
+            Button(role: .destructive, action: {
+                viewModel.promptForDeleteConfigFile(configFile)
+            }) {
+                Label(L10n.App.delete, systemImage: "trash")
+            }
+            .disabled(configFile.fileType == .active || configFile.fileType == .backup)
+        }
+    }
+    
+    private func handleSelectionChange(newId: String?) {
+        if let id = newId {
+            if let configFile = viewModel.displayedConfigFiles.first(where: { $0.id == id }) {
+                viewModel.selectConfigFile(configFile)
             }
         }
     }

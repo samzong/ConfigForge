@@ -107,6 +107,7 @@ final class EventManager: @unchecked Sendable {
             
             // 获取配置目录
             if let configDir = try? kubeConfigFileManager.getConfigsDirectoryPath() {
+                // 使用单一调用监控目录，避免多次操作
                 return fileWatcher.watchDirectory(configDir, fileExtension: "yaml") &&
                        fileWatcher.watchDirectory(configDir, fileExtension: "yml")
             }
@@ -129,6 +130,14 @@ final class EventManager: @unchecked Sendable {
             print("无法获取主配置文件路径: \(error.localizedDescription)")
             return false
         }
+    }
+    
+    /// 停止所有文件监控
+    /// - Returns: 操作是否成功
+    @discardableResult
+    func stopAllFileWatching() -> Bool {
+        fileWatcher.stopAllWatching()
+        return true
     }
     
     /// 发送事件

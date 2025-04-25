@@ -10,15 +10,20 @@ This module handles the management of Kubernetes configurations (`~/.kube/config
 ## Key Components
 
 ### Models
-- [KubeConfigModels.swift](mdc:ConfigForge/Models/KubeConfigModels.swift) - Data models for Kubernetes configurations
+- [KubeConfigFile.swift](mdc:ConfigForge/Models/KubeConfigFile.swift) - Represents a Kubernetes configuration file with raw YAML content
 
 ### Services
 - [KubeConfigFileManager.swift](mdc:ConfigForge/Services/KubeConfigFileManager.swift) - Handles reading/writing Kubernetes config files
-- [KubeConfigParser.swift](mdc:ConfigForge/Services/KubeConfigParser.swift) - Parses Kubernetes config file format
+- [Yams Library](https://github.com/jpsim/Yams) - Used for YAML parsing and validation
 
 ### Data Flow
-1. Kubernetes config is loaded from disk via `KubeConfigFileManager`
-2. Raw file content is parsed by `KubeConfigParser` into Kubernetes model objects
+1. Kubernetes config is loaded from disk as raw YAML string via `KubeConfigFileManager`
+2. Raw YAML content is validated and processed directly using the Yams library
 3. The `MainViewModel` manages these configurations and user interactions
-4. The UI displays different aspects (Contexts, Clusters, Users) based on user selection
-5. When changes are made, the configurations are converted back to YAML and saved
+4. When changes are made, the YAML content is validated and saved back to disk
+5. The UI displays the raw YAML content for editing in the `ConfigEditorView`
+
+### Validation Process
+1. YAML syntax validation using Yams parser
+2. Structure validation to ensure required Kubernetes fields are present
+3. Reference validation to verify context references to clusters and users

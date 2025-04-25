@@ -10,7 +10,7 @@ enum AppEvent: Equatable {
     /// 配置文件被删除
     case configFileRemoved(URL)
     /// 活动配置变更
-    case activeConfigChanged(KubeConfig?)
+    case activeConfigChanged(String)
     /// 请求重新加载配置
     case reloadConfigRequested
     /// 通知消息
@@ -107,6 +107,7 @@ final class EventManager: @unchecked Sendable {
             
             // 获取配置目录
             if let configDir = try? kubeConfigFileManager.getConfigsDirectoryPath() {
+                // 使用单一调用监控目录，避免多次操作
                 return fileWatcher.watchDirectory(configDir, fileExtension: "yaml") &&
                        fileWatcher.watchDirectory(configDir, fileExtension: "yml")
             }
@@ -131,6 +132,14 @@ final class EventManager: @unchecked Sendable {
         }
     }
     
+    /// 停止所有文件监控
+    /// - Returns: 操作是否成功
+    @discardableResult
+    func stopAllFileWatching() -> Bool {
+        fileWatcher.stopAllWatching()
+        return true
+    }
+    
     /// 发送事件
     /// - Parameter event: 要发送的事件
     func publish(_ event: AppEvent) {
@@ -151,9 +160,9 @@ final class EventManager: @unchecked Sendable {
     }
     
     /// 通知活动配置已更改
-    /// - Parameter config: 新的活动配置
-    func notifyActiveConfigChanged(_ config: KubeConfig?) {
-        eventsSubject.send(.activeConfigChanged(config))
+    /// - Parameter yamlContent: 新的活动配置内容（YAML 字符串）
+    func notifyActiveConfigChanged(_ yamlContent: String) {
+        eventsSubject.send(.activeConfigChanged(yamlContent))
     }
     
     /// 获取文件监控服务

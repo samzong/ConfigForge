@@ -9,6 +9,7 @@ import SwiftUI
 import Combine // Import Combine for AnyCancellable if needed later
 import Foundation
 import AppKit // 导入 AppKit 用于 NSAlert 和 NSTextField
+import Yams // 导入 Yams 用于 YAML 解析
 
 // MARK: - Enums for State Management
 
@@ -33,7 +34,7 @@ class MainViewModel: ObservableObject {
     @Published var isLoadingConfigFiles: Bool = false // Loading indicator for config files
     
     @Published var sshEntries: [SSHConfigEntry] = [] // For SSH config
-    @Published var kubeConfig: KubeConfig? // Current active Kubernetes config
+    @Published var activeConfigContent: String = "" // Current active Kubernetes config content
     
     // 配置文件列表
     @Published var configFiles: [KubeConfigFile] = []
@@ -298,8 +299,8 @@ class MainViewModel: ObservableObject {
                 let manager = KubeConfigFileManager()
                 let loadResult = manager.loadConfig()
                 switch loadResult {
-                case .success(let config):
-                    return config 
+                case .success(let yamlContent):
+                    return yamlContent 
                 case .failure(let error):
                     throw error
                 }
@@ -307,8 +308,8 @@ class MainViewModel: ObservableObject {
             isLoading = false
 
             switch result {
-            case .success(let loadedConfig):
-                self.kubeConfig = loadedConfig
+            case .success(let yamlContent):
+                self.activeConfigContent = yamlContent
 
                 if selectedConfigurationType == .kubernetes {
                     messageHandler.show("Kubeconfig 加载成功", type: .success)
@@ -316,10 +317,10 @@ class MainViewModel: ObservableObject {
 
             case .failure(let error):
                 if case ConfigForgeError.kubeConfigNotFound = error {
-                    self.kubeConfig = KubeConfig(apiVersion: nil, kind: nil, clusters: [], contexts: [], users: [], currentContext: nil)
+                    self.activeConfigContent = ""
                 } else {
                     ErrorHandler.handle(error, messageHandler: messageHandler)
-                    self.kubeConfig = nil
+                    self.activeConfigContent = ""
                 }
             }
         }
@@ -338,14 +339,9 @@ class MainViewModel: ObservableObject {
                 
                 switch discoverResult {
                 case .success(let files):
-                    // 加载每个配置文件的内容
-                    let loadResult = await fileManager.loadConfigFiles(files)
-                    switch loadResult {
-                    case .success(let loadedFiles):
-                        return loadedFiles
-                    case .failure(let error):
-                        throw error
-                    }
+                    // 文件已经包含其内容，只需验证它们
+                    let validatedFiles = await self.validateConfigFiles(files)
+                    return validatedFiles
                 case .failure(let error):
                     throw error
                 }
@@ -358,13 +354,116 @@ class MainViewModel: ObservableObject {
                 self.configFiles = files
                 if selectedConfigurationType == .kubernetes {
                     if !files.isEmpty {
-                        messageHandler.show("加载了 \(files.count) 个配置文件", type: .success)
+                        messageHandler.show("加载了 \\(files.count) 个配置文件", type: .success)
                     }
                 }
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
                 self.configFiles = []
             }
+        }
+    }
+    
+    /// 验证配置文件内容
+    private func validateConfigFiles(_ files: [KubeConfigFile]) async -> [KubeConfigFile] {
+        var validatedFiles = [KubeConfigFile]()
+        
+        for var configFile in files {
+            if let yamlContent = configFile.yamlContent {
+                // 尝试解析 YAML 内容
+                let validationResult = await validateYamlContent(yamlContent)
+                
+                switch validationResult {
+                case .success:
+                    // 标记为有效
+                    configFile.status = .valid
+                case .failure(let error):
+                    // 标记为无效并添加错误原因
+                    configFile.markAsInvalid(error.localizedDescription)
+                }
+            } else {
+                // 内容为空，标记为无效
+                configFile.markAsInvalid("配置文件内容为空或无法读取")
+            }
+            
+            validatedFiles.append(configFile)
+        }
+        
+        return validatedFiles
+    }
+    
+    /// 验证 YAML 内容
+    private func validateYamlContent(_ content: String) async -> Result<Void, ConfigForgeError> {
+        do {
+            // 使用 Yams 解析 YAML
+            guard let yaml = try Yams.load(yaml: content) as? [String: Any] else {
+                return .failure(.validation("YAML 格式错误：无法解析为字典"))
+            }
+            
+            // 基本结构验证 - 检查必要的字段
+            guard let clusters = yaml["clusters"] as? [[String: Any]], !clusters.isEmpty else {
+                return .failure(.validation("配置缺少集群定义"))
+            }
+            
+            guard let contexts = yaml["contexts"] as? [[String: Any]], !contexts.isEmpty else {
+                return .failure(.validation("配置缺少上下文定义"))
+            }
+            
+            guard let users = yaml["users"] as? [[String: Any]], !users.isEmpty else {
+                return .failure(.validation("配置缺少用户定义"))
+            }
+            
+            // 检查当前上下文是否有效
+            if let currentContext = yaml["current-context"] as? String {
+                let contextExists = contexts.contains { context in
+                    if let contextName = (context["name"] as? String) {
+                        return contextName == currentContext
+                    }
+                    return false
+                }
+                
+                if !contextExists {
+                    return .failure(.validation("当前上下文 '\(currentContext)' 未在配置中定义"))
+                }
+            }
+            
+            // 验证上下文引用的集群和用户是否存在
+            for context in contexts {
+                guard let name = context["name"] as? String,
+                      let contextDict = context["context"] as? [String: Any],
+                      let clusterName = contextDict["cluster"] as? String,
+                      let userName = contextDict["user"] as? String else {
+                    return .failure(.validation("上下文定义格式错误"))
+                }
+                
+                // 检查集群是否存在
+                let clusterExists = clusters.contains { cluster in
+                    if let clusterNameInList = cluster["name"] as? String {
+                        return clusterNameInList == clusterName
+                    }
+                    return false
+                }
+                
+                if !clusterExists {
+                    return .failure(.validation("上下文 '\(name)' 引用了未定义的集群 '\(clusterName)'"))
+                }
+                
+                // 检查用户是否存在
+                let userExists = users.contains { user in
+                    if let userNameInList = user["name"] as? String {
+                        return userNameInList == userName
+                    }
+                    return false
+                }
+                
+                if !userExists {
+                    return .failure(.validation("上下文 '\(name)' 引用了未定义的用户 '\(userName)'"))
+                }
+            }
+            
+            return .success(())
+        } catch {
+            return .failure(.validation("YAML 解析错误: \\(error.localizedDescription)"))
         }
     }
     
@@ -397,46 +496,50 @@ class MainViewModel: ObservableObject {
     func saveConfigFileContent(_ content: String) async {
         guard let configFile = selectedConfigFile else { return }
         
-        do {
-            // 保存文件
-            let fileUtils = FileSystemUtils.shared
-            let writeResult = fileUtils.writeFile(content: content, to: configFile.filePath)
-            if case .failure(let error) = writeResult {
-                throw error
+        // 使用文件监控服务的统一API更新文件
+        let fileWatcher = EventManager.shared.getFileWatcher()
+        let success = fileWatcher.createOrUpdateFile(content: content, at: configFile.filePath)
+        
+        if success {
+            // 验证文件
+            let validationResult = await validateYamlContent(content)
+            
+            // 创建更新后的配置文件对象
+            var updatedFile = configFile
+            updatedFile.updateYamlContent(content)
+            
+            switch validationResult {
+            case .success:
+                updatedFile.status = .valid
+            case .failure(let error):
+                updatedFile.markAsInvalid(error.localizedDescription)
             }
             
-            // 尝试解析保存的内容
-            if let parsedConfig = try? KubeConfigParser().decode(from: content).get() {
-                // 更新配置文件对象
-                var updatedFile = configFile
-                updatedFile.updateConfig(parsedConfig)
+            // 更新视图模型状态
+            await MainActor.run {
+                // 更新配置文件列表中的条目
+                if let index = configFiles.firstIndex(where: { $0.id == configFile.id }) {
+                    configFiles[index] = updatedFile
+                }
                 
-                // 更新视图模型状态
-                await MainActor.run {
-                    // 更新配置文件列表中的条目
-                    if let index = configFiles.firstIndex(where: { $0.id == configFile.id }) {
-                        configFiles[index] = updatedFile
-                    }
-                    
-                    // 更新选中的配置文件
-                    selectedConfigFile = updatedFile
-                    selectedConfigFileContent = content
-                    
-                    // 显示成功消息
+                // 更新选中的配置文件
+                selectedConfigFile = updatedFile
+                selectedConfigFileContent = content
+                
+                // 显示成功消息
+                if updatedFile.status == .valid {
                     messageHandler.show("配置已保存", type: .success)
+                } else {
+                    messageHandler.show("配置已保存，但验证未通过：\(updatedFile.status)", type: .error)
                 }
-                
-                // 如果是活动配置，重新加载主配置
-                if configFile.fileType == .active {
-                    loadKubeConfig()
-                }
-            } else {
-                // 解析失败但保存成功
-                messageHandler.show("配置已保存，但解析失败", type: .error)
             }
-        } catch {
-            // 保存失败
-            messageHandler.show("保存配置失败: \(error.localizedDescription)", type: .error)
+            
+            // 如果是活动配置，重新加载主配置
+            if configFile.fileType == .active {
+                loadKubeConfig()
+            }
+        } else {
+            messageHandler.show("保存配置失败", type: .error)
         }
     }
     
@@ -447,31 +550,32 @@ class MainViewModel: ObservableObject {
             return
         }
         
+        guard let yamlContent = configFile.yamlContent else {
+            messageHandler.show("无法读取配置文件内容", type: .error)
+            return
+        }
+        
         Task {
             isLoading = true
             
             do {
-                // 读取要激活的配置文件内容
-                let fileContent = try String(contentsOf: configFile.filePath, encoding: .utf8)
-                
-                // 创建备份
-                let fileManager = KubeConfigFileManager()
-                let backupResult = await fileManager.createDefaultBackup()
-                if case .failure(let error) = backupResult {
-                    throw error
-                }
-                
                 // 获取主配置文件路径
+                let fileManager = KubeConfigFileManager()
                 let mainConfigPath = try fileManager.getConfigFilePath()
                 
-                // 写入主配置文件
-                try fileContent.write(to: mainConfigPath, atomically: true, encoding: .utf8)
+                // 使用文件监控服务的统一 API 更新文件
+                let fileWatcher = EventManager.shared.getFileWatcher()
+                let success = fileWatcher.createOrUpdateFile(content: yamlContent, at: mainConfigPath)
                 
-                // 重新加载配置和配置文件列表
-                loadKubeConfig()
-                loadKubeConfigFiles()
-                
-                messageHandler.show("\(configFile.displayName) 已设为活动配置", type: .success)
+                if success {
+                    // 重新加载配置和配置文件列表
+                    loadKubeConfig()
+                    loadKubeConfigFiles()
+                    
+                    messageHandler.show("\(configFile.displayName) 已设为活动配置", type: .success)
+                } else {
+                    messageHandler.show("设置活动配置失败", type: .error)
+                }
             } catch {
                 messageHandler.show("设置活动配置失败: \(error.localizedDescription)", type: .error)
             }
@@ -512,13 +616,7 @@ class MainViewModel: ObservableObject {
             return
         }
         
-        // 执行一个完全自包含的重命名操作，避免所有文件监控相关问题
         do {
-            // 停止文件监控
-            let eventManager = EventManager.shared
-            let fileWatcher = eventManager.getFileWatcher()
-            fileWatcher.stopAllWatching()
-            
             let fileManager = KubeConfigFileManager()
             let configsDir = try fileManager.getConfigsDirectoryPath()
             
@@ -533,83 +631,46 @@ class MainViewModel: ObservableObject {
             // 检查新文件名是否已存在
             if FileManager.default.fileExists(atPath: newFilePath.path) {
                 messageHandler.show("文件 \(newFileName) 已存在", type: .error)
-                
-                // 重新启动文件监控
-                _ = eventManager.startWatchingConfigDirectory()
-                _ = eventManager.startWatchingMainConfig()
                 return
             }
             
             // 保存旧文件路径
             let oldFilePath = configFile.filePath
             
-            // 读取原文件内容
-            let fileContent: String
-            do {
-                fileContent = try String(contentsOf: oldFilePath, encoding: .utf8)
-            } catch {
-                messageHandler.show("读取文件内容失败: \(error.localizedDescription)", type: .error)
-                
-                // 重新启动文件监控
-                _ = eventManager.startWatchingConfigDirectory()
-                _ = eventManager.startWatchingMainConfig()
-                return
-            }
+            // 使用文件监控服务的统一API进行重命名
+            let fileWatcher = EventManager.shared.getFileWatcher()
+            let success = fileWatcher.renameFile(from: oldFilePath, to: newFilePath)
             
-            // 写入新文件
-            do {
-                try fileContent.write(to: newFilePath, atomically: true, encoding: .utf8)
-            } catch {
-                messageHandler.show("创建新文件失败: \(error.localizedDescription)", type: .error)
-                
-                // 重新启动文件监控
-                _ = eventManager.startWatchingConfigDirectory()
-                _ = eventManager.startWatchingMainConfig()
-                return
-            }
-            
-            // 删除旧文件
-            do {
-                try FileManager.default.removeItem(at: oldFilePath)
-            } catch {
-                // 即使删除旧文件失败，我们也认为重命名成功了
-                print("删除旧文件失败: \(error.localizedDescription)")
-            }
-            
-            // 取消当前选择
-            if self.selectedConfigFile?.id == configFile.id {
-                self.selectedConfigFile = nil
-                self.selectedConfigFileContent = ""
-            }
-            
-            // 清除缓存信息
-            self.configFiles.removeAll(where: { $0.id == configFile.id })
-            
-            // 重新启动文件监控
-            _ = eventManager.startWatchingConfigDirectory()
-            _ = eventManager.startWatchingMainConfig()
-            
-            // 重新加载配置文件列表
-            loadKubeConfigFiles()
-            
-            // 显示成功消息
-            messageHandler.show("文件已重命名为 \(newFileName)", type: .success)
-            
-            // 选择新文件
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self = self else { return }
-                
-                // 找到新文件并选择它
-                if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
-                    self.selectConfigFile(newFile)
+            if success {
+                // 取消当前选择
+                if self.selectedConfigFile?.id == configFile.id {
+                    self.selectedConfigFile = nil
+                    self.selectedConfigFileContent = ""
                 }
+                
+                // 清除缓存信息
+                self.configFiles.removeAll(where: { $0.id == configFile.id })
+                
+                // 显示成功消息
+                messageHandler.show("文件已重命名为 \(newFileName)", type: .success)
+                
+                // 重新加载配置文件列表并选择新文件
+                loadKubeConfigFiles()
+                
+                // 选择新文件
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    guard let self = self else { return }
+                    
+                    // 找到新文件并选择它
+                    if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                        self.selectConfigFile(newFile)
+                    }
+                }
+            } else {
+                messageHandler.show("重命名文件失败", type: .error)
             }
         } catch {
             messageHandler.show("重命名文件失败: \(error.localizedDescription)", type: .error)
-            
-            // 重新启动文件监控
-            _ = EventManager.shared.startWatchingConfigDirectory()
-            _ = EventManager.shared.startWatchingMainConfig()
         }
     }
     
@@ -632,37 +693,37 @@ class MainViewModel: ObservableObject {
     
     /// 删除配置文件
     func deleteConfigFile(_ configFile: KubeConfigFile) {
-        // 不使用异步任务，直接在主线程上执行，避免多线程操作导致的问题
-        do {
-            // 如果是当前选中的文件，先清除选择
-            let wasSelected = (self.selectedConfigFile?.id == configFile.id)
-            if wasSelected {
-                self.selectedConfigFile = nil
-                self.selectedConfigFileContent = ""
-            }
-            
-            // 先取消监控文件
-            EventManager.shared.publish(.configFileRemoved(configFile.filePath))
-            
-            // 删除文件
-            try FileManager.default.removeItem(at: configFile.filePath)
-            
-            // 先显示成功消息
+        // 如果是当前选中的文件，先清除选择
+        if self.selectedConfigFile?.id == configFile.id {
+            self.selectedConfigFile = nil
+            self.selectedConfigFileContent = ""
+        }
+        
+        // 获取文件监控服务并使用统一的文件删除API
+        let fileWatcher = EventManager.shared.getFileWatcher()
+        let success = fileWatcher.deleteFile(at: configFile.filePath)
+        
+        if success {
+            // 显示成功消息
             messageHandler.show("\(configFile.displayName) 已删除", type: .success)
             
-            // 延迟执行后续操作，让FileWatcher先处理完文件系统事件
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            // 从内存中的列表中移除
+            if let index = configFiles.firstIndex(where: { $0.id == configFile.id }) {
+                configFiles.remove(at: index)
+            }
+            
+            // 重新加载配置文件列表
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                 guard let self = self else { return }
-                
-                // 重新加载配置文件列表
                 self.loadKubeConfigFiles()
             }
-        } catch {
-            messageHandler.show("删除文件失败: \(error.localizedDescription)", type: .error)
+        } else {
+            // 删除失败
+            messageHandler.show("删除文件失败", type: .error)
         }
     }
     
-    /// 创建新配置文件
+    /// 创建新的配置文件
     func createNewConfigFile() {
         Task {
             do {
@@ -686,34 +747,112 @@ class MainViewModel: ObservableObject {
                 current-context: my-context
                 """
                 
-                // 获取配置目录
-                let fileManager = KubeConfigFileManager()
-                let configsDir = try fileManager.getConfigsDirectoryPath()
-                
-                // 创建唯一的文件名
+                // 生成唯一的文件名
                 let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
                     .replacingOccurrences(of: "/", with: "-")
                     .replacingOccurrences(of: ":", with: "-")
                     .replacingOccurrences(of: " ", with: "_")
                 
                 let newFileName = "new-config-\(timestamp).yaml"
+                
+                // 获取配置目录
+                let fileManager = KubeConfigFileManager()
+                let configsDir = try fileManager.getConfigsDirectoryPath()
                 let newFilePath = configsDir.appendingPathComponent(newFileName)
                 
-                // 写入新文件
-                try emptyConfig.write(to: newFilePath, atomically: true, encoding: .utf8)
+                // 使用文件监控服务的统一API创建文件
+                let fileWatcher = EventManager.shared.getFileWatcher()
+                let success = fileWatcher.createOrUpdateFile(content: emptyConfig, at: newFilePath)
+                
+                if success {
+                    // 重新加载配置文件列表
+                    loadKubeConfigFiles()
+                    
+                    // 延迟以等待列表刷新
+                    try await Task.sleep(nanoseconds: 500_000_000) // 500毫秒
+                    
+                    // 找到新创建的文件并选择它
+                    if let newFile = configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                        selectConfigFile(newFile)
+                        messageHandler.show("已创建新配置文件", type: .success)
+                    } else {
+                        // 如果没找到新文件，重新加载一次
+                        loadKubeConfigFiles()
+                        messageHandler.show("已创建新配置文件，请在列表中选择", type: .success)
+                    }
+                } else {
+                    messageHandler.show("创建新配置文件失败", type: .error)
+                }
+            } catch {
+                messageHandler.show("创建新配置文件失败: \(error.localizedDescription)", type: .error)
+            }
+        }
+    }
+    
+    /// 提示复制配置文件
+    func promptForCopyConfigFile(_ configFile: KubeConfigFile) {
+        // 提示用户输入新名称
+        let alert = NSAlert()
+        alert.messageText = "复制配置文件"
+        alert.informativeText = "请输入新文件的名称:"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "确定")
+        alert.addButton(withTitle: "取消")
+        
+        let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
+        textField.placeholderString = "新文件名"
+        textField.stringValue = "copy-of-\(configFile.displayName)"
+        
+        alert.accessoryView = textField
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            let newName = textField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !newName.isEmpty {
+                copyConfigFile(configFile, to: newName)
+            }
+        }
+    }
+    
+    /// 复制配置文件
+    func copyConfigFile(_ configFile: KubeConfigFile, to newName: String) {
+        do {
+            // 获取文件管理器和配置目录
+            let fileManager = KubeConfigFileManager()
+            let configsDir = try fileManager.getConfigsDirectoryPath()
+            
+            // 确保新名称有正确的扩展名
+            var newFileName = newName
+            if !newFileName.hasSuffix(".yaml") && !newFileName.hasSuffix(".yml") {
+                newFileName += ".yaml"
+            }
+            
+            // 使用文件监控服务的统一 API 复制文件
+            let fileWatcher = EventManager.shared.getFileWatcher()
+            let success = fileWatcher.copyFile(from: configFile.filePath, to: configsDir, newFileName: newFileName)
+            
+            if success {
+                // 显示成功消息
+                messageHandler.show("文件已复制为 \(newFileName)", type: .success)
                 
                 // 重新加载配置文件列表
                 loadKubeConfigFiles()
                 
-                // 如果创建成功，选择新文件
-                if let newFile = configFiles.first(where: { $0.fileName == newFileName }) {
-                    selectConfigFile(newFile)
+                // 选择新文件
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    guard let self = self else { return }
+                    
+                    let newFilePath = configsDir.appendingPathComponent(newFileName)
+                    // 找到新文件并选择它
+                    if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                        self.selectConfigFile(newFile)
+                    }
                 }
-                
-                messageHandler.show("已创建新配置文件", type: .success)
-            } catch {
-                messageHandler.show("创建新配置文件失败: \(error.localizedDescription)", type: .error)
+            } else {
+                messageHandler.show("复制文件失败", type: .error)
             }
+        } catch {
+            messageHandler.show("复制文件失败: \(error.localizedDescription)", type: .error)
         }
     }
     
@@ -745,51 +884,62 @@ class MainViewModel: ObservableObject {
         Task {
             isLoading = true
             
-            let result = await asyncUtility.perform { [weak self] in
-                guard let self = self, let config = await self.kubeConfig else { 
-                    throw ConfigForgeError.configRead("KubeConfig未加载或已被释放")
-                }
-                
-                // 在闭包内创建实例，而不是使用实例变量
+            guard !activeConfigContent.isEmpty else { 
+                messageHandler.show("KubeConfig内容为空", type: .error)
+                isLoading = false
+                return
+            }
+            
+            do {
+                // 获取主配置文件路径
                 let fileManager = KubeConfigFileManager()
-                return try await fileManager.saveConfig(config: config)
+                let configPath = try fileManager.getConfigFilePath()
+                
+                // 使用文件监控服务的统一 API 保存文件
+                let fileWatcher = EventManager.shared.getFileWatcher()
+                let success = fileWatcher.createOrUpdateFile(content: activeConfigContent, at: configPath)
+                
+                if success {
+                    // 设置编辑状态为 false，确保 UI 刷新
+                    await MainActor.run {
+                        self.isEditing = false
+                    }
+                    
+                    messageHandler.show("Kubeconfig 保存成功", type: .success)
+                    
+                    // 通知配置变更
+                    EventManager.shared.notifyActiveConfigChanged(activeConfigContent)
+                } else {
+                    messageHandler.show("保存 Kubeconfig 失败", type: .error)
+                }
+            } catch {
+                messageHandler.show("保存 Kubeconfig 失败: \(error.localizedDescription)", type: .error)
             }
             
             isLoading = false
-            switch result {
-            case .success:
-                messageHandler.show("Kubeconfig 保存成功", type: .success)
-            case .failure(let error):
-                ErrorHandler.handle(error, messageHandler: messageHandler)
-            }
         }
     }
     
     // 备份 Kubeconfig
     func backupKubeConfig(to url: URL) {
         Task {
-            guard let config = self.kubeConfig else {
-                messageHandler.show("错误：无法备份，KubeConfig 未加载。", type: .error)
+            guard !activeConfigContent.isEmpty else {
+                messageHandler.show("错误：无法备份，KubeConfig 内容为空。", type: .error)
                 return
             }
             
             isLoading = true
-            let result = await asyncUtility.perform { 
-                let fileManager = KubeConfigFileManager()
-                do {
-                    try await fileManager.backupConfig(config: config, to: url)
-                    return ()
-                } catch {
-                    throw error
-                }
-            }
+            
+            // 使用文件监控服务的统一 API 创建备份文件
+            let fileWatcher = EventManager.shared.getFileWatcher()
+            let success = fileWatcher.createOrUpdateFile(content: activeConfigContent, at: url)
+            
             isLoading = false
-
-            switch result {
-            case .success:
+            
+            if success {
                 messageHandler.show("Kubeconfig 已成功备份到 \(url.lastPathComponent)。", type: .success)
-            case .failure(let error):
-                messageHandler.show("备份 Kubeconfig 失败：\(error.localizedDescription)", type: .error)
+            } else {
+                messageHandler.show("备份 Kubeconfig 失败", type: .error)
             }
         }
     }
@@ -797,22 +947,29 @@ class MainViewModel: ObservableObject {
     // 恢复 Kubeconfig
     func restoreKubeConfig(from url: URL) async {
         isLoading = true
-        let result = await asyncUtility.perform { 
-            let fileManager = KubeConfigFileManager()
-            do {
-                return try await fileManager.restoreConfig(from: url)
-            } catch {
-                throw error
-            }
-        }
         
-        switch result {
-        case .success(let restoredConfig):
-            // 更新视图模型中的数据
-            self.kubeConfig = restoredConfig
+        do {
+            // 读取备份文件内容
+            let backupContent = try String(contentsOf: url, encoding: .utf8)
             
-            messageHandler.show("Kubeconfig 已从 \(url.lastPathComponent) 成功恢复。", type: .success)
-        case .failure(let error):
+            // 获取主配置文件路径
+            let fileManager = KubeConfigFileManager()
+            let mainConfigPath = try fileManager.getConfigFilePath()
+            
+            // 使用文件监控服务的统一 API 更新主配置文件
+            let fileWatcher = EventManager.shared.getFileWatcher()
+            let success = fileWatcher.createOrUpdateFile(content: backupContent, at: mainConfigPath)
+            
+            if success {
+                // 更新视图模型中的数据
+                self.activeConfigContent = backupContent
+                messageHandler.show("Kubeconfig 已从 \(url.lastPathComponent) 成功恢复。", type: .success)
+            } else {
+                messageHandler.show("恢复 Kubeconfig 失败", type: .error)
+                // 重新加载现有配置
+                loadKubeConfig()
+            }
+        } catch {
             messageHandler.show("恢复 Kubeconfig 失败：\(error.localizedDescription)", type: .error)
             // 重新加载现有配置
             loadKubeConfig()
@@ -868,10 +1025,10 @@ class MainViewModel: ObservableObject {
                         self.removeConfigFile(url)
                     }
                     
-                case .activeConfigChanged(let config):
-                    // 活动配置变更
+                case .activeConfigChanged(let yamlContent):
+                    // 活动配置变更 (注意：事件类型需要在 EventManager 中更新)
                     Task { @MainActor in
-                        self.kubeConfig = config
+                        self.activeConfigContent = yamlContent
                     }
                     
                 case .reloadConfigRequested:
@@ -925,27 +1082,21 @@ class MainViewModel: ObservableObject {
             throw ConfigForgeError.unknown("无法创建配置文件对象")
         }
         
-        // 读取和解析文件内容
-        do {
-            let content = try String(contentsOf: url, encoding: .utf8)
-            let parser = KubeConfigParser()
-            let parseResult = parser.decode(from: content)
+        // 如果有内容，验证其有效性
+        if let yamlContent = configFile.yamlContent {
+            let validationResult = await validateYamlContent(yamlContent)
             
-            switch parseResult {
-            case .success(let config):
-                // 更新配置文件状态
-                configFile.updateConfig(config)
-                return configFile
+            switch validationResult {
+            case .success:
+                configFile.status = .valid
             case .failure(let error):
-                // 标记为无效，但仍然返回配置文件对象
                 configFile.markAsInvalid(error.localizedDescription)
-                return configFile
             }
-        } catch {
-            // 读取失败，标记为无效
-            configFile.markAsInvalid("读取文件失败: \(error.localizedDescription)")
-            return configFile
+        } else {
+            configFile.markAsInvalid("读取文件内容失败")
         }
+        
+        return configFile
     }
 
     /// 根据URL重新加载特定配置文件

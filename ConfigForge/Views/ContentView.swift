@@ -95,17 +95,8 @@ struct ContentView: View {
             let parser = SSHConfigParser() 
             return parser.formatConfig(entries: viewModel.sshEntries)
         case .kubernetes:
-            if let kubeConfig = viewModel.kubeConfig {
-                let parser = KubeConfigParser()
-                let result = parser.encode(config: kubeConfig)
-                switch result {
-                case .success(let yamlString):
-                    return yamlString
-                case .failure(let error):
-                    print("Error formatting Kubernetes config: \(error.localizedDescription)")
-                    // Return a formatted error message as fallback
-                    return "# Error formatting Kubernetes config: \(error.localizedDescription)"
-                }
+            if !viewModel.activeConfigContent.isEmpty {
+                return viewModel.activeConfigContent
             } else {
                 return "# No Kubernetes config loaded"
             }

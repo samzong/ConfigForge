@@ -209,7 +209,7 @@ struct SidebarView: View {
         case .ssh:
             return L10n.Sidebar.Add.host
         case .kubernetes:
-            return L10n.Sidebar.Add.config // 使用一致的本地化字符串格式
+            return L10n.Sidebar.Add.config
         }
     }
 } 

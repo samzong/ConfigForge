@@ -19,9 +19,7 @@ ConfigForge uses SwiftUI for its interface, with a split-view design that provid
 ## Editor Components
 
 - [Editors/ModernEntryEditorView.swift](mdc:ConfigForge/Views/Editors/ModernEntryEditorView.swift) - Form editor for SSH entries
-- [Editors/KubeContextEditorView.swift](mdc:ConfigForge/Views/Editors/KubeContextEditorView.swift) - Editor for Kubernetes contexts 
-- [Editors/KubeClusterEditorView.swift](mdc:ConfigForge/Views/Editors/KubeClusterEditorView.swift) - Editor for Kubernetes clusters
-- [Editors/KubeUserEditorView.swift](mdc:ConfigForge/Views/Editors/KubeUserEditorView.swift) - Editor for Kubernetes users
+- [Editors/ConfigEditorView.swift](mdc:ConfigForge/Views/Editors/ConfigEditorView.swift) - Text-based editor for Kubernetes configuration files
 
 ## UI Layout and Hierarchy
 
@@ -31,16 +29,17 @@ ConfigForge uses SwiftUI for its interface, with a split-view design that provid
    - Save button for quick access
    - Configuration type selector (SSH/Kubernetes)
    - Search bar for filtering entries
-   - Secondary selector for Kubernetes objects (Contexts/Clusters/Users) when in Kubernetes mode
+   - Secondary selector for Kubernetes (file list) when in Kubernetes mode
 
 3. **Sidebar Section**:
    - List of entries based on selected configuration type
-   - Context menus for quick actions (delete, set current context)
+   - Context menus for quick actions (delete, set active config)
    - Support for keyboard shortcuts and selection
    - Add button at the bottom for creating new entries
 
 4. **Detail Section**:
-   - Form-based editors specific to each entry type
+   - For SSH: Form-based editors for host entries
+   - For Kubernetes: YAML text editor with syntax validation
    - Edit/Save buttons to toggle edit mode
    - Property editors with appropriate input validation
    - One-click terminal launcher for SSH connections

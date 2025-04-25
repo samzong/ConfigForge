@@ -36,14 +36,14 @@ struct KubeConfigFile: Identifiable, Equatable {
     /// 完整的文件路径
     let filePath: URL
     
-    /// 文件的配置内容
-    private(set) var config: KubeConfig?
+    /// The raw YAML content of the config file
+    private(set) var yamlContent: String?
     
     /// 文件类型 (活动、备份、存储的)
     let fileType: KubeConfigFileType
     
     /// 文件状态 (有效、无效等)
-    private(set) var status: KubeConfigFileStatus = .unknown
+    var status: KubeConfigFileStatus = .unknown
     
     /// 文件创建日期
     let creationDate: Date?
@@ -56,53 +56,61 @@ struct KubeConfigFile: Identifiable, Equatable {
     ///   - fileName: 文件名
     ///   - filePath: 文件路径
     ///   - fileType: 文件类型
-    ///   - config: 配置内容 (如果已加载)
+    ///   - yamlContent: Raw YAML content (if loaded)
     ///   - creationDate: 创建日期
     ///   - modificationDate: 修改日期
-    init(fileName: String, filePath: URL, fileType: KubeConfigFileType, config: KubeConfig? = nil, 
+    init(fileName: String, filePath: URL, fileType: KubeConfigFileType, yamlContent: String? = nil, 
          creationDate: Date? = nil, modificationDate: Date? = nil) {
         self.fileName = fileName
         self.filePath = filePath
         self.fileType = fileType
-        self.config = config
+        self.yamlContent = yamlContent
         self.creationDate = creationDate
         self.modificationDate = modificationDate
     }
     
-    /// 使用文件属性从文件路径创建实例
+    /// Creates an instance from a file URL, attempting to read its content and attributes.
     /// - Parameters:
-    ///   - url: 文件URL
-    ///   - fileType: 文件类型
-    ///   - fileManager: 文件管理器
-    /// - Returns: 新的 KubeConfigFile 实例或 nil (如果不能获取文件属性)
+    ///   - url: The file URL.
+    ///   - fileType: The type of the file.
+    ///   - fileManager: FileManager instance.
+    /// - Returns: A new KubeConfigFile instance, potentially with nil content if read fails.
     static func from(url: URL, fileType: KubeConfigFileType, fileManager: FileManager = .default) -> KubeConfigFile? {
+        var creationDate: Date? = nil
+        var modificationDate: Date? = nil
+        var yamlContent: String? = nil
+
         do {
             let attributes = try fileManager.attributesOfItem(atPath: url.path)
-            let creationDate = attributes[.creationDate] as? Date
-            let modificationDate = attributes[.modificationDate] as? Date
-            
-            return KubeConfigFile(
-                fileName: url.lastPathComponent,
-                filePath: url,
-                fileType: fileType,
-                creationDate: creationDate,
-                modificationDate: modificationDate
-            )
+            creationDate = attributes[.creationDate] as? Date
+            modificationDate = attributes[.modificationDate] as? Date
         } catch {
-            print("无法读取文件属性: \(error.localizedDescription)")
-            return KubeConfigFile(
-                fileName: url.lastPathComponent,
-                filePath: url,
-                fileType: fileType
-            )
+            print("Warning: Could not read file attributes for \(url.path): \(error.localizedDescription)")
         }
+
+        do {
+             yamlContent = try String(contentsOf: url, encoding: .utf8)
+        } catch {
+            print("Warning: Could not read file content for \(url.path): \(error.localizedDescription)")
+            // Content remains nil, status remains .unknown
+        }
+        
+        return KubeConfigFile(
+            fileName: url.lastPathComponent,
+            filePath: url,
+            fileType: fileType,
+            yamlContent: yamlContent,
+            creationDate: creationDate,
+            modificationDate: modificationDate
+        )
     }
     
-    /// 更新配置内容和状态
-    /// - Parameter newConfig: 新的配置内容
-    mutating func updateConfig(_ newConfig: KubeConfig) {
-        self.config = newConfig
-        self.status = .valid
+    /// Updates the raw YAML content and resets the status to unknown.
+    /// - Parameter newContent: The new YAML content.
+    mutating func updateYamlContent(_ newContent: String) {
+        self.yamlContent = newContent
+        self.status = .unknown // Status needs re-validation after content change
+        self.modificationDate = Date() // Update modification date
     }
     
     /// 标记为无效，并提供原因

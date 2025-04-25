@@ -10,7 +10,7 @@ enum AppEvent: Equatable {
     /// 配置文件被删除
     case configFileRemoved(URL)
     /// 活动配置变更
-    case activeConfigChanged(KubeConfig?)
+    case activeConfigChanged(String)
     /// 请求重新加载配置
     case reloadConfigRequested
     /// 通知消息
@@ -151,9 +151,9 @@ final class EventManager: @unchecked Sendable {
     }
     
     /// 通知活动配置已更改
-    /// - Parameter config: 新的活动配置
-    func notifyActiveConfigChanged(_ config: KubeConfig?) {
-        eventsSubject.send(.activeConfigChanged(config))
+    /// - Parameter yamlContent: 新的活动配置内容（YAML 字符串）
+    func notifyActiveConfigChanged(_ yamlContent: String) {
+        eventsSubject.send(.activeConfigChanged(yamlContent))
     }
     
     /// 获取文件监控服务

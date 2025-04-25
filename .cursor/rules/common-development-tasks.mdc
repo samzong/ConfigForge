@@ -37,9 +37,9 @@ This guide outlines common development tasks and operations in ConfigForge for q
 
 ### Adding a New Kubernetes Feature
 
-1. Update relevant model in [KubernetesModel.swift](mdc:ConfigForge/Models/KubernetesModel.swift)
-2. Update parser in [KubernetesConfigParser.swift](mdc:ConfigForge/Services/KubernetesConfigParser.swift)
-3. Add UI elements to the appropriate editor view
+1. Update [KubeConfigFile.swift](mdc:ConfigForge/Models/KubeConfigFile.swift) if needed
+2. Update YAML validation logic in [ConfigEditorViewModel.swift](mdc:ConfigForge/ViewModels/ConfigEditorViewModel.swift)
+3. Enhance the YAML editor functionality in [ConfigEditorView.swift](mdc:ConfigForge/Views/Editors/ConfigEditorView.swift) if required
 
 ### Adding a New CLI Command
 

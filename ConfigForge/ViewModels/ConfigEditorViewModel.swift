@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import Foundation
+import Yams // 导入 Yams 用于 YAML 解析
 
 /// 配置编辑器视图模型，处理配置文件编辑状态和操作
 @MainActor
@@ -34,7 +35,6 @@ class ConfigEditorViewModel: ObservableObject {
     
     // MARK: - 依赖项
     
-    private let kubeConfigParser = KubeConfigParser()
     private let kubeConfigFileManager = KubeConfigFileManager()
     private let messageHandler: MessageHandler
     
@@ -121,14 +121,15 @@ class ConfigEditorViewModel: ObservableObject {
                 // 保存文件
                 try editorContent.write(to: configFile.filePath, atomically: true, encoding: .utf8)
                 
-                // 尝试解析保存的内容
-                let parseResult = kubeConfigParser.decode(from: editorContent)
+                // 验证保存的内容
+                let validationResult = await validateYamlContent(editorContent)
                 
-                switch parseResult {
-                case .success(let parsedConfig):
+                switch validationResult {
+                case .success:
                     // 更新配置文件对象的状态
                     var updatedFile = configFile
-                    updatedFile.updateConfig(parsedConfig)
+                    updatedFile.updateYamlContent(editorContent)
+                    updatedFile.status = .valid
                     
                     // 更新视图模型状态
                     await MainActor.run {
@@ -137,9 +138,21 @@ class ConfigEditorViewModel: ObservableObject {
                         self.clearRedoStack()
                         self.messageHandler.show("配置已保存", type: .success)
                     }
-                case .failure(_):
+                    
+                    // 如果是活动配置，通知更改
+                    if configFile.fileType == .active {
+                        EventManager.shared.notifyActiveConfigChanged(editorContent)
+                    }
+                    
+                case .failure(let error):
+                    // 更新配置文件对象的状态
+                    var updatedFile = configFile
+                    updatedFile.updateYamlContent(editorContent)
+                    updatedFile.markAsInvalid(error.localizedDescription)
+                    
                     await MainActor.run {
-                        self.messageHandler.show("配置已保存，但解析失败", type: .info)
+                        self.configFile = updatedFile
+                        self.messageHandler.show("配置已保存，但验证未通过：\(error.localizedDescription)", type: .error)
                         self.hasUnsavedChanges = false
                     }
                 }
@@ -248,15 +261,94 @@ class ConfigEditorViewModel: ObservableObject {
             return
         }
         
-        // 尝试解析内容
-        let parseResult = kubeConfigParser.decode(from: editorContent)
-        
-        switch parseResult {
-        case .success(_):
-            validationState = .valid
-        case .failure(let error):
-            let errorMessage = "验证失败: \(error.localizedDescription)"
-            validationState = .invalid(errorMessage)
+        // 使用 Yams 验证 YAML 内容
+        Task {
+            let validationResult = await validateYamlContent(editorContent)
+            
+            await MainActor.run {
+                switch validationResult {
+                case .success:
+                    self.validationState = .valid
+                case .failure(let error):
+                    let errorMessage = "验证失败: \(error.localizedDescription)"
+                    self.validationState = .invalid(errorMessage)
+                }
+            }
+        }
+    }
+    
+    /// 验证 YAML 内容
+    private func validateYamlContent(_ content: String) async -> Result<Void, ConfigForgeError> {
+        do {
+            // 使用 Yams 解析 YAML
+            guard let yaml = try Yams.load(yaml: content) as? [String: Any] else {
+                return .failure(.validation("YAML 格式错误：无法解析为字典"))
+            }
+            
+            // 基本结构验证 - 检查必要的字段
+            guard let clusters = yaml["clusters"] as? [[String: Any]], !clusters.isEmpty else {
+                return .failure(.validation("配置缺少集群定义"))
+            }
+            
+            guard let contexts = yaml["contexts"] as? [[String: Any]], !contexts.isEmpty else {
+                return .failure(.validation("配置缺少上下文定义"))
+            }
+            
+            guard let users = yaml["users"] as? [[String: Any]], !users.isEmpty else {
+                return .failure(.validation("配置缺少用户定义"))
+            }
+            
+            // 检查当前上下文是否有效
+            if let currentContext = yaml["current-context"] as? String {
+                let contextExists = contexts.contains { context in
+                    if let contextName = (context["name"] as? String) {
+                        return contextName == currentContext
+                    }
+                    return false
+                }
+                
+                if !contextExists {
+                    return .failure(.validation("当前上下文 '\(currentContext)' 未在配置中定义"))
+                }
+            }
+            
+            // 验证上下文引用的集群和用户是否存在
+            for context in contexts {
+                guard let name = context["name"] as? String,
+                      let contextDict = context["context"] as? [String: Any],
+                      let clusterName = contextDict["cluster"] as? String,
+                      let userName = contextDict["user"] as? String else {
+                    return .failure(.validation("上下文定义格式错误"))
+                }
+                
+                // 检查集群是否存在
+                let clusterExists = clusters.contains { cluster in
+                    if let clusterNameInList = cluster["name"] as? String {
+                        return clusterNameInList == clusterName
+                    }
+                    return false
+                }
+                
+                if !clusterExists {
+                    return .failure(.validation("上下文 '\(name)' 引用了未定义的集群 '\(clusterName)'"))
+                }
+                
+                // 检查用户是否存在
+                let userExists = users.contains { user in
+                    if let userNameInList = user["name"] as? String {
+                        return userNameInList == userName
+                    }
+                    return false
+                }
+                
+                if !userExists {
+                    return .failure(.validation("上下文 '\(name)' 引用了未定义的用户 '\(userName)'"))
+                }
+            }
+            
+            return .success(())
+        } catch {
+            return .failure(.validation("YAML 解析错误: \(error.localizedDescription)"))
         }
     }
     

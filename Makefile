@@ -24,7 +24,7 @@ VERSION ?= $(if $(CI_BUILD),$(shell git describe --tags --always),Dev-$(shell gi
 CLEAN_VERSION = $(shell echo $(VERSION) | sed 's/^v//')
 
 # CLI 相关变量
-CLI_INSTALL_PATH = /usr/local/bin
+CLI_INSTALL_PATH = .
 APP_CLI_PATH = $(BUILD_DIR)/app/$(APP_NAME).app/Contents/Resources/bin
 
 # Homebrew 相关变量

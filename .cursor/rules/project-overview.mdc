@@ -22,3 +22,9 @@ The application follows the MVVM (Model-View-ViewModel) architecture pattern:
 - **Views**: [ConfigForge/Views](mdc:ConfigForge/Views) - User interface
 - **ViewModels**: [ConfigForge/ViewModels](mdc:ConfigForge/ViewModels) - Business logic
 - **Services**: [ConfigForge/Services](mdc:ConfigForge/Services) - File management and parsing
+
+## CLI Tool
+
+The project includes a command-line interface tool:
+- [CLI/Sources](mdc:CLI/Sources) - CLI implementation
+- [Sources/ConfigForgeCLI](mdc:Sources/ConfigForgeCLI) - Core CLI functionality

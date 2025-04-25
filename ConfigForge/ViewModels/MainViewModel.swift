@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine // Import Combine for AnyCancellable if needed later
 import Foundation
+import AppKit // 导入 AppKit 用于 NSAlert 和 NSTextField
 
 // MARK: - Enums for State Management
 
@@ -18,38 +19,25 @@ enum ConfigType: String, CaseIterable, Identifiable {
     var id: String { self.rawValue }
 }
 
-// Type of Kubernetes object being viewed/edited
-enum KubeObjectType: String, CaseIterable, Identifiable {
-    case contexts = "Contexts"
-    case clusters = "Clusters"
-    case users = "Users"
-    var id: String { self.rawValue }
-}
-
 @MainActor
 class MainViewModel: ObservableObject {
-    @Published var selectedConfigurationType: ConfigType = .ssh // NEW: Top level selector
-    @Published var selectedKubernetesObjectType: KubeObjectType = .contexts {
-        didSet {
-            // Only act if we're actually changing the type
-            if oldValue != selectedKubernetesObjectType {
-                handleKubeObjectTypeChange(from: oldValue, to: selectedKubernetesObjectType)
-            }
-        }
-    } // NEW: Kube internal selector
+    @Published var selectedConfigurationType: ConfigType = .ssh // Top level selector
     @Published var searchText: String = ""
-    @Published var selectedEntry: (any Identifiable)? // MODIFIED: Can hold SSH or Kube objects
-    @Published var isEditing: Bool = false // Note: Might need adjustment depending on how editing Kube objects works
+    @Published var configSearchText: String = "" // Search text for config files
+    @Published var selectedEntry: (any Identifiable)? // Can hold SSH entries
+    @Published var selectedConfigFile: KubeConfigFile? // For selected Kubernetes config file
+    @Published var isEditing: Bool = false
     @Published var errorMessage: String?
     @Published var appMessage: AppMessage?
     @Published var isLoading: Bool = false
+    @Published var isLoadingConfigFiles: Bool = false // Loading indicator for config files
     
-    @Published var sshEntries: [SSHConfigEntry] = [] // Renamed from 'entries' for clarity
-    @Published var kubeConfig: KubeConfig?
-    @Published var kubeContexts: [KubeContext] = []
-    @Published var kubeClusters: [KubeCluster] = []
-    @Published var kubeUsers: [KubeUser] = []
-    @Published var currentKubeContextName: String?
+    @Published var sshEntries: [SSHConfigEntry] = [] // For SSH config
+    @Published var kubeConfig: KubeConfig? // Current active Kubernetes config
+    
+    // 配置文件列表
+    @Published var configFiles: [KubeConfigFile] = []
+    @Published var selectedConfigFileContent: String = ""
     
     private let asyncUtility = AsyncUtility()
     private let messageHandler = MessageHandler()
@@ -57,58 +45,28 @@ class MainViewModel: ObservableObject {
     private let kubeConfigFileManager = KubeConfigFileManager()
     let sshParser = SSHConfigParser()
     
-    // 计算属性：过滤后的条目列表
+    // 计算属性：过滤后的条目列表 (仅 SSH 条目)
     var displayedEntries: [any Identifiable] {
-        var filtered: [any Identifiable] = []
-
-        switch selectedConfigurationType {
-        case .ssh:
-            filtered = sshEntries
-            if !searchText.isEmpty {
-                filtered = sshEntries.filter { $0.host.localizedCaseInsensitiveContains(searchText) }
+        if selectedConfigurationType == .ssh {
+            if searchText.isEmpty {
+                return sshEntries.sorted { $0.host < $1.host }
+            } else {
+                return sshEntries.filter { 
+                    $0.host.localizedCaseInsensitiveContains(searchText) 
+                }.sorted { $0.host < $1.host }
             }
-            return filtered.sorted { 
-                guard let entry1 = $0 as? SSHConfigEntry, let entry2 = $1 as? SSHConfigEntry else {
-                    return false
-                }
-                return entry1.host < entry2.host
-            }
-
-        case .kubernetes:
-            switch selectedKubernetesObjectType {
-            case .contexts:
-                filtered = kubeContexts
-                if !searchText.isEmpty {
-                    filtered = kubeContexts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-                }
-                return filtered.sorted { 
-                    guard let ctx1 = $0 as? KubeContext, let ctx2 = $1 as? KubeContext else {
-                        return false
-                    }
-                    return ctx1.name < ctx2.name
-                }
-            case .clusters:
-                filtered = kubeClusters
-                if !searchText.isEmpty {
-                    filtered = kubeClusters.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-                }
-                return filtered.sorted { 
-                    guard let cluster1 = $0 as? KubeCluster, let cluster2 = $1 as? KubeCluster else {
-                        return false
-                    }
-                    return cluster1.name < cluster2.name
-                }
-            case .users:
-                filtered = kubeUsers
-                if !searchText.isEmpty {
-                    filtered = kubeUsers.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
-                }
-                return filtered.sorted { 
-                    guard let user1 = $0 as? KubeUser, let user2 = $1 as? KubeUser else {
-                        return false
-                    }
-                    return user1.name < user2.name
-                }
+        }
+        return []
+    }
+    
+    // 计算属性：过滤后的配置文件列表
+    var displayedConfigFiles: [KubeConfigFile] {
+        if configSearchText.isEmpty {
+            return configFiles
+        } else {
+            return configFiles.filter { 
+                $0.fileName.localizedCaseInsensitiveContains(configSearchText) ||
+                $0.displayName.localizedCaseInsensitiveContains(configSearchText)
             }
         }
     }
@@ -141,8 +99,6 @@ class MainViewModel: ObservableObject {
     
     init() {
         // Pass the postMessage function to the handlers if they need it
-        // Or ensure messageHandler.show internally calls postMessage or updates appMessage
-        // Current structure: messageHandler seems separate, let's unify
         self.messageHandler.messagePoster = { [weak self] message, type in
             Task { @MainActor in
                 self?.postMessage(message, type: type)
@@ -150,7 +106,11 @@ class MainViewModel: ObservableObject {
         } // Inject posting capability
 
         loadSshConfig()
-        loadKubeConfig()
+        loadKubeConfig() // 仍然加载主 Kubeconfig 以获取当前配置
+        loadKubeConfigFiles() // 加载所有配置文件
+
+        // Setup event handling
+        setupEventHandling()
     }
     
     // MARK: - 公共方法
@@ -330,14 +290,13 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    // 加载 Kubeconfig
+    // 加载 Kubeconfig (仍然需要保留以获取当前活动配置信息)
     func loadKubeConfig() {
         Task {
             isLoading = true
             let result = await asyncUtility.perform { 
-                // 在闭包内创建实例
                 let manager = KubeConfigFileManager()
-                let loadResult = manager.loadConfig() // 不需要await，这不是异步方法
+                let loadResult = manager.loadConfig()
                 switch loadResult {
                 case .success(let config):
                     return config 
@@ -350,42 +309,439 @@ class MainViewModel: ObservableObject {
             switch result {
             case .success(let loadedConfig):
                 self.kubeConfig = loadedConfig
-                self.kubeContexts = loadedConfig.safeContexts
-                self.kubeClusters = loadedConfig.safeClusters
-                self.kubeUsers = loadedConfig.safeUsers
-                self.currentKubeContextName = loadedConfig.currentContext
 
-                if !loadedConfig.safeContexts.isEmpty && selectedConfigurationType == .kubernetes {
+                if selectedConfigurationType == .kubernetes {
                     messageHandler.show("Kubeconfig 加载成功", type: .success)
                 }
 
             case .failure(let error):
-                // Handle Kubeconfig specific errors gracefully
-                // Use case matching instead of == comparison
                 if case ConfigForgeError.kubeConfigNotFound = error {
                     self.kubeConfig = KubeConfig(apiVersion: nil, kind: nil, clusters: [], contexts: [], users: [], currentContext: nil)
-                    self.kubeContexts = []
-                    self.kubeClusters = []
-                    self.kubeUsers = []
-                    self.currentKubeContextName = nil
                 } else {
                     ErrorHandler.handle(error, messageHandler: messageHandler)
                     self.kubeConfig = nil
-                    self.kubeContexts = []
-                    self.kubeClusters = []
-                    self.kubeUsers = []
-                    self.currentKubeContextName = nil
                 }
             }
         }
     }
     
-    // MARK: - Kubernetes Specific Methods (Placeholders/Basic Impl)
+    // MARK: - Kubernetes Config Files Management
     
-    // Placeholder: Save current Kubernetes configuration
+    /// 加载 Kubernetes 配置文件列表
+    func loadKubeConfigFiles() {
+        Task {
+            isLoadingConfigFiles = true
+            
+            let result = await asyncUtility.perform {
+                let fileManager = KubeConfigFileManager()
+                let discoverResult = await fileManager.discoverConfigFiles()
+                
+                switch discoverResult {
+                case .success(let files):
+                    // 加载每个配置文件的内容
+                    let loadResult = await fileManager.loadConfigFiles(files)
+                    switch loadResult {
+                    case .success(let loadedFiles):
+                        return loadedFiles
+                    case .failure(let error):
+                        throw error
+                    }
+                case .failure(let error):
+                    throw error
+                }
+            }
+            
+            isLoadingConfigFiles = false
+            
+            switch result {
+            case .success(let files):
+                self.configFiles = files
+                if selectedConfigurationType == .kubernetes {
+                    if !files.isEmpty {
+                        messageHandler.show("加载了 \(files.count) 个配置文件", type: .success)
+                    }
+                }
+            case .failure(let error):
+                ErrorHandler.handle(error, messageHandler: messageHandler)
+                self.configFiles = []
+            }
+        }
+    }
+    
+    /// 刷新配置文件列表
+    func refreshKubeConfigFiles() {
+        loadKubeConfigFiles()
+    }
+    
+    /// 选择配置文件
+    func selectConfigFile(_ configFile: KubeConfigFile) {
+        self.selectedConfigFile = configFile
+        
+        // 加载配置文件内容
+        Task {
+            do {
+                let fileContent = try String(contentsOf: configFile.filePath, encoding: .utf8)
+                await MainActor.run {
+                    self.selectedConfigFileContent = fileContent
+                }
+            } catch {
+                messageHandler.show("无法读取配置文件内容: \(error.localizedDescription)", type: .error)
+                await MainActor.run {
+                    self.selectedConfigFileContent = "# 错误: 无法读取文件内容\n# \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    /// 保存配置文件内容
+    func saveConfigFileContent(_ content: String) async {
+        guard let configFile = selectedConfigFile else { return }
+        
+        do {
+            // 保存文件
+            let fileUtils = FileSystemUtils.shared
+            let writeResult = fileUtils.writeFile(content: content, to: configFile.filePath)
+            if case .failure(let error) = writeResult {
+                throw error
+            }
+            
+            // 尝试解析保存的内容
+            if let parsedConfig = try? KubeConfigParser().decode(from: content).get() {
+                // 更新配置文件对象
+                var updatedFile = configFile
+                updatedFile.updateConfig(parsedConfig)
+                
+                // 更新视图模型状态
+                await MainActor.run {
+                    // 更新配置文件列表中的条目
+                    if let index = configFiles.firstIndex(where: { $0.id == configFile.id }) {
+                        configFiles[index] = updatedFile
+                    }
+                    
+                    // 更新选中的配置文件
+                    selectedConfigFile = updatedFile
+                    selectedConfigFileContent = content
+                    
+                    // 显示成功消息
+                    messageHandler.show("配置已保存", type: .success)
+                }
+                
+                // 如果是活动配置，重新加载主配置
+                if configFile.fileType == .active {
+                    loadKubeConfig()
+                }
+            } else {
+                // 解析失败但保存成功
+                messageHandler.show("配置已保存，但解析失败", type: .error)
+            }
+        } catch {
+            // 保存失败
+            messageHandler.show("保存配置失败: \(error.localizedDescription)", type: .error)
+        }
+    }
+    
+    /// 激活配置文件 (设为主配置)
+    func activateConfigFile(_ configFile: KubeConfigFile) {
+        guard configFile.status == .valid else {
+            messageHandler.show("无法激活无效的配置文件", type: .error)
+            return
+        }
+        
+        Task {
+            isLoading = true
+            
+            do {
+                // 读取要激活的配置文件内容
+                let fileContent = try String(contentsOf: configFile.filePath, encoding: .utf8)
+                
+                // 创建备份
+                let fileManager = KubeConfigFileManager()
+                let backupResult = await fileManager.createDefaultBackup()
+                if case .failure(let error) = backupResult {
+                    throw error
+                }
+                
+                // 获取主配置文件路径
+                let mainConfigPath = try fileManager.getConfigFilePath()
+                
+                // 写入主配置文件
+                try fileContent.write(to: mainConfigPath, atomically: true, encoding: .utf8)
+                
+                // 重新加载配置和配置文件列表
+                loadKubeConfig()
+                loadKubeConfigFiles()
+                
+                messageHandler.show("\(configFile.displayName) 已设为活动配置", type: .success)
+            } catch {
+                messageHandler.show("设置活动配置失败: \(error.localizedDescription)", type: .error)
+            }
+            
+            isLoading = false
+        }
+    }
+    
+    /// 提示重命名配置文件
+    func promptForRenameConfigFile(_ configFile: KubeConfigFile) {
+        // 提示用户输入新名称
+        let alert = NSAlert()
+        alert.messageText = "重命名配置文件"
+        alert.informativeText = "请输入新的文件名:"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "确定")
+        alert.addButton(withTitle: "取消")
+        
+        let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
+        textField.placeholderString = "新文件名"
+        textField.stringValue = configFile.displayName
+        
+        alert.accessoryView = textField
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            let newName = textField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !newName.isEmpty && newName != configFile.displayName {
+                renameConfigFile(configFile, to: newName)
+            }
+        }
+    }
+    
+    /// 重命名配置文件
+    func renameConfigFile(_ configFile: KubeConfigFile, to newName: String) {
+        guard !newName.isEmpty else {
+            messageHandler.show("文件名不能为空", type: .error)
+            return
+        }
+        
+        // 执行一个完全自包含的重命名操作，避免所有文件监控相关问题
+        do {
+            // 停止文件监控
+            let eventManager = EventManager.shared
+            let fileWatcher = eventManager.getFileWatcher()
+            fileWatcher.stopAllWatching()
+            
+            let fileManager = KubeConfigFileManager()
+            let configsDir = try fileManager.getConfigsDirectoryPath()
+            
+            // 确保新名称有正确的扩展名
+            var newFileName = newName
+            if !newFileName.hasSuffix(".yaml") && !newFileName.hasSuffix(".yml") {
+                newFileName += ".yaml"
+            }
+            
+            let newFilePath = configsDir.appendingPathComponent(newFileName)
+            
+            // 检查新文件名是否已存在
+            if FileManager.default.fileExists(atPath: newFilePath.path) {
+                messageHandler.show("文件 \(newFileName) 已存在", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 保存旧文件路径
+            let oldFilePath = configFile.filePath
+            
+            // 读取原文件内容
+            let fileContent: String
+            do {
+                fileContent = try String(contentsOf: oldFilePath, encoding: .utf8)
+            } catch {
+                messageHandler.show("读取文件内容失败: \(error.localizedDescription)", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 写入新文件
+            do {
+                try fileContent.write(to: newFilePath, atomically: true, encoding: .utf8)
+            } catch {
+                messageHandler.show("创建新文件失败: \(error.localizedDescription)", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 删除旧文件
+            do {
+                try FileManager.default.removeItem(at: oldFilePath)
+            } catch {
+                // 即使删除旧文件失败，我们也认为重命名成功了
+                print("删除旧文件失败: \(error.localizedDescription)")
+            }
+            
+            // 取消当前选择
+            if self.selectedConfigFile?.id == configFile.id {
+                self.selectedConfigFile = nil
+                self.selectedConfigFileContent = ""
+            }
+            
+            // 清除缓存信息
+            self.configFiles.removeAll(where: { $0.id == configFile.id })
+            
+            // 重新启动文件监控
+            _ = eventManager.startWatchingConfigDirectory()
+            _ = eventManager.startWatchingMainConfig()
+            
+            // 重新加载配置文件列表
+            loadKubeConfigFiles()
+            
+            // 显示成功消息
+            messageHandler.show("文件已重命名为 \(newFileName)", type: .success)
+            
+            // 选择新文件
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                
+                // 找到新文件并选择它
+                if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                    self.selectConfigFile(newFile)
+                }
+            }
+        } catch {
+            messageHandler.show("重命名文件失败: \(error.localizedDescription)", type: .error)
+            
+            // 重新启动文件监控
+            _ = EventManager.shared.startWatchingConfigDirectory()
+            _ = EventManager.shared.startWatchingMainConfig()
+        }
+    }
+    
+    /// 提示删除配置文件
+    func promptForDeleteConfigFile(_ configFile: KubeConfigFile) {
+        // 显示确认对话框
+        let alert = NSAlert()
+        alert.messageText = "删除配置文件"
+        alert.informativeText = "确定要删除 \(configFile.displayName) 吗？此操作不可恢复。"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "删除")
+        alert.addButton(withTitle: "取消")
+        
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            deleteConfigFile(configFile)
+        }
+    }
+    
+    /// 删除配置文件
+    func deleteConfigFile(_ configFile: KubeConfigFile) {
+        // 不使用异步任务，直接在主线程上执行，避免多线程操作导致的问题
+        do {
+            // 如果是当前选中的文件，先清除选择
+            let wasSelected = (self.selectedConfigFile?.id == configFile.id)
+            if wasSelected {
+                self.selectedConfigFile = nil
+                self.selectedConfigFileContent = ""
+            }
+            
+            // 先取消监控文件
+            EventManager.shared.publish(.configFileRemoved(configFile.filePath))
+            
+            // 删除文件
+            try FileManager.default.removeItem(at: configFile.filePath)
+            
+            // 先显示成功消息
+            messageHandler.show("\(configFile.displayName) 已删除", type: .success)
+            
+            // 延迟执行后续操作，让FileWatcher先处理完文件系统事件
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                
+                // 重新加载配置文件列表
+                self.loadKubeConfigFiles()
+            }
+        } catch {
+            messageHandler.show("删除文件失败: \(error.localizedDescription)", type: .error)
+        }
+    }
+    
+    /// 创建新配置文件
+    func createNewConfigFile() {
+        Task {
+            do {
+                // 创建一个基本的空 Kubernetes 配置
+                let emptyConfig = """
+                apiVersion: v1
+                kind: Config
+                clusters:
+                - name: my-cluster
+                  cluster:
+                    server: https://example.com
+                contexts:
+                - name: my-context
+                  context:
+                    cluster: my-cluster
+                    user: my-user
+                users:
+                - name: my-user
+                  user:
+                    token: placeholder-token
+                current-context: my-context
+                """
+                
+                // 获取配置目录
+                let fileManager = KubeConfigFileManager()
+                let configsDir = try fileManager.getConfigsDirectoryPath()
+                
+                // 创建唯一的文件名
+                let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
+                    .replacingOccurrences(of: "/", with: "-")
+                    .replacingOccurrences(of: ":", with: "-")
+                    .replacingOccurrences(of: " ", with: "_")
+                
+                let newFileName = "new-config-\(timestamp).yaml"
+                let newFilePath = configsDir.appendingPathComponent(newFileName)
+                
+                // 写入新文件
+                try emptyConfig.write(to: newFilePath, atomically: true, encoding: .utf8)
+                
+                // 重新加载配置文件列表
+                loadKubeConfigFiles()
+                
+                // 如果创建成功，选择新文件
+                if let newFile = configFiles.first(where: { $0.fileName == newFileName }) {
+                    selectConfigFile(newFile)
+                }
+                
+                messageHandler.show("已创建新配置文件", type: .success)
+            } catch {
+                messageHandler.show("创建新配置文件失败: \(error.localizedDescription)", type: .error)
+            }
+        }
+    }
+    
+    // MARK: - 辅助方法
+    
+    // 获取消息处理器（用于视图绑定）
+    func getMessageHandler() -> MessageHandler {
+        messageHandler
+    }
+    
+    // 获取异步工具（用于视图绑定）
+    func getAsyncUtility() -> AsyncUtility {
+        asyncUtility
+    }
+    
+    // MARK: - Unified Save/Backup/Restore
+    
+    func saveCurrentConfig() {
+        switch selectedConfigurationType {
+        case .ssh:
+            saveSshConfig() // Call existing SSH save method
+        case .kubernetes:
+            saveKubeConfig() // Call new Kube save method
+        }
+    }
+    
+    // 保存 Kubeconfig
     func saveKubeConfig() {
-        // Actual implementation will require formatting the kubeConfig object (if loaded)
-        // and writing it using kubeConfigFileManager.
         Task {
             isLoading = true
             
@@ -409,365 +765,7 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    // 设置当前 Kubeconfig Context
-    func setCurrentKubeContext(name: String) {
-        // Ensure kubeConfig exists and the context name is valid
-        guard self.kubeConfig != nil else {
-            messageHandler.show("无法设置当前 Context：Kubeconfig 数据未加载。", type: .error)
-            return
-        }
-
-        guard self.kubeContexts.contains(where: { $0.name == name }) else {
-            messageHandler.show("无法设置当前 Context：无效的 Context 名称 '\(name)'。", type: .error)
-            return
-        }
-
-        // Avoid unnecessary save if the context is already the current one
-        if self.kubeConfig?.currentContext == name {
-            print("Context '\(name)' is already the current context.")
-            return
-        }
-
-        // Update the model
-        self.kubeConfig?.currentContext = name
-        self.currentKubeContextName = name // Update the published property for UI reactivity
-
-        // Save the changes
-        saveKubeConfig()
-
-        // Optionally show success message
-        messageHandler.show("当前 Kubeconfig Context 已设置为 '\(name)'。", type: .success)
-    }
-    
-    // 获取消息处理器（用于视图绑定）
-    func getMessageHandler() -> MessageHandler {
-        messageHandler
-    }
-    
-    // 获取异步工具（用于视图绑定）
-    func getAsyncUtility() -> AsyncUtility {
-        asyncUtility
-    }
-    
-    // Add/Update/Delete Kubeconfig items (Implementations needed later)
-    // Placeholder Add Methods for Kube Objects
-    func addKubeContext() {
-        // 生成唯一的上下文名称
-        let newName = generateUniqueName(base: "new-context", existing: kubeContexts.map { $0.name })
-        
-        // 确保至少有一个集群和用户
-        guard let defaultCluster = kubeClusters.first?.name, let defaultUser = kubeUsers.first?.name else {
-            messageHandler.show("无法添加 Context：需要至少一个 Cluster 和 User。", type: .error)
-            return
-        }
-        
-        // 创建新上下文
-        let newContext = KubeContext(
-            name: newName, 
-            context: ContextDetails(
-                cluster: defaultCluster, 
-                user: defaultUser, 
-                namespace: nil
-            )
-        )
-        
-        // 更新数据模型
-        kubeContexts.append(newContext)
-        kubeConfig?.contexts = kubeContexts
-        
-        // 选择新创建的上下文
-        safelySelectEntry(newContext)
-        
-        // 保存配置
-        messageHandler.show("已创建新 Context '\(newName)'。", type: .success)
-        saveKubeConfig()
-    }
-
-    func addKubeCluster() {
-        // 生成唯一的集群名称
-        let newName = generateUniqueName(base: "new-cluster", existing: kubeClusters.map { $0.name })
-        
-        // 创建新集群
-        let newCluster = KubeCluster(
-            name: newName, 
-            cluster: ClusterDetails(
-                server: "https://kubernetes.default.svc", 
-                certificateAuthorityData: nil, 
-                insecureSkipTlsVerify: true
-            )
-        )
-        
-        // 更新数据模型
-        kubeClusters.append(newCluster)
-        kubeConfig?.clusters = kubeClusters
-        
-        // 选择新创建的集群
-        safelySelectEntry(newCluster)
-        
-        // 保存配置
-        messageHandler.show("已创建新 Cluster '\(newName)'。", type: .success)
-        saveKubeConfig()
-    }
-
-    func addKubeUser() {
-        // 生成唯一的用户名称
-        let newName = generateUniqueName(base: "new-user", existing: kubeUsers.map { $0.name })
-        
-        // 创建新用户
-        let newUser = KubeUser(
-            name: newName, 
-            user: UserDetails(
-                clientCertificateData: nil, 
-                clientKeyData: nil, 
-                token: nil
-            )
-        )
-        
-        // 更新数据模型
-        kubeUsers.append(newUser)
-        kubeConfig?.users = kubeUsers
-        
-        // 选择新创建的用户
-        safelySelectEntry(newUser)
-        
-        // 保存配置
-        messageHandler.show("已创建新 User '\(newName)'。", type: .success)
-        saveKubeConfig()
-    }
-
-    func updateKubeContext(id: String, name: String, cluster: String, user: String, namespace: String?) {
-        guard !name.isEmpty, !cluster.isEmpty, !user.isEmpty else {
-            messageHandler.show("Context 名称、Cluster 和 User 不能为空。", type: .error)
-            return
-        }
-        
-        // 检查名称唯一性（排除当前上下文）
-        let otherContexts = kubeContexts.filter { $0.id != id }
-        if otherContexts.contains(where: { $0.name == name }) {
-            messageHandler.show("已存在相同名称的 Context '\(name)'。", type: .error)
-            return
-        }
-        
-        // 查找并更新上下文
-        if let index = kubeContexts.firstIndex(where: { $0.id == id }) {
-            kubeContexts[index].name = name
-            kubeContexts[index].context.cluster = cluster
-            kubeContexts[index].context.user = user
-            kubeContexts[index].context.namespace = namespace
-            
-            // 更新 kubeConfig
-            kubeConfig?.contexts = kubeContexts
-            
-            // 如果更新的是当前上下文，更新 currentKubeContextName
-            if kubeConfig?.currentContext == id {
-                kubeConfig?.currentContext = name
-                currentKubeContextName = name
-            }
-            
-            // 保存配置
-            messageHandler.show("Context '\(name)' 已更新。", type: .success)
-            saveKubeConfig()
-            
-            // 重新选择更新后的对象，确保视图刷新
-            let updatedContext = kubeContexts[index]
-            safelySelectEntry(nil) // 先取消选择
-            updateUIState {
-                // 在下一个运行循环中重新选择，确保 UI 有机会更新
-                self.safelySelectEntry(updatedContext)
-            }
-        }
-    }
-
-    func updateKubeCluster(id: String, name: String, server: String, certificateAuthorityData: String?, insecureSkipTlsVerify: Bool?) {
-        guard !name.isEmpty, !server.isEmpty else {
-            messageHandler.show("Cluster 名称和服务器 URL 不能为空。", type: .error)
-            return
-        }
-        
-        // 检查名称唯一性（排除当前集群）
-        let otherClusters = kubeClusters.filter { $0.id != id }
-        if otherClusters.contains(where: { $0.name == name }) {
-            messageHandler.show("已存在相同名称的 Cluster '\(name)'。", type: .error)
-            return
-        }
-        
-        // 查找并更新集群
-        if let index = kubeClusters.firstIndex(where: { $0.id == id }) {
-            // 保存旧名称以处理依赖关系
-            let oldName = kubeClusters[index].name
-            
-            // 更新集群
-            kubeClusters[index].name = name
-            kubeClusters[index].cluster.server = server
-            kubeClusters[index].cluster.certificateAuthorityData = certificateAuthorityData
-            kubeClusters[index].cluster.insecureSkipTlsVerify = insecureSkipTlsVerify
-            
-            // 更新 kubeConfig
-            kubeConfig?.clusters = kubeClusters
-            
-            // 如果集群名称已更改，更新所有引用该集群的上下文
-            if oldName != name {
-                for i in 0..<kubeContexts.count {
-                    if kubeContexts[i].context.cluster == oldName {
-                        kubeContexts[i].context.cluster = name
-                    }
-                }
-                kubeConfig?.contexts = kubeContexts
-            }
-            
-            // 保存配置
-            messageHandler.show("Cluster '\(name)' 已更新。", type: .success)
-            saveKubeConfig()
-            
-            // 重新选择更新后的对象，确保视图刷新
-            let updatedCluster = kubeClusters[index]
-            safelySelectEntry(nil) // 先取消选择
-            updateUIState {
-                // 在下一个运行循环中重新选择，确保 UI 有机会更新
-                self.safelySelectEntry(updatedCluster)
-            }
-        }
-    }
-
-    func updateKubeUser(id: String, name: String, clientCertificateData: String?, clientKeyData: String?, token: String?) {
-        guard !name.isEmpty else {
-            messageHandler.show("User 名称不能为空。", type: .error)
-            return
-        }
-        
-        // 检查名称唯一性（排除当前用户）
-        let otherUsers = kubeUsers.filter { $0.id != id }
-        if otherUsers.contains(where: { $0.name == name }) {
-            messageHandler.show("已存在相同名称的 User '\(name)'。", type: .error)
-            return
-        }
-        
-        // 查找并更新用户
-        if let index = kubeUsers.firstIndex(where: { $0.id == id }) {
-            // 保存旧名称以处理依赖关系
-            let oldName = kubeUsers[index].name
-            
-            // 更新用户
-            kubeUsers[index].name = name
-            kubeUsers[index].user.clientCertificateData = clientCertificateData
-            kubeUsers[index].user.clientKeyData = clientKeyData
-            kubeUsers[index].user.token = token
-            
-            // 更新 kubeConfig
-            kubeConfig?.users = kubeUsers
-            
-            // 如果用户名称已更改，更新所有引用该用户的上下文
-            if oldName != name {
-                for i in 0..<kubeContexts.count {
-                    if kubeContexts[i].context.user == oldName {
-                        kubeContexts[i].context.user = name
-                    }
-                }
-                kubeConfig?.contexts = kubeContexts
-            }
-            
-            // 保存配置
-            messageHandler.show("User '\(name)' 已更新。", type: .success)
-            saveKubeConfig()
-            
-            // 重新选择更新后的对象，确保视图刷新
-            let updatedUser = kubeUsers[index]
-            safelySelectEntry(nil) // 先取消选择
-            updateUIState {
-                // 在下一个运行循环中重新选择，确保 UI 有机会更新
-                self.safelySelectEntry(updatedUser)
-            }
-        }
-    }
-
-    // 辅助方法：生成唯一名称
-    private func generateUniqueName(base: String, existing: [String]) -> String {
-        var counter = 1
-        var newName = "\(base)-\(counter)"
-        
-        while existing.contains(newName) {
-            counter += 1
-            newName = "\(base)-\(counter)"
-        }
-        
-        return newName
-    }
-
-    func deleteKubeContext(id: String) {
-        if let index = kubeContexts.firstIndex(where: { $0.id == id }) {
-            let contextToDelete = kubeContexts[index]
-            kubeContexts.remove(at: index)
-            kubeConfig?.contexts = kubeContexts // Update main config object
-
-            // Deselect if the deleted item was selected
-            if let selected = selectedEntry as? KubeContext, selected.id == id {
-                safelySelectEntry(nil)
-            }
-
-            messageHandler.show("Context '\(contextToDelete.name)' 已删除。", type: .success)
-            saveKubeConfig()
-        }
-    }
-
-    // func addKubeCluster(...) { ... } // Moved up
-    // func updateKubeCluster(...) { ... }
-
-    func deleteKubeCluster(id: String) {
-        // Dependency Check: Find contexts using this cluster
-        let dependingContexts = kubeContexts.filter { $0.context.cluster == id }
-
-        if !dependingContexts.isEmpty {
-            let contextNames = dependingContexts.map { $0.name }.joined(separator: ", ")
-            messageHandler.show("无法删除 Cluster '\(id)'，因为它被 Context(s): \(contextNames) 使用。", type: .error)
-            return
-        }
-
-        // Proceed with deletion if no dependencies
-        if let index = kubeClusters.firstIndex(where: { $0.id == id }) {
-            let clusterToDelete = kubeClusters[index]
-            kubeClusters.remove(at: index)
-            kubeConfig?.clusters = kubeClusters // Update main config object
-
-            if let selected = selectedEntry as? KubeCluster, selected.id == id {
-                safelySelectEntry(nil)
-            }
-
-            messageHandler.show("Cluster '\(clusterToDelete.name)' 已删除。", type: .success)
-            saveKubeConfig()
-        }
-    }
-
-    // func addKubeUser(...) { ... } // Moved up
-    // func updateUser(...) { ... }
-
-    func deleteKubeUser(id: String) {
-        // Dependency Check: Find contexts using this user
-        let dependingContexts = kubeContexts.filter { $0.context.user == id }
-
-        if !dependingContexts.isEmpty {
-            let contextNames = dependingContexts.map { $0.name }.joined(separator: ", ")
-            messageHandler.show("无法删除 User '\(id)'，因为它被 Context(s): \(contextNames) 使用。", type: .error)
-            return
-        }
-
-        // Proceed with deletion if no dependencies
-        if let index = kubeUsers.firstIndex(where: { $0.id == id }) {
-            let userToDelete = kubeUsers[index]
-            kubeUsers.remove(at: index)
-            kubeConfig?.users = kubeUsers // Update main config object
-
-            if let selected = selectedEntry as? KubeUser, selected.id == id {
-                safelySelectEntry(nil)
-            }
-
-            messageHandler.show("User '\(userToDelete.name)' 已删除。", type: .success)
-            saveKubeConfig()
-        }
-    }
-
-    // MARK: - Public Methods - Kubeconfig Backup/Restore
-
-    // IMPLEMENT the async backup function that takes a URL
+    // 备份 Kubeconfig
     func backupKubeConfig(to url: URL) {
         Task {
             guard let config = self.kubeConfig else {
@@ -777,7 +775,6 @@ class MainViewModel: ObservableObject {
             
             isLoading = true
             let result = await asyncUtility.perform { 
-                // 在闭包内创建实例
                 let fileManager = KubeConfigFileManager()
                 do {
                     try await fileManager.backupConfig(config: config, to: url)
@@ -797,12 +794,10 @@ class MainViewModel: ObservableObject {
         }
     }
 
-    // RE-INSERT the restoreKubeConfig function that was accidentally removed
-    // Restore Kubeconfig (Placeholder Implementation)
+    // 恢复 Kubeconfig
     func restoreKubeConfig(from url: URL) async {
         isLoading = true
         let result = await asyncUtility.perform { 
-            // 在闭包内创建实例
             let fileManager = KubeConfigFileManager()
             do {
                 return try await fileManager.restoreConfig(from: url)
@@ -815,17 +810,6 @@ class MainViewModel: ObservableObject {
         case .success(let restoredConfig):
             // 更新视图模型中的数据
             self.kubeConfig = restoredConfig
-            self.kubeContexts = restoredConfig.safeContexts
-            self.kubeClusters = restoredConfig.safeClusters
-            self.kubeUsers = restoredConfig.safeUsers
-            self.currentKubeContextName = restoredConfig.currentContext
-            
-            // 选择第一个上下文（如果有）
-            if let firstContext = self.kubeContexts.first {
-                safelySelectEntry(firstContext)
-            } else {
-                safelySelectEntry(nil)
-            }
             
             messageHandler.show("Kubeconfig 已从 \(url.lastPathComponent) 成功恢复。", type: .success)
         case .failure(let error):
@@ -837,29 +821,11 @@ class MainViewModel: ObservableObject {
         isLoading = false
     }
     
-    // MARK: - Unified Save/Backup/Restore
-    
-    func saveCurrentConfig() {
-        switch selectedConfigurationType {
-        case .ssh:
-            saveSshConfig() // Call existing SSH save method
-        case .kubernetes:
-            saveKubeConfig() // Call new Kube save method (placeholder for now)
-        }
-    }
-    
-    // Note: Backup is primarily handled by the ConfigDocument formatting
-    //       and the .fileExporter modifier in ContentView.
-    //       This method isn't strictly necessary unless pre-processing is needed.
-    // func backupCurrentConfig(to url: URL) { ... }
-
+    // 统一恢复配置
     func restoreCurrentConfig(from url: URL) {
         Task {
             isLoading = true
             print("--- Triggered: restoreCurrentConfig for type: \(selectedConfigurationType) from URL: \(url.path) ---")
-            // Determine type based on the **currently selected view** in the UI,
-            // as the ConfigDocument init tries to guess but might be ambiguous.
-            // A more robust solution might involve asking the user or better file inspection.
             switch selectedConfigurationType {
             case .ssh:
                 await restoreSshConfig(from: url)
@@ -870,46 +836,166 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Helper Methods (Existing)
-    // ... existing code ...
+    // MARK: - 事件处理
 
-    // MARK: - Kubernetes Navigation Helpers
+    /// 设置事件处理
+    private func setupEventHandling() {
+        // 启动文件监控
+        startFileWatching()
+        
+        // 订阅应用程序事件
+        EventManager.shared.events
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                
+                switch event {
+                case .configFileAdded(let url):
+                    // 新配置文件添加，重新加载配置文件列表
+                    Task { @MainActor in
+                        await self.reloadConfigFileByURL(url)
+                    }
+                    
+                case .configFileChanged(let url):
+                    // 配置文件变更，更新内容
+                    Task { @MainActor in
+                        await self.reloadConfigFileByURL(url)
+                    }
+                    
+                case .configFileRemoved(let url):
+                    // 配置文件被删除，从列表中移除
+                    Task { @MainActor in
+                        self.removeConfigFile(url)
+                    }
+                    
+                case .activeConfigChanged(let config):
+                    // 活动配置变更
+                    Task { @MainActor in
+                        self.kubeConfig = config
+                    }
+                    
+                case .reloadConfigRequested:
+                    // 请求重新加载配置
+                    loadKubeConfigFiles()
+                    
+                case .notification(let message, let type):
+                    // 显示通知
+                    messageHandler.show(message, type: type)
+                }
+            }
+            .store(in: &cancellables)
+    }
 
-    // Handle changing between context/cluster/user views
-    private func handleKubeObjectTypeChange(from oldType: KubeObjectType, to newType: KubeObjectType) {
-        // If we're currently editing, check if we need to save
-        if isEditing {
-            // In a real app, we would show a dialog here to ask user to save
-            // Since we can't directly show alerts from the ViewModel, we can:
-            // 1. Revert the selection (let the View handle the alert)
-            // 2. Auto-save the changes (less ideal)
-            // 3. Define a callback that the View can use to handle this situation
-            
-            // For now, auto-save if editing
-            saveKubeConfig()
-            isEditing = false
+    /// 启动文件监控
+    private func startFileWatching() {
+        // 开始监控配置目录
+        _ = EventManager.shared.startWatchingConfigDirectory()
+        
+        // 开始监控主配置文件
+        _ = EventManager.shared.startWatchingMainConfig()
+    }
+
+    /// 加载指定路径的配置文件
+    /// - Parameter url: 配置文件URL
+    /// - Returns: 加载的配置文件对象
+    private func loadConfigFile(at url: URL) async throws -> KubeConfigFile {
+        // 确保文件存在
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw ConfigForgeError.fileAccess("文件不存在")
         }
         
-        // Select the first item of the new type, if available
-        switch newType {
-        case .contexts:
-            if let firstContext = kubeContexts.first {
-                safelySelectEntry(firstContext)
+        // 确定文件类型
+        let fileType: KubeConfigFileType
+        let fileManager = KubeConfigFileManager()
+        
+        let mainConfigPath = try? fileManager.getConfigFilePath().path
+        if url.path == mainConfigPath {
+            fileType = .active
+        } else {
+            let backupPath = try? fileManager.getConfigBackupFilePath().path
+            if url.path == backupPath {
+                fileType = .backup
             } else {
-                safelySelectEntry(nil) // No contexts available
-            }
-        case .clusters:
-            if let firstCluster = kubeClusters.first {
-                safelySelectEntry(firstCluster)
-            } else {
-                safelySelectEntry(nil) // No clusters available
-            }
-        case .users:
-            if let firstUser = kubeUsers.first {
-                safelySelectEntry(firstUser)
-            } else {
-                safelySelectEntry(nil) // No users available
+                fileType = .stored
             }
         }
+        
+        // 创建配置文件对象
+        guard var configFile = KubeConfigFile.from(url: url, fileType: fileType) else {
+            throw ConfigForgeError.unknown("无法创建配置文件对象")
+        }
+        
+        // 读取和解析文件内容
+        do {
+            let content = try String(contentsOf: url, encoding: .utf8)
+            let parser = KubeConfigParser()
+            let parseResult = parser.decode(from: content)
+            
+            switch parseResult {
+            case .success(let config):
+                // 更新配置文件状态
+                configFile.updateConfig(config)
+                return configFile
+            case .failure(let error):
+                // 标记为无效，但仍然返回配置文件对象
+                configFile.markAsInvalid(error.localizedDescription)
+                return configFile
+            }
+        } catch {
+            // 读取失败，标记为无效
+            configFile.markAsInvalid("读取文件失败: \(error.localizedDescription)")
+            return configFile
+        }
     }
+
+    /// 根据URL重新加载特定配置文件
+    private func reloadConfigFileByURL(_ url: URL) async {
+        // 查找是否已存在此配置文件
+        if let index = configFiles.firstIndex(where: { $0.filePath == url }) {
+            // 更新现有配置文件
+            do {
+                let updatedFile = try await loadConfigFile(at: url)
+                configFiles[index] = updatedFile
+                
+                // 如果是当前选中的文件，更新内容
+                if selectedConfigFile?.filePath == url {
+                    selectedConfigFile = updatedFile
+                    do {
+                        let content = try String(contentsOf: url, encoding: .utf8)
+                        selectedConfigFileContent = content
+                    } catch {
+                        print("读取文件内容失败: \(error.localizedDescription)")
+                    }
+                }
+                
+                // 如果是活动配置，更新主配置
+                if updatedFile.fileType == .active {
+                    loadKubeConfig()
+                }
+            } catch {
+                print("更新配置文件失败: \(error.localizedDescription)")
+            }
+        } else {
+            // 新文件，加载配置文件列表
+            loadKubeConfigFiles()
+        }
+    }
+
+    /// 从列表中移除配置文件
+    private func removeConfigFile(_ url: URL) {
+        // 查找是否存在此配置文件
+        if let index = configFiles.firstIndex(where: { $0.filePath == url }) {
+            // 如果是当前选中的文件，取消选择
+            if selectedConfigFile?.filePath == url {
+                selectedConfigFile = nil
+                selectedConfigFileContent = ""
+            }
+            
+            // 从列表中移除
+            configFiles.remove(at: index)
+        }
+    }
+
+    /// 用于存储取消的订阅
+    private var cancellables = Set<AnyCancellable>()
 }

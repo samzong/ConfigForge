@@ -1,0 +1,48 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project File Structure
+
+This document outlines the file structure of ConfigForge to help with navigation and understanding the codebase organization.
+
+## Main Application Structure
+
+- [ConfigForgeApp.swift](mdc:ConfigForgeApp.swift) - Main entry point
+- [ConfigForge/](mdc:ConfigForge) - Main application code
+  - [Models/](mdc:ConfigForge/Models) - Data models for SSH and Kubernetes configs
+  - [Views/](mdc:ConfigForge/Views) - SwiftUI views for the application
+  - [ViewModels/](mdc:ConfigForge/ViewModels) - Business logic for views
+  - [Services/](mdc:ConfigForge/Services) - Services for file management and parsing
+  - [Utilities/](mdc:ConfigForge/Utilities) - Helper functions and utilities
+  - [Extensions/](mdc:ConfigForge/Extensions) - Swift extensions
+  - [Styles/](mdc:ConfigForge/Styles) - UI style definitions
+  - [Generated/](mdc:ConfigForge/Generated) - Generated code (SwiftGen)
+  - [Assets.xcassets/](mdc:ConfigForge/Assets.xcassets) - App icons and image assets
+  - [Resources/](mdc:ConfigForge/Resources) - Additional resources
+
+## CLI Tool Structure
+
+- [CLI/](mdc:CLI) - Command Line Interface tool
+  - [Sources/](mdc:CLI/Sources) - CLI source code
+  - [Package.swift](mdc:CLI/Package.swift) - Swift package definition for CLI
+  - [Tests/](mdc:CLI/Tests) - CLI tests
+
+## Configuration Files
+
+- [.gitignore](mdc:.gitignore) - Git ignore file
+- [swiftgen.yml](mdc:swiftgen.yml) - SwiftGen configuration
+- [buildServer.json](mdc:buildServer.json) - Build server configuration
+- [ConfigForge.xcodeproj/](mdc:ConfigForge.xcodeproj) - Xcode project files
+
+## Documentation
+
+- [README.md](mdc:README.md) - Main project documentation
+- [DEVELOPMENT.md](mdc:DEVELOPMENT.md) - Development documentation
+- [docs/](mdc:docs) - Additional documentation files
+
+## Testing
+
+- [ConfigForgeTests/](mdc:ConfigForgeTests) - Unit tests
+- [ConfigForgeUITests/](mdc:ConfigForgeUITests) - UI tests

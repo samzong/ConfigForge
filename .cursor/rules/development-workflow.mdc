@@ -32,3 +32,11 @@ This document describes the development workflow for ConfigForge.
 3. Maintain backward compatibility with macOS 10.15+
 4. Implement proper error handling and user feedback
 5. Ensure all file operations have appropriate permission handling
+
+## CLI Development
+
+- CLI is built as a separate Swift package in [CLI/](mdc:CLI)
+- Uses Swift Argument Parser for command line handling
+- Shares core services with the main app
+- Build CLI with `make cli` command
+- Test CLI with `make test-cli` command

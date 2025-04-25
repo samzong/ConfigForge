@@ -49,21 +49,39 @@ struct SidebarView: View {
             .padding(.bottom, 8)
             // ---- End Top Navigation Picker ----
             
-            // 搜索区域
+            // 统一的搜索区域 - 根据当前选择的配置类型绑定不同的搜索文本
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                TextField(L10n.Sidebar.search, text: $viewModel.searchText)
-                    .textFieldStyle(PlainTextFieldStyle())
                 
-                if !viewModel.searchText.isEmpty {
-                    Button(action: {
-                        viewModel.searchText = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                // 根据当前模式动态绑定搜索文本
+                if viewModel.selectedConfigurationType == .ssh {
+                    TextField(L10n.Sidebar.search, text: $viewModel.searchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                    
+                    if !viewModel.searchText.isEmpty {
+                        Button(action: {
+                            viewModel.searchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    // Kubernetes 模式下的搜索
+                    TextField(L10n.Kubernetes.search, text: $viewModel.configSearchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                    
+                    if !viewModel.configSearchText.isEmpty {
+                        Button(action: {
+                            viewModel.configSearchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
             }
             .padding(8)
@@ -71,118 +89,64 @@ struct SidebarView: View {
             .cornerRadius(8)
             .padding([.horizontal, .top], 8)
             
-            // ---- Secondary Kubernetes Picker (Contexts/Clusters/Users) ----
-            if viewModel.selectedConfigurationType == .kubernetes {
-                Picker("", selection: $viewModel.selectedKubernetesObjectType) {
-                    ForEach(KubeObjectType.allCases) { type in
-                        Text(NSLocalizedString(type.rawValue, bundle: .main, comment: "")).tag(type)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 12)
-                .padding(.top, 4) // Add some space below search bar
-                .padding(.bottom, 8)
-                .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .top))) // Optional animation
-            }
-            // ---- End Secondary Kubernetes Picker ----
-            
-            // 主机列表区域
-            List(viewModel.displayedEntries.indices, id: \.self, selection: $selectedListIndex) { index in
-                 // Get entry using index with safety check
-                 if index < viewModel.displayedEntries.count {
-                     let entry = viewModel.displayedEntries[index]
-                     
-                     // Determine which row view to display
-                     if let sshEntry = entry as? SSHConfigEntry {
-                         HostRowView(entry: sshEntry)
-                             .tag(sshEntry.id as AnyHashable)
-                             .contextMenu {
-                                 Button(role: .destructive) {
-                                     viewModel.deleteSshEntry(id: sshEntry.id) // Use specific delete method
-                                 } label: {
-                                     Label(L10n.App.delete, systemImage: "trash")
-                                 }
-                             }
-                     } else if let kubeContext = entry as? KubeContext {
-                         KubeContextRowView(context: kubeContext, isCurrent: viewModel.currentKubeContextName == kubeContext.name)
-                             .tag(kubeContext.id as AnyHashable)
-                             .contextMenu {
-                                 // Connect action to ViewModel method
-                                 Button { viewModel.setCurrentKubeContext(name: kubeContext.name) } label: {
-                                     Label("Set as Current Context", systemImage: "star.circle.fill")
-                                 }
-                                  // Disable if already current? Optional UX improvement
-                                 .disabled(viewModel.currentKubeContextName == kubeContext.name) 
-                                 Divider()
-                                 Button(role: .destructive) {
-                                     viewModel.deleteKubeContext(id: kubeContext.id)
-                                 } label: {
-                                     Label(L10n.App.delete, systemImage: "trash")
-                                 }
-                             }
-                             .onTapGesture {
-                                 handleItemTapGesture(entry: kubeContext)
-                             }
-                     } else if let kubeCluster = entry as? KubeCluster {
-                         // 使用简单的行视图显示，而不是在边栏嵌入编辑器
-                         KubeClusterRowView(cluster: kubeCluster)
-                             .tag(kubeCluster.id as AnyHashable)
-                             .contextMenu {
-                                 Button(role: .destructive) {
-                                     viewModel.deleteKubeCluster(id: kubeCluster.id)
-                                 } label: {
-                                     Label(L10n.App.delete, systemImage: "trash")
-                                 }
-                             }
-                             .onTapGesture {
-                                 handleItemTapGesture(entry: kubeCluster)
-                             }
-                     } else if let kubeUser = entry as? KubeUser {
-                         KubeUserRowView(user: kubeUser) // Use existing Row View
-                             .tag(kubeUser.id as AnyHashable)
-                             .contextMenu {
-                                  Button(role: .destructive) {
-                                     viewModel.deleteKubeUser(id: kubeUser.id)
-                                 } label: {
-                                     Label(L10n.App.delete, systemImage: "trash")
-                                 }
-                             }
-                             .onTapGesture {
-                                 handleItemTapGesture(entry: kubeUser)
-                             }
-                     } else {
-                         Text("Unknown entry type") 
-                     }
-                 } else {
-                     Text("Loading...") // Placeholder for out-of-bounds index
-                 }
-            }
-            .listStyle(.sidebar)
-            .onChange(of: selectedListIndex) { newIndex in
-                // Sync list index selection TO ViewModel selection
-                let currentlySelectedVMEntryId = viewModel.selectedEntry?.id as? AnyHashable
-                var newEntryToSelect: (any Identifiable)? = nil
-                if let index = newIndex, index >= 0 && index < viewModel.displayedEntries.count {
-                    newEntryToSelect = viewModel.displayedEntries[index]
-                }
-                if currentlySelectedVMEntryId != newEntryToSelect?.id as? AnyHashable {
-                    viewModel.safelySelectEntry(newEntryToSelect)
-                }
-            }
-            // Ensure this observes ID as AnyHashable and uses hashable comparison
-            .onChange(of: viewModel.selectedEntry?.id as? AnyHashable) { selectedIdHashable in 
-                // Sync ViewModel selection TO list index selection
-                let currentlySelectedListIndexEntryId = (selectedListIndex != nil && selectedListIndex! >= 0 && selectedListIndex! < viewModel.displayedEntries.count) ? viewModel.displayedEntries[selectedListIndex!].id as? AnyHashable : nil
-                
-                // Only update List index if the selection ID actually changes
-                if selectedIdHashable != currentlySelectedListIndexEntryId { // Compare hashables
-                    if let idToSelect = selectedIdHashable, // idToSelect is AnyHashable?
-                       let newIndex = viewModel.displayedEntries.firstIndex(where: { ($0.id as? AnyHashable) == idToSelect }) { // Compare hashables in find
-                        selectedListIndex = newIndex
+            // SSH 模式显示主机列表
+            if viewModel.selectedConfigurationType == .ssh {
+                // 主机列表区域
+                List(viewModel.displayedEntries.indices, id: \.self, selection: $selectedListIndex) { index in
+                    // Get entry using index with safety check
+                    if index < viewModel.displayedEntries.count {
+                        let entry = viewModel.displayedEntries[index]
+                        
+                        // Determine which row view to display
+                        if let sshEntry = entry as? SSHConfigEntry {
+                            HostRowView(entry: sshEntry)
+                                .tag(sshEntry.id as AnyHashable)
+                                .contextMenu {
+                                    Button(role: .destructive) {
+                                        viewModel.deleteSshEntry(id: sshEntry.id) // Use specific delete method
+                                    } label: {
+                                        Label(L10n.App.delete, systemImage: "trash")
+                                    }
+                                }
+                        } else {
+                            Text("Unknown entry type") 
+                        }
                     } else {
-                        selectedListIndex = nil // Deselect if ViewModel selection is nil or not found
+                        Text("Loading...") // Placeholder for out-of-bounds index
                     }
                 }
+                .listStyle(.sidebar)
+                .onChange(of: selectedListIndex) { newIndex in
+                    // Sync list index selection TO ViewModel selection
+                    let currentlySelectedVMEntryId = viewModel.selectedEntry?.id as? AnyHashable
+                    var newEntryToSelect: (any Identifiable)? = nil
+                    if let index = newIndex, index >= 0 && index < viewModel.displayedEntries.count {
+                        newEntryToSelect = viewModel.displayedEntries[index]
+                    }
+                    if currentlySelectedVMEntryId != newEntryToSelect?.id as? AnyHashable {
+                        viewModel.safelySelectEntry(newEntryToSelect)
+                    }
+                }
+                // Ensure this observes ID as AnyHashable and uses hashable comparison
+                .onChange(of: viewModel.selectedEntry?.id as? AnyHashable) { selectedIdHashable in 
+                    // Sync ViewModel selection TO list index selection
+                    let currentlySelectedListIndexEntryId = (selectedListIndex != nil && selectedListIndex! >= 0 && selectedListIndex! < viewModel.displayedEntries.count) ? viewModel.displayedEntries[selectedListIndex!].id as? AnyHashable : nil
+                    
+                    // Only update List index if the selection ID actually changes
+                    if selectedIdHashable != currentlySelectedListIndexEntryId { // Compare hashables
+                        if let idToSelect = selectedIdHashable, // idToSelect is AnyHashable?
+                           let newIndex = viewModel.displayedEntries.firstIndex(where: { ($0.id as? AnyHashable) == idToSelect }) { // Compare hashables in find
+                            selectedListIndex = newIndex
+                        } else {
+                            selectedListIndex = nil // Deselect if ViewModel selection is nil or not found
+                        }
+                    }
+                }
+            } 
+            // Kubernetes 模式显示配置文件列表
+            else if viewModel.selectedConfigurationType == .kubernetes {
+                // 内嵌 ConfigListView
+                ConfigListView(viewModel: viewModel)
             }
             
             Divider()
@@ -204,19 +168,13 @@ struct SidebarView: View {
                     }
 
                 case .kubernetes:
-                    switch viewModel.selectedKubernetesObjectType {
-                    case .contexts:
-                        viewModel.addKubeContext() 
-                    case .clusters:
-                        viewModel.addKubeCluster() 
-                    case .users:
-                        viewModel.addKubeUser()    
-                    }
+                    // 创建新的 Kubernetes 配置文件
+                    viewModel.createNewConfigFile()
                 }
             }) {
                 HStack {
                     Image(systemName: "plus.circle.fill")
-                    Text(addButtoText()) 
+                    Text(addButtonText()) 
                 }
                 .frame(maxWidth: .infinity)
                 .padding(8)
@@ -246,16 +204,12 @@ struct SidebarView: View {
     }
     
     // Helper function for dynamic Add button text
-    private func addButtoText() -> String {
+    private func addButtonText() -> String {
         switch viewModel.selectedConfigurationType {
         case .ssh:
             return L10n.Sidebar.Add.host
         case .kubernetes:
-            switch viewModel.selectedKubernetesObjectType {
-            case .contexts: return L10n.Sidebar.Add.context
-            case .clusters: return L10n.Sidebar.Add.cluster
-            case .users: return L10n.Sidebar.Add.user
-            }
+            return L10n.Sidebar.Add.config // 使用一致的本地化字符串格式
         }
     }
 } 

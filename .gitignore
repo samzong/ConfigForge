@@ -98,3 +98,4 @@ swiftlint-report.html
 .env.production.local
 
 .DS_Store
+cf

@@ -89,6 +89,16 @@ public enum L10n {
     }
   }
   public enum Kubernetes {
+    /// Search kubernetes configurations
+    public static let search = L10n.tr("Localizable", "kubernetes.search", fallback: "Search configurations")
+    /// Refresh configurations
+    public static let refresh = L10n.tr("Localizable", "kubernetes.refresh", fallback: "Refresh configurations")
+    /// No configuration selected
+    public static let noSelection = L10n.tr("Localizable", "kubernetes.noSelection", fallback: "No configuration selected")
+    /// Select a configuration from the list or create a new one
+    public static let selectOrCreate = L10n.tr("Localizable", "kubernetes.selectOrCreate", fallback: "Select a configuration from the list or create a new one")
+    /// Create new configuration
+    public static let createNew = L10n.tr("Localizable", "kubernetes.createNew", fallback: "Create new configuration")
     public enum Cluster {
       /// Certificate Authority Data (Base64)
       public static let ca = L10n.tr("Localizable", "kubernetes.cluster.ca", fallback: "Certificate Authority Data (Base64)")
@@ -136,6 +146,16 @@ public enum L10n {
     public enum Config {
       /// Configuration saved
       public static let saved = L10n.tr("Localizable", "kubernetes.config.saved", fallback: "Configuration saved")
+      /// Active configuration
+      public static let active = L10n.tr("Localizable", "kubernetes.config.active", fallback: "Active configuration")
+      /// Backup configuration
+      public static let backup = L10n.tr("Localizable", "kubernetes.config.backup", fallback: "Backup configuration")
+      /// Set as active configuration
+      public static let setActive = L10n.tr("Localizable", "kubernetes.config.setActive", fallback: "Set as active configuration")
+      /// Duplicate
+      public static let duplicate = L10n.tr("Localizable", "kubernetes.config.duplicate", fallback: "Duplicate")
+      /// Rename
+      public static let rename = L10n.tr("Localizable", "kubernetes.config.rename", fallback: "Rename")
     }
     public enum Context {
       /// Cluster
@@ -379,17 +399,13 @@ public enum L10n {
     }
   }
   public enum Sidebar {
-    /// Sidebar
-    public static let search = L10n.tr("Localizable", "sidebar.search", fallback: "Search hosts")
+    /// Search
+    public static let search = L10n.tr("Localizable", "sidebar.search", fallback: "Search")
     public enum Add {
-      /// Add Cluster
-      public static let cluster = L10n.tr("Localizable", "sidebar.add.cluster", fallback: "Add Cluster")
-      /// Add Context
-      public static let context = L10n.tr("Localizable", "sidebar.add.context", fallback: "Add Context")
-      /// Add Host
-      public static let host = L10n.tr("Localizable", "sidebar.add.host", fallback: "Add Host")
-      /// Add User
-      public static let user = L10n.tr("Localizable", "sidebar.add.user", fallback: "Add User")
+      /// Add host
+      public static let host = L10n.tr("Localizable", "sidebar.add.host", fallback: "Add host")
+      /// Add configuration
+      public static let config = L10n.tr("Localizable", "sidebar.add.config", fallback: "Add configuration")
     }
   }
   public enum Terminal {

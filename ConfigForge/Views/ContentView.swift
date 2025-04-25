@@ -22,7 +22,15 @@ struct ContentView: View {
             
             Rectangle().fill(Color.gray.opacity(0.2)).frame(width: 1) // Divider
             
-            EditorAreaView(viewModel: viewModel)
+            // 根据选择的配置类型决定显示内容
+            if viewModel.selectedConfigurationType == .kubernetes {
+                // 显示 Kubernetes 配置文件编辑器
+                ConfigEditorView()
+                    .environmentObject(viewModel)
+            } else {
+                // 显示 SSH 编辑器区域
+                EditorAreaView(viewModel: viewModel)
+            }
         }
         // Apply original modifiers
         .frame(minWidth: 800, minHeight: 500)
@@ -96,7 +104,7 @@ struct ContentView: View {
                 case .failure(let error):
                     print("Error formatting Kubernetes config: \(error.localizedDescription)")
                     // Return a formatted error message as fallback
-                    return "# Error formatting Kubernetes config: \(error.localizedDescription)\n# Data summary: \(viewModel.kubeContexts.count) contexts, \(viewModel.kubeClusters.count) clusters, \(viewModel.kubeUsers.count) users"
+                    return "# Error formatting Kubernetes config: \(error.localizedDescription)"
                 }
             } else {
                 return "# No Kubernetes config loaded"

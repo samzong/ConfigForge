@@ -7,15 +7,16 @@ struct ConfigEditorView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // 编辑器工具栏 - 更新样式与 SSH 一致
-            HStack(spacing: 16) {
+            // 编辑器顶部
+            HStack {
+                // 文件标题
                 Text(viewModel.editorTitle)
                     .font(.title2.bold())
                     .frame(alignment: .leading)
                 
                 Spacer()
                 
-                // 简化为编辑/保存按钮，与 SSH 保持一致
+                // 编辑/保存按钮
                 Button(action: {
                     if viewModel.isEditing {
                         viewModel.saveChanges()
@@ -42,6 +43,7 @@ struct ConfigEditorView: View {
                 EmptyEditorView()
             } else {
                 if viewModel.isEditing {
+                    // 编辑模式
                     TextEditor(text: Binding(
                         get: { viewModel.editorContent },
                         set: { viewModel.updateContent($0) }
@@ -49,6 +51,7 @@ struct ConfigEditorView: View {
                     .font(.system(.body, design: .monospaced))
                     .padding(8)
                 } else {
+                    // 查看模式
                     ScrollView {
                         Text(viewModel.editorContent)
                             .font(.system(.body, design: .monospaced))

@@ -24,16 +24,19 @@ struct SidebarView: View {
                     .foregroundColor(.primary)
                 Spacer()
                 
-                // 保存按钮
-                Button(action: {
-                    viewModel.saveCurrentConfig()
-                }) {
-                    Text(L10n.App.save)
+                // 仅在SSH模式下显示顶部保存按钮，Kubernetes模式使用编辑器内的按钮
+                if viewModel.selectedConfigurationType == .ssh {
+                    // 保存按钮
+                    Button(action: {
+                        viewModel.saveCurrentConfig()
+                    }) {
+                        Text(L10n.App.save)
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .controlSize(.small)
+                    .keyboardShortcut("s", modifiers: .command)
+                    .help(L10n.App.Save.help)
                 }
-                .buttonStyle(BorderedButtonStyle())
-                .controlSize(.small)
-                .keyboardShortcut("s", modifiers: .command)
-                .help(L10n.App.Save.help)
             }
             .padding([.horizontal, .top], 12)
             .padding(.bottom, 4)

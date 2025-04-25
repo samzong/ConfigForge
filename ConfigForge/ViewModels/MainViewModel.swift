@@ -900,7 +900,15 @@ class MainViewModel: ObservableObject {
                 let success = fileWatcher.createOrUpdateFile(content: activeConfigContent, at: configPath)
                 
                 if success {
+                    // 设置编辑状态为 false，确保 UI 刷新
+                    await MainActor.run {
+                        self.isEditing = false
+                    }
+                    
                     messageHandler.show("Kubeconfig 保存成功", type: .success)
+                    
+                    // 通知配置变更
+                    EventManager.shared.notifyActiveConfigChanged(activeConfigContent)
                 } else {
                     messageHandler.show("保存 Kubeconfig 失败", type: .error)
                 }

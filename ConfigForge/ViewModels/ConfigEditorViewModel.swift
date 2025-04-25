@@ -108,7 +108,11 @@ class ConfigEditorViewModel: ObservableObject {
     
     /// 保存当前编辑内容
     func saveChanges() {
-        guard let configFile = configFile, hasUnsavedChanges else { return }
+        guard let configFile = configFile, hasUnsavedChanges else { 
+            // 没有更改时，直接退出编辑模式
+            self.isEditing = false
+            return
+        }
         
         // 先验证内容
         if case .invalid(_) = validationState {
@@ -137,6 +141,7 @@ class ConfigEditorViewModel: ObservableObject {
                         self.hasUnsavedChanges = false
                         self.clearRedoStack()
                         self.messageHandler.show("配置已保存", type: .success)
+                        self.isEditing = false  // 保存成功后关闭编辑模式
                     }
                     
                     // 如果是活动配置，通知更改
@@ -154,12 +159,14 @@ class ConfigEditorViewModel: ObservableObject {
                         self.configFile = updatedFile
                         self.messageHandler.show("配置已保存，但验证未通过：\(error.localizedDescription)", type: .error)
                         self.hasUnsavedChanges = false
+                        self.isEditing = false  // 即使验证未通过，也关闭编辑模式
                     }
                 }
             } catch {
                 await MainActor.run {
                     self.errorMessage = "保存配置失败: \(error.localizedDescription)"
                     self.messageHandler.show("保存配置失败", type: .error)
+                    // 保存失败时不关闭编辑模式，让用户有机会修复问题
                 }
             }
         }

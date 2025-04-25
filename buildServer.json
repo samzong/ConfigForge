@@ -14,5 +14,6 @@
 	],
 	"workspace": "/Users/x/git/samzong/ConfigForge/ConfigForge.xcodeproj/project.xcworkspace",
 	"build_root": "/Users/x/Library/Developer/Xcode/DerivedData/ConfigForge-elvbdtvnccnlwyedzyvhwydzvhey",
-	"kind": "xcode"
+	"kind": "xcode",
+	"scheme": "ConfigForge"
 }

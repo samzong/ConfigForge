@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine // Import Combine for AnyCancellable if needed later
 import Foundation
+import AppKit // 导入 AppKit 用于 NSAlert 和 NSTextField
 
 // MARK: - Enums for State Management
 
@@ -479,57 +480,29 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    /// 复制配置文件
-    func duplicateConfigFile(_ configFile: KubeConfigFile) {
-        Task {
-            do {
-                // 读取源文件内容
-                let fileContent = try String(contentsOf: configFile.filePath, encoding: .utf8)
-                
-                // 创建新文件名
-                let fileManager = KubeConfigFileManager()
-                let configsDir = try fileManager.getConfigsDirectoryPath()
-                
-                // 从原文件名中提取基本名称 (不含扩展名)
-                let baseName = configFile.fileName.components(separatedBy: ".").first ?? configFile.fileName
-                let fileExtension = configFile.fileName.components(separatedBy: ".").last ?? "yaml"
-                
-                // 创建一个唯一的新文件名
-                var newFileName = "\(baseName)-copy.\(fileExtension)"
-                var newFilePath = configsDir.appendingPathComponent(newFileName)
-                var counter = 1
-                
-                // 检查文件是否已经存在，如果存在则添加数字
-                while FileManager.default.fileExists(atPath: newFilePath.path) {
-                    counter += 1
-                    newFileName = "\(baseName)-copy-\(counter).\(fileExtension)"
-                    newFilePath = configsDir.appendingPathComponent(newFileName)
-                }
-                
-                // 写入新文件
-                try fileContent.write(to: newFilePath, atomically: true, encoding: .utf8)
-                
-                // 重新加载配置文件列表
-                loadKubeConfigFiles()
-                
-                messageHandler.show("已创建副本: \(newFileName)", type: .success)
-            } catch {
-                messageHandler.show("创建副本失败: \(error.localizedDescription)", type: .error)
-            }
-        }
-    }
-    
     /// 提示重命名配置文件
     func promptForRenameConfigFile(_ configFile: KubeConfigFile) {
-        // 由于这个方法需要显示一个重命名对话框，我们先实现一个简单版本
-        // 在实际的应用中，这需要与UI交互
-        // 这个方法应该通过一个可观察的状态来触发 UI 显示对话框
+        // 提示用户输入新名称
+        let alert = NSAlert()
+        alert.messageText = "重命名配置文件"
+        alert.informativeText = "请输入新的文件名:"
+        alert.alertStyle = .informational
+        alert.addButton(withTitle: "确定")
+        alert.addButton(withTitle: "取消")
         
-        messageHandler.show("重命名功能尚未实现", type: .info)
+        let textField = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
+        textField.placeholderString = "新文件名"
+        textField.stringValue = configFile.displayName
         
-        // 实现示例：
-        // showRenameDialog = true
-        // configFileToRename = configFile
+        alert.accessoryView = textField
+        let response = alert.runModal()
+        
+        if response == .alertFirstButtonReturn {
+            let newName = textField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !newName.isEmpty && newName != configFile.displayName {
+                renameConfigFile(configFile, to: newName)
+            }
+        }
     }
     
     /// 重命名配置文件
@@ -539,70 +512,153 @@ class MainViewModel: ObservableObject {
             return
         }
         
-        Task {
-            do {
-                let fileManager = KubeConfigFileManager()
-                let configsDir = try fileManager.getConfigsDirectoryPath()
-                
-                // 确保新名称有正确的扩展名
-                var newFileName = newName
-                if !newFileName.hasSuffix(".yaml") && !newFileName.hasSuffix(".yml") {
-                    newFileName += ".yaml"
-                }
-                
-                let newFilePath = configsDir.appendingPathComponent(newFileName)
-                
-                // 检查新文件名是否已存在
-                if FileManager.default.fileExists(atPath: newFilePath.path) {
-                    messageHandler.show("文件 \(newFileName) 已存在", type: .error)
-                    return
-                }
-        
-                // 重命名文件
-                try FileManager.default.moveItem(at: configFile.filePath, to: newFilePath)
-                
-                // 重新加载配置文件列表
-                loadKubeConfigFiles()
-                
-                messageHandler.show("文件已重命名为 \(newFileName)", type: .success)
-            } catch {
-                messageHandler.show("重命名文件失败: \(error.localizedDescription)", type: .error)
+        // 执行一个完全自包含的重命名操作，避免所有文件监控相关问题
+        do {
+            // 停止文件监控
+            let eventManager = EventManager.shared
+            let fileWatcher = eventManager.getFileWatcher()
+            fileWatcher.stopAllWatching()
+            
+            let fileManager = KubeConfigFileManager()
+            let configsDir = try fileManager.getConfigsDirectoryPath()
+            
+            // 确保新名称有正确的扩展名
+            var newFileName = newName
+            if !newFileName.hasSuffix(".yaml") && !newFileName.hasSuffix(".yml") {
+                newFileName += ".yaml"
             }
+            
+            let newFilePath = configsDir.appendingPathComponent(newFileName)
+            
+            // 检查新文件名是否已存在
+            if FileManager.default.fileExists(atPath: newFilePath.path) {
+                messageHandler.show("文件 \(newFileName) 已存在", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 保存旧文件路径
+            let oldFilePath = configFile.filePath
+            
+            // 读取原文件内容
+            let fileContent: String
+            do {
+                fileContent = try String(contentsOf: oldFilePath, encoding: .utf8)
+            } catch {
+                messageHandler.show("读取文件内容失败: \(error.localizedDescription)", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 写入新文件
+            do {
+                try fileContent.write(to: newFilePath, atomically: true, encoding: .utf8)
+            } catch {
+                messageHandler.show("创建新文件失败: \(error.localizedDescription)", type: .error)
+                
+                // 重新启动文件监控
+                _ = eventManager.startWatchingConfigDirectory()
+                _ = eventManager.startWatchingMainConfig()
+                return
+            }
+            
+            // 删除旧文件
+            do {
+                try FileManager.default.removeItem(at: oldFilePath)
+            } catch {
+                // 即使删除旧文件失败，我们也认为重命名成功了
+                print("删除旧文件失败: \(error.localizedDescription)")
+            }
+            
+            // 取消当前选择
+            if self.selectedConfigFile?.id == configFile.id {
+                self.selectedConfigFile = nil
+                self.selectedConfigFileContent = ""
+            }
+            
+            // 清除缓存信息
+            self.configFiles.removeAll(where: { $0.id == configFile.id })
+            
+            // 重新启动文件监控
+            _ = eventManager.startWatchingConfigDirectory()
+            _ = eventManager.startWatchingMainConfig()
+            
+            // 重新加载配置文件列表
+            loadKubeConfigFiles()
+            
+            // 显示成功消息
+            messageHandler.show("文件已重命名为 \(newFileName)", type: .success)
+            
+            // 选择新文件
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                
+                // 找到新文件并选择它
+                if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                    self.selectConfigFile(newFile)
+                }
+            }
+        } catch {
+            messageHandler.show("重命名文件失败: \(error.localizedDescription)", type: .error)
+            
+            // 重新启动文件监控
+            _ = EventManager.shared.startWatchingConfigDirectory()
+            _ = EventManager.shared.startWatchingMainConfig()
         }
     }
     
     /// 提示删除配置文件
     func promptForDeleteConfigFile(_ configFile: KubeConfigFile) {
-        // 与重命名类似，这应该触发一个确认对话框
-        // 在实际应用中，这需要与UI交互
+        // 显示确认对话框
+        let alert = NSAlert()
+        alert.messageText = "删除配置文件"
+        alert.informativeText = "确定要删除 \(configFile.displayName) 吗？此操作不可恢复。"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "删除")
+        alert.addButton(withTitle: "取消")
         
-        messageHandler.show("删除功能尚未实现", type: .info)
+        let response = alert.runModal()
         
-        // 实现示例：
-        // showDeleteConfirmDialog = true
-        // configFileToDelete = configFile
+        if response == .alertFirstButtonReturn {
+            deleteConfigFile(configFile)
+        }
     }
     
     /// 删除配置文件
     func deleteConfigFile(_ configFile: KubeConfigFile) {
-        Task {
-            do {
-                // 删除文件
-                try FileManager.default.removeItem(at: configFile.filePath)
-                
-                // 如果是当前选中的文件，清除选择
-                if self.selectedConfigFile?.id == configFile.id {
-                    self.selectedConfigFile = nil
-                    self.selectedConfigFileContent = ""
-                }
+        // 不使用异步任务，直接在主线程上执行，避免多线程操作导致的问题
+        do {
+            // 如果是当前选中的文件，先清除选择
+            let wasSelected = (self.selectedConfigFile?.id == configFile.id)
+            if wasSelected {
+                self.selectedConfigFile = nil
+                self.selectedConfigFileContent = ""
+            }
+            
+            // 先取消监控文件
+            EventManager.shared.publish(.configFileRemoved(configFile.filePath))
+            
+            // 删除文件
+            try FileManager.default.removeItem(at: configFile.filePath)
+            
+            // 先显示成功消息
+            messageHandler.show("\(configFile.displayName) 已删除", type: .success)
+            
+            // 延迟执行后续操作，让FileWatcher先处理完文件系统事件
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
                 
                 // 重新加载配置文件列表
-                loadKubeConfigFiles()
-                
-                messageHandler.show("\(configFile.displayName) 已删除", type: .success)
-            } catch {
-                messageHandler.show("删除文件失败: \(error.localizedDescription)", type: .error)
+                self.loadKubeConfigFiles()
             }
+        } catch {
+            messageHandler.show("删除文件失败: \(error.localizedDescription)", type: .error)
         }
     }
     

@@ -7,76 +7,35 @@ struct ConfigEditorView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // 编辑器工具栏
-            HStack {
+            // 编辑器工具栏 - 更新样式与 SSH 一致
+            HStack(spacing: 16) {
                 Text(viewModel.editorTitle)
-                    .font(.headline)
+                    .font(.title2.bold())
+                    .frame(alignment: .leading)
                 
                 Spacer()
                 
-                // 显示配置文件状态
-                if let configFile = viewModel.configFile {
-                    ConfigStatusLabel(status: configFile.status)
-                }
-                
-                // 编辑器验证状态（当编辑时显示）
-                if viewModel.isEditing {
-                    ValidationStatusView(state: viewModel.validationState)
-                        .transition(.opacity)
-                }
-                
-                // 撤销/重做按钮（仅在编辑模式）
-                if viewModel.isEditing {
-                    Button(action: {
-                        viewModel.undo()
-                    }) {
-                        Image(systemName: "arrow.uturn.backward")
-                    }
-                    .buttonStyle(.plain)
-                    .help("撤销")
-                    .disabled(!viewModel.canUndo)
-                    
-                    Button(action: {
-                        viewModel.redo()
-                    }) {
-                        Image(systemName: "arrow.uturn.forward")
-                    }
-                    .buttonStyle(.plain)
-                    .help("重做")
-                    .disabled(!viewModel.canRedo)
-                }
-                
-                // 编辑模式切换按钮
+                // 简化为编辑/保存按钮，与 SSH 保持一致
                 Button(action: {
-                    toggleEditMode()
-                }) {
-                    Image(systemName: viewModel.isEditing ? "eye" : "pencil")
-                }
-                .buttonStyle(.plain)
-                .help(viewModel.isEditing ? "切换到查看模式" : "切换到编辑模式")
-                .disabled(viewModel.configFile?.status != .valid || 
-                          viewModel.configFile == nil)
-                
-                if viewModel.isEditing {
-                    Button(action: {
+                    if viewModel.isEditing {
                         viewModel.saveChanges()
-                    }) {
-                        Image(systemName: "checkmark")
+                    } else {
+                        viewModel.startEditing()
                     }
-                    .buttonStyle(.plain)
-                    .help("保存更改")
-                    
-                    Button(action: {
-                        viewModel.discardChanges()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                    .buttonStyle(.plain)
-                    .help("取消编辑")
+                }) {
+                    Text(viewModel.isEditing ? L10n.App.save : L10n.App.edit)
+                        .frame(minWidth: 80)
                 }
+                .keyboardShortcut(viewModel.isEditing ? "s" : .return, modifiers: .command)
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.large)
+                .disabled(!viewModel.isEditing && (viewModel.configFile?.status != .valid || 
+                          viewModel.configFile == nil))
             }
-            .padding(10)
-            .background(Color.gray.opacity(0.1))
+            .padding()
+            .background(Color(NSColor.textBackgroundColor))
+            
+            Divider()
             
             // 编辑器内容区域
             if viewModel.configFile == nil {
@@ -111,78 +70,6 @@ struct ConfigEditorView: View {
             }
         }
     }
-    
-    // 切换编辑模式
-    private func toggleEditMode() {
-        if !viewModel.isEditing {
-            viewModel.startEditing()
-        } else {
-            viewModel.stopEditing()
-        }
-    }
-}
-
-/// 验证状态视图
-struct ValidationStatusView: View {
-    let state: ConfigEditorViewModel.ValidationState
-    
-    var body: some View {
-        HStack(spacing: 4) {
-            statusIcon
-            
-            if case .invalid(let message) = state {
-                Text("验证错误")
-                    .font(.caption)
-                    .onHover { isHovered in
-                        if isHovered {
-                            NSCursor.pointingHand.set()
-                        } else {
-                            NSCursor.arrow.set()
-                        }
-                    }
-                    .help(message)
-            } else if case .validating = state {
-                Text("验证中...")
-                    .font(.caption)
-            } else if case .valid = state {
-                Text("有效")
-                    .font(.caption)
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(statusColor.opacity(0.2))
-        .foregroundColor(statusColor)
-        .cornerRadius(4)
-    }
-    
-    // 状态图标
-    private var statusIcon: some View {
-        switch state {
-        case .valid:
-            return Image(systemName: "checkmark.circle.fill")
-        case .invalid:
-            return Image(systemName: "exclamationmark.triangle.fill")
-        case .validating:
-            return Image(systemName: "clock.fill")
-        case .notValidated:
-            return Image(systemName: "questionmark.circle.fill")
-        }
-    }
-    
-    // 状态颜色
-    private var statusColor: Color {
-        switch state {
-        case .valid:
-            return .green
-        case .invalid:
-            return .red
-        case .validating:
-            return .orange
-        case .notValidated:
-            return .gray
-        }
-    }
 }
 
 /// 配置状态标签
@@ -208,10 +95,13 @@ struct ConfigStatusLabel: View {
         switch status {
         case .valid:
             return Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green)
         case .invalid:
             return Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundColor(.red)
         case .unknown:
             return Image(systemName: "questionmark.circle.fill")
+                .foregroundColor(.gray)
         }
     }
     
@@ -244,23 +134,26 @@ struct ConfigStatusLabel: View {
 struct EmptyEditorView: View {
     var body: some View {
         VStack(spacing: 16) {
-            Image(systemName: "doc.text")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60)
-                .foregroundColor(.gray)
+            Image(systemName: "square.on.square.dashed")
+                .font(.system(size: 56))
+                .foregroundColor(.secondary)
+                .symbolRenderingMode(.hierarchical)
+                .padding(.bottom, 10)
             
-            Text("未选择配置文件")
-                .font(.headline)
+            Text(L10n.Kubernetes.noSelection)
+                .font(.title3)
+                .foregroundColor(.primary)
             
-            Text("从左侧列表中选择一个配置文件进行查看或编辑。")
+            Text(L10n.Kubernetes.selectOrCreate)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: 300)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.windowBackgroundColor))
     }
 }
 

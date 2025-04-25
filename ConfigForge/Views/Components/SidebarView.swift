@@ -49,21 +49,39 @@ struct SidebarView: View {
             .padding(.bottom, 8)
             // ---- End Top Navigation Picker ----
             
-            // 搜索区域
+            // 统一的搜索区域 - 根据当前选择的配置类型绑定不同的搜索文本
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.secondary)
-                TextField(L10n.Sidebar.search, text: $viewModel.searchText)
-                    .textFieldStyle(PlainTextFieldStyle())
                 
-                if !viewModel.searchText.isEmpty {
-                    Button(action: {
-                        viewModel.searchText = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                // 根据当前模式动态绑定搜索文本
+                if viewModel.selectedConfigurationType == .ssh {
+                    TextField(L10n.Sidebar.search, text: $viewModel.searchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                    
+                    if !viewModel.searchText.isEmpty {
+                        Button(action: {
+                            viewModel.searchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                } else {
+                    // Kubernetes 模式下的搜索
+                    TextField(L10n.Kubernetes.search, text: $viewModel.configSearchText)
+                        .textFieldStyle(PlainTextFieldStyle())
+                    
+                    if !viewModel.configSearchText.isEmpty {
+                        Button(action: {
+                            viewModel.configSearchText = ""
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
                 }
             }
             .padding(8)
@@ -191,7 +209,7 @@ struct SidebarView: View {
         case .ssh:
             return L10n.Sidebar.Add.host
         case .kubernetes:
-            return "添加配置文件"
+            return L10n.Sidebar.Add.config // 使用一致的本地化字符串格式
         }
     }
 } 

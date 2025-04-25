@@ -155,4 +155,10 @@ final class EventManager: @unchecked Sendable {
     func notifyActiveConfigChanged(_ config: KubeConfig?) {
         eventsSubject.send(.activeConfigChanged(config))
     }
+    
+    /// 获取文件监控服务
+    /// - Returns: 文件监控服务实例
+    func getFileWatcher() -> FileWatcherService {
+        return fileWatcher
+    }
 } 

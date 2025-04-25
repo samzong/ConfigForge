@@ -3,49 +3,12 @@ import SwiftUI
 /// 配置文件列表视图，显示所有发现的 Kubernetes 配置文件
 struct ConfigListView: View {
     @ObservedObject var viewModel: MainViewModel
+    @State private var selectedConfigFileIndex: Int?
     
     var body: some View {
         VStack(spacing: 0) {
-            // 标题栏
-            HStack {
-                Text("配置文件")
-                    .font(.headline)
-                    .padding(.leading)
-                
-                Spacer()
-                
-                Button(action: {
-                    viewModel.refreshKubeConfigFiles()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.plain)
-                .padding(.trailing)
-                .help("刷新配置文件列表")
-            }
-            .padding(.vertical, 8)
-            .background(Color.gray.opacity(0.1))
-            
-            // 搜索框
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                
-                TextField("搜索配置文件", text: $viewModel.configSearchText)
-                    .textFieldStyle(PlainTextFieldStyle())
-                
-                if !viewModel.configSearchText.isEmpty {
-                    Button(action: {
-                        viewModel.configSearchText = ""
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .padding(8)
-            .background(Color.gray.opacity(0.1))
+            // 移除了标题栏
+            // 移除了搜索框，使用 SidebarView 中的通用搜索框
             
             if viewModel.isLoadingConfigFiles {
                 ProgressView()
@@ -54,19 +17,48 @@ struct ConfigListView: View {
                 if viewModel.displayedConfigFiles.isEmpty {
                     EmptyConfigView(viewModel: viewModel)
                 } else {
-                    // 配置文件列表
-                    List(viewModel.displayedConfigFiles, id: \.id) { configFile in
-                        ConfigFileRow(configFile: configFile, 
-                                     isSelected: viewModel.selectedConfigFile?.id == configFile.id,
-                                     isActive: configFile.fileType == .active)
-                            .onTapGesture {
-                                viewModel.selectConfigFile(configFile)
-                            }
-                            .contextMenu {
-                                ConfigFileContextMenu(viewModel: viewModel, configFile: configFile)
-                            }
+                    // 配置文件列表 - 使用 .sidebar 样式与 SSH 一致
+                    List(viewModel.displayedConfigFiles.indices, id: \.self, selection: $selectedConfigFileIndex) { index in
+                        if index < viewModel.displayedConfigFiles.count {
+                            let configFile = viewModel.displayedConfigFiles[index]
+                            
+                            ConfigFileRow(configFile: configFile, 
+                                         isSelected: viewModel.selectedConfigFile?.id == configFile.id,
+                                         isActive: configFile.fileType == .active)
+                                .tag(configFile.id as AnyHashable)
+                                .contextMenu {
+                                    // 保持与 SSH 一致的上下文菜单样式
+                                    Button(action: {
+                                        viewModel.activateConfigFile(configFile)
+                                    }) {
+                                        Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
+                                    }
+                                    .disabled(configFile.fileType == .active || configFile.status != .valid)
+                                    
+                                    Divider()
+                                    
+                                    // 已移除重命名选项，与 SSH 行为保持一致
+                                    
+                                    Button(role: .destructive, action: {
+                                        viewModel.promptForDeleteConfigFile(configFile)
+                                    }) {
+                                        Label(L10n.App.delete, systemImage: "trash")
+                                    }
+                                    .disabled(configFile.fileType == .active || configFile.fileType == .backup)
+                                }
+                        } else {
+                            Text("Loading...")
+                        }
                     }
-                    .listStyle(PlainListStyle())
+                    .listStyle(.sidebar)
+                    .onChange(of: selectedConfigFileIndex) { newIndex in
+                        // 与 SSH 使用相同的选择逻辑
+                        if let index = newIndex, index >= 0 && index < viewModel.displayedConfigFiles.count {
+                            let configFile = viewModel.displayedConfigFiles[index]
+                            viewModel.selectConfigFile(configFile)
+                        }
+                    }
+                    // 与 SSH 一致的视觉样式
                 }
             }
         }
@@ -80,102 +72,42 @@ struct ConfigFileRow: View {
     let isActive: Bool
     
     var body: some View {
-        HStack {
-            // 状态图标
-            statusIcon
-                .frame(width: 20)
-            
-            // 文件名
+        VStack(alignment: .leading, spacing: 2) {
+            // 主要内容与 HostRowView 保持一致的风格
             Text(configFile.displayName)
-                .lineLimit(1)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.primary)
             
-            Spacer()
-            
-            // 如果是活动配置，显示活动标记
-            if isActive {
-                Text("活动")
-                    .font(.caption)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.blue.opacity(0.2))
-                    .foregroundColor(.blue)
-                    .cornerRadius(4)
-            }
-            
-            // 如果是备份，显示备份标记
-            if configFile.fileType == .backup {
-                Text("备份")
-                    .font(.caption)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.orange.opacity(0.2))
-                    .foregroundColor(.orange)
-                    .cornerRadius(4)
+            // 次要内容也与 HostRowView 一致
+            HStack(spacing: 4) {
+                // 只有活跃的配置文件显示勾选标记
+                if configFile.fileType == .active {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 10))
+                } else if case .invalid = configFile.status {
+                    // 无效的配置文件显示警告图标
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .font(.system(size: 10))
+                }
+                
+                Text(statusText)
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
             }
         }
         .padding(.vertical, 4)
-        .padding(.horizontal, 8)
-        .background(isSelected ? Color.blue.opacity(0.1) : Color.clear)
     }
     
-    // 状态图标根据配置文件状态显示不同图标
-    private var statusIcon: some View {
-        Group {
-            switch configFile.status {
-            case .valid:
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-            case .invalid:
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundColor(.red)
-            case .unknown:
-                Image(systemName: "questionmark.circle.fill")
-                    .foregroundColor(.gray)
-            }
+    private var statusText: String {
+        if configFile.fileType == .active {
+            return L10n.Kubernetes.Config.active
+        } else if configFile.fileType == .backup {
+            return L10n.Kubernetes.Config.backup
+        } else {
+            return configFile.filePath.path
         }
-    }
-}
-
-/// 配置文件上下文菜单
-struct ConfigFileContextMenu: View {
-    @ObservedObject var viewModel: MainViewModel
-    let configFile: KubeConfigFile
-    
-    var body: some View {
-        Button(action: {
-            viewModel.activateConfigFile(configFile)
-        }) {
-            Text("设为活动配置")
-            Image(systemName: "checkmark.circle")
-        }
-        .disabled(configFile.fileType == .active || configFile.status != .valid)
-        
-        Divider()
-        
-        Button(action: {
-            viewModel.duplicateConfigFile(configFile)
-        }) {
-            Text("复制")
-            Image(systemName: "doc.on.doc")
-        }
-        
-        Button(action: {
-            viewModel.promptForRenameConfigFile(configFile)
-        }) {
-            Text("重命名")
-            Image(systemName: "pencil")
-        }
-        .disabled(configFile.fileType == .active || configFile.fileType == .backup)
-        
-        Divider()
-        
-        Button(action: {
-            viewModel.promptForDeleteConfigFile(configFile)
-        }) {
-            Text("删除")
-            Image(systemName: "trash")
-        }
-        .disabled(configFile.fileType == .active || configFile.fileType == .backup)
     }
 }
 
@@ -185,22 +117,24 @@ struct EmptyConfigView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Image(systemName: "doc.text.magnifyingglass")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60)
-                .foregroundColor(.gray)
+            Image(systemName: "square.on.square.dashed")
+                .font(.system(size: 56))
+                .foregroundColor(.secondary)
+                .symbolRenderingMode(.hierarchical)
+                .padding(.bottom, 10)
             
-            Text("没有找到配置文件")
-                .font(.headline)
+            Text(L10n.Kubernetes.noSelection)
+                .font(.title3)
+                .foregroundColor(.primary)
             
-            Text("在 ~/.kube/configs/ 目录中创建配置文件，或者从这里创建一个新的配置。")
+            Text(L10n.Kubernetes.selectOrCreate)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .padding(.horizontal)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: 300)
             
-            Button("创建新配置") {
+            Button(L10n.Kubernetes.createNew) {
                 viewModel.createNewConfigFile()
             }
             .buttonStyle(.bordered)
@@ -208,6 +142,7 @@ struct EmptyConfigView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.windowBackgroundColor))
     }
 }
 

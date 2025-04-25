@@ -51,6 +51,9 @@ struct KubeConfigFile: Identifiable, Equatable {
     /// 文件最后修改日期
     var modificationDate: Date?
     
+    /// 是否为当前活动配置文件
+    var isActive: Bool = false
+    
     /// 创建配置文件对象
     /// - Parameters:
     ///   - fileName: 文件名
@@ -60,13 +63,14 @@ struct KubeConfigFile: Identifiable, Equatable {
     ///   - creationDate: 创建日期
     ///   - modificationDate: 修改日期
     init(fileName: String, filePath: URL, fileType: KubeConfigFileType, yamlContent: String? = nil, 
-         creationDate: Date? = nil, modificationDate: Date? = nil) {
+         creationDate: Date? = nil, modificationDate: Date? = nil, isActive: Bool = false) {
         self.fileName = fileName
         self.filePath = filePath
         self.fileType = fileType
         self.yamlContent = yamlContent
         self.creationDate = creationDate
         self.modificationDate = modificationDate
+        self.isActive = isActive
     }
     
     /// Creates an instance from a file URL, attempting to read its content and attributes.
@@ -75,7 +79,7 @@ struct KubeConfigFile: Identifiable, Equatable {
     ///   - fileType: The type of the file.
     ///   - fileManager: FileManager instance.
     /// - Returns: A new KubeConfigFile instance, potentially with nil content if read fails.
-    static func from(url: URL, fileType: KubeConfigFileType, fileManager: FileManager = .default) -> KubeConfigFile? {
+    static func from(url: URL, fileType: KubeConfigFileType, fileManager: FileManager = .default, isActive: Bool = false) -> KubeConfigFile? {
         var creationDate: Date? = nil
         var modificationDate: Date? = nil
         var yamlContent: String? = nil
@@ -101,7 +105,8 @@ struct KubeConfigFile: Identifiable, Equatable {
             fileType: fileType,
             yamlContent: yamlContent,
             creationDate: creationDate,
-            modificationDate: modificationDate
+            modificationDate: modificationDate,
+            isActive: isActive
         )
     }
     

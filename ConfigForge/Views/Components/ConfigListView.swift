@@ -36,7 +36,7 @@ private struct ConfigListContent: View {
             ConfigFileRow(
                 configFile: configFile, 
                 isSelected: viewModel.selectedConfigFile?.id == configFile.id,
-                isActive: configFile.fileType == .active
+                isActive: configFile.isActive
             )
             .tag(configFile.id)
             .contextMenu {
@@ -54,7 +54,7 @@ private struct ConfigListContent: View {
             }) {
                 Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
             }
-            .disabled(configFile.fileType == .active || configFile.status != .valid)
+            .disabled(configFile.isActive || configFile.status != .valid)
             
             Divider()
             
@@ -63,7 +63,6 @@ private struct ConfigListContent: View {
             }) {
                 Label(L10n.App.delete, systemImage: "trash")
             }
-            .disabled(configFile.fileType == .active || configFile.fileType == .backup)
         }
     }
     
@@ -92,7 +91,7 @@ struct ConfigFileRow: View {
             // 次要内容也与 HostRowView 一致
             HStack(spacing: 4) {
                 // 只有活跃的配置文件显示勾选标记
-                if configFile.fileType == .active {
+                if configFile.isActive {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                         .font(.system(size: 10))
@@ -112,12 +111,12 @@ struct ConfigFileRow: View {
     }
     
     private var statusText: String {
-        if configFile.fileType == .active {
+        if configFile.isActive {
             return L10n.Kubernetes.Config.active
-        } else if configFile.fileType == .backup {
-            return L10n.Kubernetes.Config.backup
         } else {
-            return configFile.filePath.path
+            // 简化状态显示，只显示路径
+            let dirPath = configFile.filePath.deletingLastPathComponent().path
+            return dirPath
         }
     }
 }

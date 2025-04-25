@@ -213,22 +213,28 @@ class KubeConfigFileManager {
             // 获取目录URL
             let configsDir = try getConfigsDirectoryPath()
             
-            // 获取主配置文件和备份文件
-            var configFiles = [KubeConfigFile]()
-            
-            // 检查主配置文件
+            // 获取主配置文件中的标识注释
             let mainConfigPath = try getConfigFilePath()
-            if fileManager.fileExists(atPath: mainConfigPath.path),
-               let mainConfigFile = KubeConfigFile.from(url: mainConfigPath, fileType: .active) {
-                configFiles.append(mainConfigFile)
+            var activeConfigIdentifier: String? = nil
+            
+            if fileManager.fileExists(atPath: mainConfigPath.path) {
+                do {
+                    let mainConfigContent = try String(contentsOf: mainConfigPath, encoding: .utf8)
+                    // 查找特殊注释，格式为：# ConfigForge-ActiveConfig: filename.yaml
+                    if let range = mainConfigContent.range(of: "# ConfigForge-ActiveConfig: .*", options: .regularExpression) {
+                        let commentLine = String(mainConfigContent[range])
+                        // 提取配置文件名
+                        if let filenameRange = commentLine.range(of: "(?<=# ConfigForge-ActiveConfig: ).*", options: .regularExpression) {
+                            activeConfigIdentifier = String(commentLine[filenameRange])
+                        }
+                    }
+                } catch {
+                    print("Warning: Could not read active config: \(error.localizedDescription)")
+                }
             }
             
-            // 检查备份文件
-            let backupPath = try getConfigBackupFilePath()
-            if fileManager.fileExists(atPath: backupPath.path),
-               let backupFile = KubeConfigFile.from(url: backupPath, fileType: .backup) {
-                configFiles.append(backupFile)
-            }
+            // 配置文件数组
+            var configFiles = [KubeConfigFile]()
             
             // 列出 configs 目录中的所有文件
             let directoryContents = try fileManager.contentsOfDirectory(at: configsDir, includingPropertiesForKeys: [.creationDateKey, .contentModificationDateKey], options: [.skipsHiddenFiles])
@@ -241,8 +247,16 @@ class KubeConfigFileManager {
             
             // 为每个文件创建 KubeConfigFile 对象
             for fileURL in yamlFiles {
-                // KubeConfigFile.from now attempts to read content
-                if let configFile = KubeConfigFile.from(url: fileURL, fileType: .stored) {
+                // 判断是否为活动配置 - 基于文件名比较
+                let isActive = activeConfigIdentifier != nil && 
+                               fileURL.lastPathComponent == activeConfigIdentifier
+                
+                // 创建配置文件对象
+                if var configFile = KubeConfigFile.from(url: fileURL, fileType: .stored) {
+                    // 如果与活动配置标识符匹配，标记为活动状态
+                    if isActive {
+                        configFile.isActive = true
+                    }
                     configFiles.append(configFile)
                 }
             }
@@ -252,7 +266,7 @@ class KubeConfigFileManager {
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
-            return .failure(.fileAccess("扫描配置文件目录失败: \\\\(error.localizedDescription)"))
+            return .failure(.fileAccess("扫描配置文件目录失败: \(error.localizedDescription)"))
         }
     }
     
@@ -278,9 +292,9 @@ class KubeConfigFileManager {
                  // Sanitize custom name slightly
                  let sanitizedName = customName.replacingOccurrences(of: "/", with: "-")
                                               .replacingOccurrences(of: "\\\\", with: "-")
-                 backupFileName = "backup-\\(sanitizedName).yaml"
+                 backupFileName = "backup-\(sanitizedName).yaml"
             } else {
-                 backupFileName = "backup-\\(timestamp).yaml"
+                 backupFileName = "backup-\(timestamp).yaml"
             }
             
             // 创建备份文件路径
@@ -305,12 +319,12 @@ class KubeConfigFileManager {
     func restoreConfigFile(_ configFile: KubeConfigFile) async -> Result<Void, ConfigForgeError> {
         // Get the YAML content from the source file
         guard let contentToRestore = configFile.yamlContent else {
-            return .failure(.configRead("无法读取要恢复的配置文件内容: \\(configFile.fileName)"))
+            return .failure(.configRead("无法读取要恢复的配置文件内容: \(configFile.fileName)"))
         }
 
         // Don't restore if content is empty (unless it's intentional)
         guard !contentToRestore.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-             return .failure(.validation("无法恢复空的配置文件: \\(configFile.fileName)"))
+            return .failure(.validation("无法恢复空的配置文件: \(configFile.fileName)"))
         }
 
         do {
@@ -318,26 +332,45 @@ class KubeConfigFileManager {
             let backupResult = await createDefaultBackup()
             if case .failure(let error) = backupResult {
                 // Log error but proceed with restore? Or fail? Let's fail for safety.
-                print("创建备份失败，恢复中止: \\(error.localizedDescription)")
-                return .failure(.configWrite("恢复前创建备份失败: \\(error.localizedDescription)"))
+                print("创建备份失败，恢复中止: \(error.localizedDescription)")
+                return .failure(.configWrite("恢复前创建备份失败: \(error.localizedDescription)"))
             }
             
-            // 2. Write the restored content to the main config file
+            // 2. 添加识别注释到配置内容
+            var modifiedContent = contentToRestore
+            
+            // 移除任何现有的ConfigForge注释
+            let lines = modifiedContent.components(separatedBy: .newlines)
+            var filteredLines = lines.filter { !$0.contains("# ConfigForge-ActiveConfig:") }
+            
+            // 添加新的标识注释
+            let identifierComment = "# ConfigForge-ActiveConfig: \(configFile.fileName)"
+            
+            // 如果第一行是注释，在其后添加；否则在开头添加
+            if !filteredLines.isEmpty && filteredLines[0].hasPrefix("#") {
+                filteredLines.insert(identifierComment, at: 1)
+            } else {
+                filteredLines.insert(identifierComment, at: 0)
+            }
+            
+            modifiedContent = filteredLines.joined(separator: "\n")
+            
+            // 3. Write the restored content to the main config file
             //    saveConfig handles writing and potential errors
-            let saveResult = saveConfig(content: contentToRestore)
+            let saveResult = saveConfig(content: modifiedContent)
             
             switch saveResult {
             case .success:
                 return .success(())
             case .failure(let error):
-                 // If saving the restored content fails, return the error
-                 return .failure(error)
+                // If saving the restored content fails, return the error
+                return .failure(error)
             }
             
         } catch {
-             // Catch potential errors from saveConfig if it throws (though it returns Result)
-             // Or other unexpected errors
-             return .failure(.configWrite("恢复配置文件时发生未知错误: \\\\(error.localizedDescription)"))
+            // Catch potential errors from saveConfig if it throws (though it returns Result)
+            // Or other unexpected errors
+            return .failure(.configWrite("恢复配置文件时发生未知错误: \(error.localizedDescription)"))
         }
     }
     
@@ -403,11 +436,11 @@ class KubeConfigFileManager {
     
     // MARK: - 配置切换服务
     
-    /// 将指定的配置文件设置为活动配置 (Essentially the same as restore)
+    /// 将指定的配置文件设置为活动配置
     /// - Parameter configFile: 要激活的配置文件
     /// - Returns: 切换结果
     func switchToConfig(_ configFile: KubeConfigFile) async -> Result<Void, ConfigForgeError> {
-        // Re-use the restore logic
+        // 使用恢复逻辑，它会添加特殊注释来标识活动配置
         return await restoreConfigFile(configFile)
     }
     

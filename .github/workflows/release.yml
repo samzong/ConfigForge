@@ -36,17 +36,17 @@ jobs:
 
       - name: Generate Release Notes
         id: release_notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "## ConfigForge ${{ env.VERSION }}" > release_notes.md
-          echo "" >> release_notes.md
-          echo "### Update" >> release_notes.md
-          echo "- Please check the specific commit record for detailed update content." >> release_notes.md
-          echo "" >> release_notes.md
-          echo "### Supported System" >> release_notes.md
-          echo "- macOS 11.0 or higher" >> release_notes.md
-          echo "- Provide two versions:" >> release_notes.md
-          echo "  - Intel version: Suitable for Intel chip Mac" >> release_notes.md
-          echo "  - Apple Silicon version: Suitable for M series chip Mac" >> release_notes.md
+          # Generate GitHub-style release notes using the GitHub CLI
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name='${{ env.VERSION }}' > generated_notes.json
+          
+          jq -r '.body' generated_notes.json > release_notes.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

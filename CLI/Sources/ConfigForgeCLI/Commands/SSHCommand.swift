@@ -41,30 +41,39 @@ struct SSHListCommand: ParsableCommand {
             
             print("Available SSH hosts:")
             for (index, entry) in entries.enumerated() {
+                let hostName = entry.host ?? "unnamed"
+                let number = index + 1
+                
                 if detail {
-                    print("\(index + 1). \(entry.host ?? "unnamed")")
+                    print("  \(number). \(hostName)")
                     if let user = entry.user {
-                        print("   User: \(user)")
+                        print("      User: \(user)")
                     }
                     if let hostname = entry.hostname {
-                        print("   Hostname: \(hostname)")
+                        print("      Hostname: \(hostname)")
                     }
                     if let port = entry.port {
-                        print("   Port: \(port)")
+                        print("      Port: \(port)")
                     }
                     if let identityFile = entry.identityFile {
-                        print("   IdentityFile: \(identityFile)")
+                        print("      IdentityFile: \(identityFile)")
                     }
                     if let forwardAgent = entry.forwardAgent {
-                        print("   ForwardAgent: \(forwardAgent)")
+                        print("      ForwardAgent: \(forwardAgent)")
                     }
                     if let proxyCommand = entry.proxyCommand {
-                        print("   ProxyCommand: \(proxyCommand)")
+                        print("      ProxyCommand: \(proxyCommand)")
                     }
                     print("")
                 } else {
-                    print("\(index + 1). \(entry.host ?? "unnamed")")
+                    print("  \(number). \(hostName)")
                 }
+            }
+            
+            if !detail {
+                print("")
+                print("Use 'cf c <number>' or 'cf c <hostname>' to connect")
+                print("Use 'cf s <number>' or 'cf s <hostname>' to show details")
             }
         } catch {
             print("Error: \(error.localizedDescription)")
@@ -80,7 +89,7 @@ struct SSHShowCommand: ParsableCommand {
         aliases: ["s"]
     )
     
-    @Argument(help: "The SSH host to show details for")
+    @Argument(help: "The SSH host number or name to show details for")
     var host: String
     
     func run() throws {
@@ -89,9 +98,19 @@ struct SSHShowCommand: ParsableCommand {
         do {
             let entries = try fileManager.getAllHosts()
             
-            guard let entry = entries.first(where: { $0.host == host }) else {
-                print("Error: Host '\(host)' not found in SSH config.")
-                throw ExitCode.failure
+            let entry: SSHConfigEntry
+            
+            // Check if input is a number
+            if let index = Int(host), index > 0, index <= entries.count {
+                entry = entries[index - 1]
+            } else {
+                // Search by host name
+                guard let foundEntry = entries.first(where: { $0.host == host }) else {
+                    print("Error: Host '\(host)' not found in SSH config.")
+                    print("Use 'cf l' to see available hosts.")
+                    throw ExitCode.failure
+                }
+                entry = foundEntry
             }
             
             print("Host: \(entry.host ?? "unnamed")")
@@ -150,7 +169,7 @@ struct SSHConnectCommand: ParsableCommand {
         aliases: ["c"]
     )
     
-    @Argument(help: "The SSH host to connect to")
+    @Argument(help: "The SSH host number or name to connect to")
     var host: String
     
     @Flag(name: .long, help: "Enable debug mode to show detailed connection diagnostics")
@@ -163,13 +182,26 @@ struct SSHConnectCommand: ParsableCommand {
         do {
             let entries = try fileManager.getAllHosts()
             
-            guard let hostEntry = entries.first(where: { $0.host == host }) else {
-                print("错误: 在SSH配置中找不到主机 '\(host)'")
-                throw ExitCode.failure
+            let hostEntry: SSHConfigEntry
+            let hostDisplayName: String
+            
+            // Check if input is a number
+            if let index = Int(host), index > 0, index <= entries.count {
+                hostEntry = entries[index - 1]
+                hostDisplayName = "\(index). \(hostEntry.host ?? "unnamed")"
+            } else {
+                // Search by host name
+                guard let foundEntry = entries.first(where: { $0.host == host }) else {
+                    print("Error: Host '\(host)' not found in SSH config.")
+                    print("Use 'cf l' to see available hosts.")
+                    throw ExitCode.failure
+                }
+                hostEntry = foundEntry
+                hostDisplayName = hostEntry.host ?? "unnamed"
             }
             
             if isDebugMode {
-                printDebugInfo(host: host, hostEntry: hostEntry)
+                printDebugInfo(host: hostDisplayName, hostEntry: hostEntry)
             }
             
             let sshCommand = "/usr/bin/ssh"
@@ -197,42 +229,42 @@ struct SSHConnectCommand: ParsableCommand {
             if let username = hostEntry.user, let hostname = hostEntry.hostname {
                 targetAddress = "\(username)@\(hostname)"
             } else {
-                targetAddress = host
+                targetAddress = hostEntry.host ?? host
             }
             argsArray.append(targetAddress)
             
-            print("正在连接到 \(host)...")
+            print("Connecting to \(hostDisplayName)...")
             
             if isDebugMode {
-                print("完整命令: \(sshCommand) \(argsArray.joined(separator: " "))")
+                print("Full command: \(sshCommand) \(argsArray.joined(separator: " "))")
             }
             
             let args: [UnsafeMutablePointer<CChar>?] = [strdup(sshCommand)] + argsArray.map { strdup($0) } + [nil]
             execv(sshCommand, args)
             
-            print("错误: 无法启动SSH会话")
+            print("Error: Failed to start SSH session")
             throw ExitCode.failure
         } catch {
-            print("错误: \(error.localizedDescription)")
+            print("Error: \(error.localizedDescription)")
             throw ExitCode.failure
         }
     }
     
     private func printDebugInfo(host: String, hostEntry: SSHConfigEntry) {
-        print("======= 调试信息 =======")
-        print("正在查找主机配置: \(host)")
-        print("当前工作目录: \(FileManager.default.currentDirectoryPath)")
-        print("系统版本: \(ProcessInfo.processInfo.operatingSystemVersionString)")
+        print("======= Debug Information =======")
+        print("Searching for host configuration: \(host)")
+        print("Current working directory: \(FileManager.default.currentDirectoryPath)")
+        print("System version: \(ProcessInfo.processInfo.operatingSystemVersionString)")
         
-        print("\n===== 主机配置信息 =====")
-        print("主机: \(hostEntry.host ?? "未命名")")
-        print("主机名: \(hostEntry.hostname ?? "未指定")")
-        print("用户: \(hostEntry.user ?? "未指定")")
-        print("端口: \(hostEntry.port ?? "未指定 (默认: 22)")")
-        print("身份文件: \(hostEntry.identityFile ?? "未指定")")
+        print("\n===== Host Configuration Information =====")
+        print("Host: \(hostEntry.host ?? "unnamed")")
+        print("Hostname: \(hostEntry.hostname ?? "not specified")")
+        print("User: \(hostEntry.user ?? "not specified")")
+        print("Port: \(hostEntry.port ?? "not specified (default: 22)")")
+        print("IdentityFile: \(hostEntry.identityFile ?? "not specified")")
         
-        print("\n===== SSH连接信息 =====")
-        print("启用SSH最高调试模式 (-vvv)")
+        print("\n===== SSH Connection Information =====")
+        print("Enable SSH highest debug mode (-vvv)")
     }
     
     private func configureConnectionParameters(argsArray: inout [String], hostEntry: SSHConfigEntry, isDebug: Bool) {

@@ -51,8 +51,8 @@ build-cli:
 # 为本地开发安装 CLI (需要 sudo)
 install-cli-local: build-cli
 	@echo "==> 安装 CLI 到 $(CLI_INSTALL_PATH)..."
-	@sudo mkdir -p $(CLI_INSTALL_PATH)
-	@sudo cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
+	@mkdir -p $(CLI_INSTALL_PATH)
+	@cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
 	@echo "==> CLI 已安装到 $(CLI_INSTALL_PATH)/$(CLI_NAME)"
 
 # 构建 x86_64 (Intel)

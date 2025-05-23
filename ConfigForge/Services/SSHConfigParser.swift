@@ -34,23 +34,34 @@ class SSHConfigParser {
     func parseConfig(content: String) -> [SSHConfigEntry] {
         var entries = [SSHConfigEntry]()
         var currentHost: String?
-        var currentProperties: [String: String] = [:]
+        var currentDirectives: [(key: String, value: String)] = []
         var inMultilineValue = false
         var multilineKey: String?
-        var multilineValue: String = ""
         let lines = content.components(separatedBy: .newlines)
         
         for lineIndex in 0..<lines.count {
             let line = lines[lineIndex]
             if line.first?.isWhitespace == true && inMultilineValue && multilineKey != nil {
-                multilineValue += " " + line.trimmingCharacters(in: .whitespaces)
-                if !line.hasSuffix("\\") {
-                    inMultilineValue = false
-                    currentProperties[multilineKey!] = multilineValue
-                    multilineKey = nil
-                    multilineValue = ""
+                if var lastDirective = currentDirectives.popLast(), lastDirective.key == multilineKey {
+                    var lineContent = line.trimmingCharacters(in: .whitespaces)
+                    if lineContent.hasSuffix("\\") {
+                        lineContent = String(lineContent.dropLast())
+                        lastDirective.value += " " + lineContent
+                        currentDirectives.append(lastDirective)
+                    } else {
+                        lastDirective.value += " " + lineContent
+                        currentDirectives.append(lastDirective)
+                        inMultilineValue = false
+                        multilineKey = nil
+                    }
                 } else {
-                    multilineValue = String(multilineValue.dropLast())
+                    // This case should ideally not happen if logic is correct
+                    // Or, if the first part of a multiline was not added, which is a bug
+                    // For now, let's add the previous directive back if it was popped
+                    if let poppedDirective = currentDirectives.popLast(), poppedDirective.key == multilineKey {
+                         currentDirectives.append(poppedDirective) // Add it back
+                    }
+                     // And ignore this continuation line or log an error
                 }
                 continue
             }
@@ -65,47 +76,31 @@ class SSHConfigParser {
             let keyword = key.lowercased()
             if keyword == "host" {
                 if let host = currentHost, !host.isEmpty {
-                    ensureBasicProperties(properties: &currentProperties)
-                    entries.append(SSHConfigEntry(host: host, properties: currentProperties))
+                    // ensureBasicProperties call removed
+                    entries.append(SSHConfigEntry(host: host, directives: currentDirectives))
                 }
                 currentHost = value
-                currentProperties = [:]
+                currentDirectives = []
             } else if currentHost != nil {
                 let formattedKey = formatPropertyKey(keyword)
                 if value.hasSuffix("\\") {
                     inMultilineValue = true
                     multilineKey = formattedKey
-                    multilineValue = String(value.dropLast()) 
+                    currentDirectives.append((key: formattedKey, value: String(value.dropLast())))
                 } else {
-                    currentProperties[formattedKey] = value
+                    currentDirectives.append((key: formattedKey, value: value))
                 }
             }
         }
         if let host = currentHost, !host.isEmpty {
-            ensureBasicProperties(properties: &currentProperties)
-            entries.append(SSHConfigEntry(host: host, properties: currentProperties))
+            // ensureBasicProperties call removed
+            entries.append(SSHConfigEntry(host: host, directives: currentDirectives))
         }
         
         return entries
     }
 
-    private func ensureBasicProperties(properties: inout [String: String]) {
-        if !properties.keys.contains("HostName") {
-            properties["HostName"] = ""
-        }
-        
-        if !properties.keys.contains("User") {
-            properties["User"] = ""
-        }
-        
-        if !properties.keys.contains("Port") {
-            properties["Port"] = "22"
-        }
-        
-        if !properties.keys.contains("IdentityFile") {
-            properties["IdentityFile"] = ""
-        }
-    }
+    // ensureBasicProperties method removed
 
     private func formatPropertyKey(_ key: String) -> String {
         let propertyMappings: [String: String] = [
@@ -131,19 +126,11 @@ class SSHConfigParser {
         
         for entry in entries {
             content += "Host \(entry.host)\n"
-            let priorityKeys = AppConstants.commonSSHProperties
-            let regularKeys = entry.properties.keys.filter { !priorityKeys.contains($0) }.sorted()
-            for key in priorityKeys {
-                if let value = entry.properties[key], !value.isEmpty {
-                    content += "    \(key) \(formatPropertyValue(value))\n"
+            for directive in entry.directives {
+                if !directive.value.isEmpty { // Optionally skip empty values, or handle as needed
+                    content += "    \(directive.key) \(formatPropertyValue(directive.value))\n"
                 }
             }
-            for key in regularKeys {
-                if let value = entry.properties[key], !value.isEmpty {
-                    content += "    \(key) \(formatPropertyValue(value))\n"
-                }
-            }
-            
             content += "\n"
         }
         
@@ -156,17 +143,16 @@ class SSHConfigParser {
         }
         for existingEntry in existingEntries {
             if existingEntry.id != entry.id && existingEntry.host == entry.host {
-                return false
+                return false // Duplicate host
             }
         }
-        if let portStr = entry.properties["Port"], !portStr.isEmpty {
-            if let port = Int(portStr) {
-                if port < 1 || port > 65535 {
-                    return false
-                }
-            } else {
-                return false
-            }
+        // Use the computed property isPortValid from SSHConfigEntry, which already handles directives
+        // and provides default port "22" logic.
+        // If port is explicitly set and invalid, isPortValid will be false.
+        // If port is not set, isPortValid is true (as "22" is valid).
+        // So, we only need to check if it's NOT valid.
+        if !entry.isPortValid {
+            return false
         }
         
         return true

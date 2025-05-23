@@ -106,7 +106,7 @@ class MainViewModel: ObservableObject {
             isLoading = true
             let result = await asyncUtility.perform { [sshFileManager, sshParser] in
                 let content = try await sshFileManager.readConfigFile()
-                return try await Task.detached {
+                return await Task.detached {
                     return sshParser.parseConfig(content: content)
                 }.value
             }
@@ -133,7 +133,7 @@ class MainViewModel: ObservableObject {
                 guard let self = self else { 
                     throw ConfigForgeError.unknown("ViewModel has been released")
                 }
-                let formattedContent = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
+                let formattedContent = await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
                 }.value
                 try await self.sshFileManager.writeConfigFile(content: formattedContent)
@@ -150,7 +150,7 @@ class MainViewModel: ObservableObject {
         }
     }
     
-    func addSshEntry(host: String, properties: [String: String]) {
+    func addSshEntry(host: String, directives: [(key: String, value: String)]) {
         guard !host.isEmpty else {
             messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
@@ -161,14 +161,14 @@ class MainViewModel: ObservableObject {
             return
         }
         
-        let newEntry = SSHConfigEntry(host: host, properties: properties)
+        let newEntry = SSHConfigEntry(host: host, directives: directives)
         sshEntries.append(newEntry)
         safelySelectEntry(newEntry)
         messageHandler.show(MessageConstants.SuccessMessages.entryAdded, type: .success)
         saveSshConfig()
     }
     
-    func updateSshEntry(id: UUID, host: String, properties: [String: String]) {
+    func updateSshEntry(id: UUID, host: String, directives: [(key: String, value: String)]) {
         guard !host.isEmpty else {
             messageHandler.show(MessageConstants.ErrorMessages.emptyHostError, type: .error)
             return
@@ -181,7 +181,8 @@ class MainViewModel: ObservableObject {
                 return
             }
             
-            var updatedEntry = SSHConfigEntry(host: host, properties: properties)
+            // Preserve the ID by creating a new entry with the existing ID
+            var updatedEntry = SSHConfigEntry(id: id, host: host, directives: directives)
             sshEntries[index] = updatedEntry
             safelySelectEntry(updatedEntry)
             messageHandler.show(MessageConstants.SuccessMessages.entryUpdated, type: .success)
@@ -208,7 +209,7 @@ class MainViewModel: ObservableObject {
                 guard let self = self else { 
                     throw ConfigForgeError.unknown("ViewModel has been released")
                 }
-                let content = try await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
+                let content = await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
                 }.value
                 try await self.sshFileManager.backupConfigFile(content: content, to: url)
@@ -229,8 +230,8 @@ class MainViewModel: ObservableObject {
         isLoading = true
         let result = await asyncUtility.perform { [sshFileManager, sshParser] in
             let content = try String(contentsOf: url, encoding: .utf8)
-            let parsedEntries = try await Task.detached {
-                return try sshParser.parseConfig(content: content)
+            let parsedEntries = await Task.detached {
+                return sshParser.parseConfig(content: content)
             }.value
             try await sshFileManager.writeConfigFile(content: content)
             return parsedEntries

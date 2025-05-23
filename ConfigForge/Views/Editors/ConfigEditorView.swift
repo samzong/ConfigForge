@@ -87,7 +87,7 @@ struct ConfigStatusLabel: View {
         case .valid:
             return Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(.green)
-        case .invalid:
+        case .invalid(_):
             return Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.red)
         case .unknown:
@@ -100,7 +100,7 @@ struct ConfigStatusLabel: View {
         switch status {
         case .valid:
             return "有效"
-        case .invalid(let reason):
+        case .invalid(_):
             return "无效"
         case .unknown:
             return "未验证"
@@ -111,7 +111,7 @@ struct ConfigStatusLabel: View {
         switch status {
         case .valid:
             return .green
-        case .invalid:
+        case .invalid(_):
             return .red
         case .unknown:
             return .gray

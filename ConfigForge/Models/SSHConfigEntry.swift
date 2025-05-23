@@ -8,38 +8,53 @@
 import Foundation
 
 struct SSHConfigEntry: Identifiable, Hashable, Sendable {
-    let id = UUID()
+    let id: UUID
     var host: String
-    var properties: [String: String]
-    var hostname: String { 
-        properties["HostName"] ?? ""
+    var directives: [(key: String, value: String)] = []
+    
+    // Default initializer that generates a new UUID
+    init(host: String, directives: [(key: String, value: String)] = []) {
+        self.id = UUID()
+        self.host = host
+        self.directives = directives
     }
     
-    var user: String { 
-        properties["User"] ?? ""
+    // Initializer that accepts a specific UUID (for updates)
+    init(id: UUID, host: String, directives: [(key: String, value: String)] = []) {
+        self.id = id
+        self.host = host
+        self.directives = directives
     }
     
-    var port: String { 
-        properties["Port"] ?? "22"
+    var hostname: String {
+        directives.first { $0.key.lowercased() == "hostname" }?.value ?? ""
     }
     
-    var identityFile: String { 
-        properties["IdentityFile"] ?? ""
+    var user: String {
+        directives.first { $0.key.lowercased() == "user" }?.value ?? ""
+    }
+    
+    var port: String {
+        directives.first { $0.key.lowercased() == "port" }?.value ?? "22"
+    }
+    
+    var identityFile: String {
+        directives.first { $0.key.lowercased() == "identityfile" }?.value ?? ""
     }
     var isPortValid: Bool {
-        guard let portStr = properties["Port"], !portStr.isEmpty else {
-            return true 
+        guard let portStr = directives.first(where: { $0.key.lowercased() == "port" })?.value, !portStr.isEmpty else {
+            return true
         }
         
         guard let port = Int(portStr) else {
-            return false 
+            return false
         }
         
-        return port >= 1 && port <= 65535 
+        return port >= 1 && port <= 65535
     }
     var isHostNameValid: Bool {
-        guard let hostName = properties["HostName"], !hostName.isEmpty else {
-            return true 
+        guard let hostName = directives.first(where: { $0.key.lowercased() == "hostname" })?.value, !hostName.isEmpty else {
+            return true
         }
         let trimmed = hostName.trimmingCharacters(in: .whitespacesAndNewlines)
         return !trimmed.isEmpty

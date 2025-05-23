@@ -41,28 +41,14 @@ struct SSHListCommand: ParsableCommand {
             
             print("Available SSH hosts:")
             for (index, entry) in entries.enumerated() {
-                let hostName = entry.host ?? "unnamed"
+                let hostName = entry.host
                 let number = index + 1
                 
                 if detail {
                     print("  \(number). \(hostName)")
-                    if let user = entry.user {
-                        print("      User: \(user)")
-                    }
-                    if let hostname = entry.hostname {
-                        print("      Hostname: \(hostname)")
-                    }
-                    if let port = entry.port {
-                        print("      Port: \(port)")
-                    }
-                    if let identityFile = entry.identityFile {
-                        print("      IdentityFile: \(identityFile)")
-                    }
-                    if let forwardAgent = entry.forwardAgent {
-                        print("      ForwardAgent: \(forwardAgent)")
-                    }
-                    if let proxyCommand = entry.proxyCommand {
-                        print("      ProxyCommand: \(proxyCommand)")
+                    // Display all directives for this host
+                    for directive in entry.directives {
+                        print("      \(directive.key): \(directive.value)")
                     }
                     print("")
                 } else {
@@ -113,47 +99,11 @@ struct SSHShowCommand: ParsableCommand {
                 entry = foundEntry
             }
             
-            print("Host: \(entry.host ?? "unnamed")")
+            print("Host: \(entry.host)")
             
-            if let hostname = entry.hostname {
-                print("   Hostname: \(hostname)")
-            }
-            if let user = entry.user {
-                print("   User: \(user)")
-            }
-            if let port = entry.port {
-                print("   Port: \(port)")
-            }
-            if let identityFile = entry.identityFile {
-                print("   IdentityFile: \(identityFile)")
-            }
-            if let forwardAgent = entry.forwardAgent {
-                print("   ForwardAgent: \(forwardAgent)")
-            }
-            if let proxyCommand = entry.proxyCommand {
-                print("   ProxyCommand: \(proxyCommand)")
-            }
-            if let serverAliveInterval = entry.serverAliveInterval {
-                print("   ServerAliveInterval: \(serverAliveInterval)")
-            }
-            if let serverAliveCountMax = entry.serverAliveCountMax {
-                print("   ServerAliveCountMax: \(serverAliveCountMax)")
-            }
-            if let strictHostKeyChecking = entry.strictHostKeyChecking {
-                print("   StrictHostKeyChecking: \(strictHostKeyChecking)")
-            }
-            if let userKnownHostsFile = entry.userKnownHostsFile {
-                print("   UserKnownHostsFile: \(userKnownHostsFile)")
-            }
-            if let connectTimeout = entry.connectTimeout {
-                print("   ConnectTimeout: \(connectTimeout)")
-            }
-            
-            if !entry.otherOptions.isEmpty {
-                print("   Other Options:")
-                for (key, value) in entry.otherOptions {
-                    print("      \(key): \(value)")
-                }
+            // Iterate through all directives and print them
+            for directive in entry.directives {
+                print("   \(directive.key): \(directive.value)")
             }
         } catch {
             print("Error: \(error.localizedDescription)")
@@ -188,7 +138,7 @@ struct SSHConnectCommand: ParsableCommand {
             // Check if input is a number
             if let index = Int(host), index > 0, index <= entries.count {
                 hostEntry = entries[index - 1]
-                hostDisplayName = "\(index). \(hostEntry.host ?? "unnamed")"
+                hostDisplayName = "\(index). \(hostEntry.host)"
             } else {
                 // Search by host name
                 guard let foundEntry = entries.first(where: { $0.host == host }) else {
@@ -197,7 +147,7 @@ struct SSHConnectCommand: ParsableCommand {
                     throw ExitCode.failure
                 }
                 hostEntry = foundEntry
-                hostDisplayName = hostEntry.host ?? "unnamed"
+                hostDisplayName = hostEntry.host
             }
             
             if isDebugMode {
@@ -229,7 +179,7 @@ struct SSHConnectCommand: ParsableCommand {
             if let username = hostEntry.user, let hostname = hostEntry.hostname {
                 targetAddress = "\(username)@\(hostname)"
             } else {
-                targetAddress = hostEntry.host ?? host
+                targetAddress = hostEntry.host // Updated since host is now non-optional
             }
             argsArray.append(targetAddress)
             
@@ -257,7 +207,7 @@ struct SSHConnectCommand: ParsableCommand {
         print("System version: \(ProcessInfo.processInfo.operatingSystemVersionString)")
         
         print("\n===== Host Configuration Information =====")
-        print("Host: \(hostEntry.host ?? "unnamed")")
+        print("Host: \(hostEntry.host)")
         print("Hostname: \(hostEntry.hostname ?? "not specified")")
         print("User: \(hostEntry.user ?? "not specified")")
         print("Port: \(hostEntry.port ?? "not specified (default: 22)")")

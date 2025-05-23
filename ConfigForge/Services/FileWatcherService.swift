@@ -9,7 +9,7 @@ enum FileChangeEvent: Equatable {
     case directoryChanged(URL)
 }
 
-class FileWatcherService {
+class FileWatcherService: @unchecked Sendable {
     private let fileChangesSubject = PassthroughSubject<FileChangeEvent, Never>()
     var fileChanges: AnyPublisher<FileChangeEvent, Never> {
         fileChangesSubject.eraseToAnyPublisher()

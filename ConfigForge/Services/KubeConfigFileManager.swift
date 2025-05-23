@@ -257,6 +257,8 @@ class KubeConfigFileManager {
             }
             
         } catch {
+            // This catch block is unreachable because no errors are thrown in 'do' block
+            // But keeping it for future error handling if needed
             return .failure(.configWrite("恢复配置文件时发生未知错误: \(error.localizedDescription)"))
         }
     }
@@ -346,8 +348,8 @@ class KubeConfigFileManager {
             if configFile.fileType == .active {
                 let backupResult = await createDefaultBackup()
                 if case .failure(let error) = backupResult {
-                     print("更新活动配置前创建备份失败，更新中止: \\(error.localizedDescription)")
-                     return .failure(.configWrite("更新前创建备份失败: \\(error.localizedDescription)"))
+                     print("更新活动配置前创建备份失败，更新中止: \(error.localizedDescription)")
+                     return .failure(.configWrite("更新前创建备份失败: \(error.localizedDescription)"))
                 }
             }
              let writeResult = fileUtils.writeFile(content: content, to: configFile.filePath, createBackup: false)

@@ -30,6 +30,14 @@ Connect to an SSH host:
 cf ssh connect <host-name>
 ```
 
+Show all configured directives for a specific SSH host:
+```bash
+cf ssh show <host-name>
+# or
+cf ssh s <host-name>
+```
+This command displays every directive (e.g., HostName, User, Port, IdentityFile, as well as any custom options) defined for the specified host in your `~/.ssh/config` file.
+
 ### Kubernetes Commands
 
 List all Kubernetes contexts:

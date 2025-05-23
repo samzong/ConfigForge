@@ -33,10 +33,10 @@ avoiding the cumbersome and error risks of directly editing text files.
 As a completely open-source project, ConfigForge respects users' privacy and freedom.
 All code is transparent and publicly available, ensuring that your configuration is safe and reliable.
 
-### Demo for cf command
+### CLI Demo
 
 <p align="center">
-  <a href="https://asciinema.org/a/719497" target="_blank"><img src="https://asciinema.org/a/719497.svg" width="560" /></a>
+  <img src="configforge.gif" width="560" />
 </p>
 
 ## Features

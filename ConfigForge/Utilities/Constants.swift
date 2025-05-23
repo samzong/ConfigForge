@@ -8,21 +8,13 @@
 import Foundation
 
 enum AppConstants {
-    // SSH配置文件路径
     static let sshConfigPath = NSHomeDirectory() + "/.ssh/config"
-    
-    // 备份文件默认名称
     static let defaultBackupFileName = "ssh_config_backup"
-    
-    // 应用名称
     static let appName = L10n.App.name
-    
-    // 应用版本
     static var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
-    
-    // 错误消息
+
     enum ErrorMessages {
         static let fileAccessError = L10n.Message.Error.File.access
         static let invalidConfigFormat = L10n.Message.Error.Invalid.format
@@ -34,8 +26,7 @@ enum AppConstants {
         static let permissionDeniedError = L10n.Message.Error.Permission.denied
         static let entryNotFoundError = L10n.Message.Error.Entry.Not.found
     }
-    
-    // 成功消息
+
     enum SuccessMessages {
         static let configLoaded = L10n.Message.Success.Config.loaded
         static let configSaved = L10n.Message.Success.Config.saved
@@ -46,7 +37,6 @@ enum AppConstants {
         static let configRestored = L10n.Message.Success.Config.restore
     }
     
-    // 常用的SSH配置属性
     static let commonSSHProperties = [
         "HostName", 
         "User", 

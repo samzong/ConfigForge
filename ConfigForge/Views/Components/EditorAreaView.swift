@@ -2,7 +2,7 @@
 //  EditorAreaView.swift
 //  ConfigForge
 //
-//  Created by samzong
+//  Created by samzong on 4/2/25.
 //
 
 import SwiftUI
@@ -13,7 +13,6 @@ struct EditorAreaView: View {
     var body: some View {
         ZStack {
             if let selectedEntry = viewModel.selectedEntry {
-                // --- Dynamically display the correct editor based on type --- 
                 if let sshEntry = selectedEntry as? SSHConfigEntry {
                     ModernEntryEditorView(viewModel: viewModel, entry: sshEntry)
                         .id(sshEntry.id) 

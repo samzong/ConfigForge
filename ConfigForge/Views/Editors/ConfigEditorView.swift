@@ -1,22 +1,17 @@
 import SwiftUI
 
-/// Kubernetes 配置编辑器视图，支持查看和编辑配置文件
 struct ConfigEditorView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @StateObject private var viewModel = ConfigEditorViewModel()
     
     var body: some View {
         VStack(spacing: 0) {
-            // 编辑器顶部
             HStack {
-                // 文件标题
                 Text(viewModel.editorTitle)
                     .font(.title2.bold())
                     .frame(alignment: .leading)
                 
                 Spacer()
-                
-                // 编辑/保存按钮
                 Button(action: {
                     if viewModel.isEditing {
                         viewModel.saveChanges()
@@ -37,13 +32,10 @@ struct ConfigEditorView: View {
             .background(Color(NSColor.textBackgroundColor))
             
             Divider()
-            
-            // 编辑器内容区域
             if viewModel.configFile == nil {
                 EmptyEditorView()
             } else {
                 if viewModel.isEditing {
-                    // 编辑模式
                     TextEditor(text: Binding(
                         get: { viewModel.editorContent },
                         set: { viewModel.updateContent($0) }
@@ -51,7 +43,6 @@ struct ConfigEditorView: View {
                     .font(.system(.body, design: .monospaced))
                     .padding(8)
                 } else {
-                    // 查看模式
                     ScrollView {
                         Text(viewModel.editorContent)
                             .font(.system(.body, design: .monospaced))
@@ -67,7 +58,6 @@ struct ConfigEditorView: View {
             }
         }
         .onAppear {
-            // 初始加载配置文件
             if let configFile = mainViewModel.selectedConfigFile {
                 viewModel.loadConfigFile(configFile)
             }
@@ -75,7 +65,6 @@ struct ConfigEditorView: View {
     }
 }
 
-/// 配置状态标签
 struct ConfigStatusLabel: View {
     let status: KubeConfigFileStatus
     
@@ -92,8 +81,7 @@ struct ConfigStatusLabel: View {
         .foregroundColor(statusColor)
         .cornerRadius(4)
     }
-    
-    // 状态图标
+
     private var statusIcon: some View {
         switch status {
         case .valid:
@@ -107,8 +95,7 @@ struct ConfigStatusLabel: View {
                 .foregroundColor(.gray)
         }
     }
-    
-    // 状态文本
+
     private var statusText: String {
         switch status {
         case .valid:
@@ -119,8 +106,7 @@ struct ConfigStatusLabel: View {
             return "未验证"
         }
     }
-    
-    // 状态颜色
+
     private var statusColor: Color {
         switch status {
         case .valid:
@@ -133,7 +119,6 @@ struct ConfigStatusLabel: View {
     }
 }
 
-/// 空编辑器视图
 struct EmptyEditorView: View {
     var body: some View {
         VStack(spacing: 16) {

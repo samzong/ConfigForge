@@ -1,6 +1,12 @@
+//
+//  ConfigListView.swift
+//  ConfigForge
+//
+//  Created by samzong on 4/2/25. 
+//
+
 import SwiftUI
 
-/// 配置文件列表视图，显示所有发现的 Kubernetes 配置文件
 struct ConfigListView: View {
     @ObservedObject var viewModel: MainViewModel
     @State private var selectedConfigFileId: String?
@@ -13,7 +19,6 @@ struct ConfigListView: View {
     }
 }
 
-/// 配置文件列表内容视图
 private struct ConfigListContent: View {
     @ObservedObject var viewModel: MainViewModel
     @Binding var selectedConfigFileId: String?
@@ -75,7 +80,6 @@ private struct ConfigListContent: View {
     }
 }
 
-/// 单个配置文件行
 struct ConfigFileRow: View {
     let configFile: KubeConfigFile
     let isSelected: Bool
@@ -83,21 +87,16 @@ struct ConfigFileRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            // 主要内容与 HostRowView 保持一致的风格
             Text(configFile.displayName)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundColor(.primary)
-            
-            // 次要内容也与 HostRowView 一致
             HStack(spacing: 4) {
-                // 只有活跃的配置文件显示勾选标记
                 if configFile.isActive {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
                         .font(.system(size: 10))
                 } else if case .invalid = configFile.status {
-                    // 无效的配置文件显示警告图标
-                    Image(systemName: "exclamationmark.triangle.fill")
+                    Image(systemName: "exclamationmark.triangle.fill")  
                         .foregroundColor(.red)
                         .font(.system(size: 10))
                 }
@@ -114,14 +113,12 @@ struct ConfigFileRow: View {
         if configFile.isActive {
             return L10n.Kubernetes.Config.active
         } else {
-            // 简化状态显示，只显示路径
             let dirPath = configFile.filePath.deletingLastPathComponent().path
             return dirPath
         }
     }
 }
 
-/// 空状态视图，当没有配置文件时显示
 struct EmptyConfigView: View {
     @ObservedObject var viewModel: MainViewModel
     

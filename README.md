@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/Platform-macOS%2010.15%2B-brightgreen" alt="Platform">
   <img src="https://img.shields.io/badge/Swift-6.1-orange" alt="Swift">
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
+  <a href="https://deepwiki.com/samzong/ConfigForge"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
 ## Introduction

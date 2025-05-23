@@ -160,7 +160,7 @@ struct SidebarView: View {
                 case .ssh:
                     // Existing SSH add logic
                     let newHostString = L10n.Host.new
-                    let newEntry = SSHConfigEntry(host: newHostString, properties: [:])
+                    let newEntry = SSHConfigEntry(host: newHostString, directives: [])
                     viewModel.sshEntries.append(newEntry) // Add to sshEntries
                     viewModel.safelySelectEntry(newEntry)
 

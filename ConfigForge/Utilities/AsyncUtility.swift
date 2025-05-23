@@ -60,7 +60,7 @@ class AsyncUtility: ObservableObject {
         
         return {
             task?.cancel()
-            let newTask = Task { [weak self] in
+            let newTask = Task {
                 try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
                 if Task.isCancelled { return AsyncOperationResult<T>.failure(CancellationError()) }
                 

@@ -26,11 +26,34 @@ class CLISSHConfigFileManager {
 class CLISSHConfigParser {
     func parseConfig(content: String) throws -> [SSHConfigEntry] {
         var entries: [SSHConfigEntry] = []
-        var currentEntry: SSHConfigEntry?
+        var currentHost: String?
+        var currentDirectives: [(key: String, value: String)] = []
+        var inMultilineValue = false
+        var multilineKey: String?
         
         let lines = content.components(separatedBy: .newlines)
         
-        for line in lines {
+        for lineIndex in 0..<lines.count {
+            let line = lines[lineIndex]
+            
+            // Handle multiline values (lines starting with whitespace)
+            if line.first?.isWhitespace == true && inMultilineValue && multilineKey != nil {
+                if var lastDirective = currentDirectives.popLast(), lastDirective.key == multilineKey {
+                    var lineContent = line.trimmingCharacters(in: .whitespaces)
+                    if lineContent.hasSuffix("\\") {
+                        lineContent = String(lineContent.dropLast())
+                        lastDirective.value += " " + lineContent
+                        currentDirectives.append(lastDirective)
+                    } else {
+                        lastDirective.value += " " + lineContent
+                        currentDirectives.append(lastDirective)
+                        inMultilineValue = false
+                        multilineKey = nil
+                    }
+                }
+                continue
+            }
+            
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
             
             // Skip comments and empty lines
@@ -42,56 +65,58 @@ class CLISSHConfigParser {
             let components = trimmedLine.components(separatedBy: .whitespaces)
             guard components.count >= 2 else { continue }
             
-            let key = components[0].lowercased()
+            let key = components[0]
             let value = components[1...].joined(separator: " ")
+            let keyword = key.lowercased()
             
             // New Host entry starts
-            if key == "host" {
+            if keyword == "host" {
                 // Save the previous entry if exists
-                if let entry = currentEntry {
-                    entries.append(entry)
+                if let host = currentHost, !host.isEmpty {
+                    entries.append(SSHConfigEntry(host: host, directives: currentDirectives))
                 }
                 
                 // Start a new entry
-                currentEntry = SSHConfigEntry(host: value)
-            } else if var entry = currentEntry {
-                // Add the option to the current entry
-                switch key {
-                case "hostname":
-                    entry.hostname = value
-                case "user":
-                    entry.user = value
-                case "port":
-                    entry.port = value
-                case "identityfile":
-                    entry.identityFile = value
-                case "forwardagent":
-                    entry.forwardAgent = value
-                case "proxycommand":
-                    entry.proxyCommand = value
-                case "serveraliveinterval":
-                    entry.serverAliveInterval = value
-                case "serveralivecountmax":
-                    entry.serverAliveCountMax = value
-                case "stricthostkeychecking":
-                    entry.strictHostKeyChecking = value
-                case "userknownhostsfile":
-                    entry.userKnownHostsFile = value
-                case "connecttimeout":
-                    entry.connectTimeout = value
-                default:
-                    entry.otherOptions[key] = value
-                }
+                currentHost = value
+                currentDirectives = []
+            } else if currentHost != nil {
+                // Format the key properly
+                let formattedKey = formatPropertyKey(keyword)
                 
-                currentEntry = entry
+                // Handle multiline values
+                if value.hasSuffix("\\") {
+                    inMultilineValue = true
+                    multilineKey = formattedKey
+                    currentDirectives.append((key: formattedKey, value: String(value.dropLast())))
+                } else {
+                    currentDirectives.append((key: formattedKey, value: value))
+                }
             }
         }
         
         // Add the last entry
-        if let entry = currentEntry {
-            entries.append(entry)
+        if let host = currentHost, !host.isEmpty {
+            entries.append(SSHConfigEntry(host: host, directives: currentDirectives))
         }
         
         return entries
+    }
+    
+    private func formatPropertyKey(_ key: String) -> String {
+        let propertyMappings: [String: String] = [
+            "hostname": "HostName",
+            "user": "User",
+            "port": "Port",
+            "identityfile": "IdentityFile",
+            "forwardagent": "ForwardAgent",
+            "proxycommand": "ProxyCommand",
+            "serveraliveinterval": "ServerAliveInterval",
+            "serveralivecountmax": "ServerAliveCountMax",
+            "stricthostkeychecking": "StrictHostKeyChecking",
+            "userknownhostsfile": "UserKnownHostsFile",
+            "connecttimeout": "ConnectTimeout"
+        ]
+        
+        return propertyMappings[key] ?? key.capitalized
     }
 } 

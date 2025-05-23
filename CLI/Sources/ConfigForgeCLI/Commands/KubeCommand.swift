@@ -45,7 +45,7 @@ struct KubeSetCommand: ParsableCommand {
         discussion: "Set the specified file as the active Kubernetes configuration"
     )
     
-    @Argument(help: "The configuration file name to set as active")
+    @Argument(help: "The configuration number or filename to set as active")
     var filename: String
     
     func run() throws {
@@ -91,7 +91,6 @@ class KubeConfigManager {
     
     // Calculate MD5 hash for a file
     private func calculateMD5(filePath: String) throws -> String {
-        // 使用Data直接读取文件内容，避免文件句柄可能的缓存问题
         let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
         
         var digest = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
@@ -155,26 +154,34 @@ class KubeConfigManager {
         return dateFormatter.string(from: Date())
     }
     
+    // Get sorted list of config files
+    private func getSortedConfigFiles() throws -> [String] {
+        let contents = try fileManager.contentsOfDirectory(atPath: kubeConfigsDir)
+        return contents.filter { 
+            $0.hasSuffix(".yaml") || $0.hasSuffix(".yml") || $0.hasSuffix(".kubeconfig") 
+        }.sorted()
+    }
+    
     // List all Kubernetes configurations
     func listConfigurations(validate: Bool) throws {
         // Create configs directory if it doesn't exist
         try ensureConfigsDirExists()
         
-        // 确保活动配置文件存在
         guard fileManager.fileExists(atPath: activeConfigPath) else {
             print("No active Kubernetes configuration found.")
-            if let configs = try? fileManager.contentsOfDirectory(atPath: kubeConfigsDir), !configs.isEmpty {
+            if let configs = try? getSortedConfigFiles(), !configs.isEmpty {
                 print("Available configurations (none active):")
-                for config in configs {
-                    print("  \(config)")
+                for (index, config) in configs.enumerated() {
+                    print("  \(index + 1). \(config)")
                 }
+                print("")
+                print("Use 'cf k set <number>' or 'cf k set <filename>' to activate a configuration")
             } else {
                 print("No configurations found in \(kubeConfigsDir)")
             }
             return
         }
         
-        // 计算活动配置的哈希值前，确保访问的是最新文件
         try? fileManager.attributesOfItem(atPath: activeConfigPath)
         
         // Get active config hash
@@ -187,10 +194,7 @@ class KubeConfigManager {
         }
         
         // List configurations
-        let contents = try fileManager.contentsOfDirectory(atPath: kubeConfigsDir)
-        let configFiles = contents.filter { 
-            $0.hasSuffix(".yaml") || $0.hasSuffix(".yml") || $0.hasSuffix(".kubeconfig") 
-        }.sorted()
+        let configFiles = try getSortedConfigFiles()
         
         if configFiles.isEmpty {
             print("No Kubernetes configurations found in \(kubeConfigsDir)")
@@ -203,9 +207,6 @@ class KubeConfigManager {
         var activeFound = false
         var exactActiveFilename: String? = nil
         
-        // Debug output for troubleshooting
-        //print("Active config hash: \(activeConfigHash)")
-        
         // First pass - look for exact match
         for file in configFiles {
             let filePath = kubeConfigsDir + "/" + file
@@ -215,7 +216,6 @@ class KubeConfigManager {
             
             do {
                 let fileHash = try calculateMD5(filePath: filePath)
-                //print("File \(file) hash: \(fileHash)")
                 if fileHash == activeConfigHash {
                     exactActiveFilename = file
                     activeFound = true
@@ -227,8 +227,9 @@ class KubeConfigManager {
         }
         
         // Second pass - display list
-        for file in configFiles {
+        for (index, file) in configFiles.enumerated() {
             let filePath = kubeConfigsDir + "/" + file
+            let number = index + 1
             
             // Check if this is the active config
             let isActive = file == exactActiveFilename
@@ -240,20 +241,16 @@ class KubeConfigManager {
             }
             
             // Format and print
-            if isActive {
-                if !isValid && validate {
-                    print("* \(file) (active) [invalid]")
-                } else {
-                    print("* \(file) (active)")
-                }
-            } else {
-                if !isValid && validate {
-                    print("  \(file) [invalid]")
-                } else {
-                    print("  \(file)")
-                }
-            }
+            let activeMarker = isActive ? "* " : "  "
+            let validationMarker = (!isValid && validate) ? " [invalid]" : ""
+            let activeLabel = isActive ? " (active)" : ""
+            
+            print("\(activeMarker)\(number). \(file)\(activeLabel)\(validationMarker)")
         }
+        
+        print("")
+        print("Use 'cf k set <number>' or 'cf k set <filename>' to switch configuration")
+        print("Use 'cf k current' to show current active configuration")
         
         if !activeFound {
             print("\nNote: Active configuration not found in configs directory")
@@ -266,17 +263,36 @@ class KubeConfigManager {
         // Ensure configs directory exists
         try ensureConfigsDirExists()
         
-        let sourcePath = kubeConfigsDir + "/" + filename
+        let configFiles = try getSortedConfigFiles()
+        
+        if configFiles.isEmpty {
+            print("Error: No configurations found in \(kubeConfigsDir)")
+            return
+        }
+        
+        let targetFilename: String
+        
+        // Check if input is a number
+        if let index = Int(filename), index > 0, index <= configFiles.count {
+            targetFilename = configFiles[index - 1]
+            print("Selected configuration \(index): \(targetFilename)")
+        } else {
+            // Use filename directly
+            targetFilename = filename
+        }
+        
+        let sourcePath = kubeConfigsDir + "/" + targetFilename
         
         // Check if the file exists
         if !fileManager.fileExists(atPath: sourcePath) {
-            print("Error: Configuration file '\(filename)' not found in \(kubeConfigsDir)")
+            print("Error: Configuration file '\(targetFilename)' not found in \(kubeConfigsDir)")
+            print("Use 'cf k l' to see available configurations")
             return
         }
         
         // Validate the config
         if !isValidKubeConfig(filePath: sourcePath) {
-            print("Warning: '\(filename)' may not be a valid Kubernetes configuration file")
+            print("Warning: '\(targetFilename)' may not be a valid Kubernetes configuration file")
             print("Do you want to continue? (y/N): ", terminator: "")
             if let response = readLine()?.lowercased(), response != "y" {
                 print("Operation canceled")
@@ -310,7 +326,7 @@ class KubeConfigManager {
         // Move temporary file to active config path
         try fileManager.moveItem(atPath: tempPath, toPath: activeConfigPath)
         
-        print("Successfully switched active Kubernetes configuration to '\(filename)'")
+        print("Successfully switched active Kubernetes configuration to '\(targetFilename)'")
     }
     
     // Show current Kubernetes configuration
@@ -328,26 +344,26 @@ class KubeConfigManager {
         let activeConfigHash = try calculateMD5(filePath: activeConfigPath)
         
         // Try to find matching file
-        let contents = try fileManager.contentsOfDirectory(atPath: kubeConfigsDir)
-        let configFiles = contents.filter { 
-            $0.hasSuffix(".yaml") || $0.hasSuffix(".yml") || $0.hasSuffix(".kubeconfig") 
-        }
+        let configFiles = try getSortedConfigFiles()
         
         var activeFilename = "unknown"
-        for file in configFiles {
+        var activeIndex: Int? = nil
+        
+        for (index, file) in configFiles.enumerated() {
             let filePath = kubeConfigsDir + "/" + file
             let fileHash = try calculateMD5(filePath: filePath)
             
             if fileHash == activeConfigHash {
                 activeFilename = file
+                activeIndex = index + 1
                 break
             }
         }
         
-        if activeFilename == "unknown" {
-            print("Current configuration: Unknown (not in configs directory)")
+        if let index = activeIndex {
+            print("Current configuration: \(index). \(activeFilename)")
         } else {
-            print("Current configuration: \(activeFilename)")
+            print("Current configuration: Unknown (not in configs directory)")
         }
     }
 } 

@@ -1,7 +1,6 @@
 import Foundation
 import SwiftUI
 
-// 应用错误类型
 enum ConfigForgeError: LocalizedError, Sendable {
     case fileAccess(String)
     case configRead(String)
@@ -10,7 +9,6 @@ enum ConfigForgeError: LocalizedError, Sendable {
     case validation(String)
     case network(String)
     case unknown(String)
-    // Kubernetes 特定错误
     case kubeConfigNotFound
     case kubeConfigParsingFailed(String)
     case kubeConfigEncodingFailed(String)
@@ -31,14 +29,12 @@ enum ConfigForgeError: LocalizedError, Sendable {
     }
 }
 
-// 消息类型枚举
 enum MessageType: Sendable {
     case error
     case success
     case info
 }
 
-// 可识别的消息结构体
 struct AppMessage: Identifiable, Sendable {
     let id: UUID
     let type: MessageType
@@ -51,14 +47,12 @@ struct AppMessage: Identifiable, Sendable {
     }
 }
 
-// 消息处理工具
 @MainActor
 class MessageHandler: ObservableObject {
     @Published var currentMessage: AppMessage?
     private var messageQueue: [AppMessage] = []
     private var isShowingMessage = false
-    
-    // 添加一个可以用来发送消息的闭包属性，支持注入消息发送功能
+
     var messagePoster: (@Sendable (String, MessageType) -> Void)?
     
     func show(_ message: String, type: MessageType = .info, duration: TimeInterval = 1.5) {
@@ -85,7 +79,6 @@ class MessageHandler: ObservableObject {
     }
 }
 
-// 错误处理工具
 struct ErrorHandler {
     static func handle(_ error: Error, messageHandler: MessageHandler) {
         let message: String
@@ -105,7 +98,6 @@ struct ErrorHandler {
     }
 }
 
-// 视图修饰符：显示消息
 struct MessageOverlay: ViewModifier {
     @ObservedObject var messageHandler: MessageHandler
     
@@ -124,7 +116,6 @@ struct MessageOverlay: ViewModifier {
     }
 }
 
-// 消息横幅视图
 struct MessageBannerView: View {
     let message: AppMessage
     
@@ -149,7 +140,6 @@ struct MessageBannerView: View {
     }
 }
 
-// 扩展消息类型
 extension MessageType {
     var iconName: String {
         switch self {

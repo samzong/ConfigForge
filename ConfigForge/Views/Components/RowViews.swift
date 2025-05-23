@@ -2,12 +2,11 @@
 //  RowViews.swift
 //  ConfigForge
 //
-//  Created by samzong
+//  Created by samzong on 4/2/25.
 //
 
 import SwiftUI
 
-// 主机行视图
 struct HostRowView: View {
     let entry: SSHConfigEntry
     

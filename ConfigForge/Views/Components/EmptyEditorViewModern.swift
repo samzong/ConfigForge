@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// 现代化的空编辑器视图
 struct EmptyEditorViewModern: View {
     var body: some View {
         VStack(spacing: 20) {

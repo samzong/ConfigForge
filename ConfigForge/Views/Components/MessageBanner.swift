@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// 消息横幅
 struct MessageBanner: View {
     let message: AppMessage
     let onDismiss: () -> Void
@@ -24,7 +23,6 @@ struct MessageBanner: View {
             
             if message.type != .success {
                 Button(action: {
-                    // 直接调用 dismiss 操作
                     onDismiss()
                 }) {
                     Image(systemName: "xmark")

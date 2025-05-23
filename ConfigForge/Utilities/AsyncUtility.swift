@@ -1,19 +1,15 @@
 import Foundation
 import SwiftUI
 
-// 通用的异步操作结果类型
 enum AsyncOperationResult<T: Sendable>: Sendable {
     case success(T)
     case failure(Error)
 }
-
-// 通用的异步操作处理工具
 @MainActor
 class AsyncUtility: ObservableObject {
     @Published private(set) var isLoading = false
     @Published var errorMessage: String?
-    
-    // 执行异步操作的通用方法
+
     func perform<T: Sendable>(_ operation: @escaping @Sendable () async throws -> T,
                    onStart: (() -> Void)? = nil,
                    onSuccess: ((T) -> Void)? = nil,
@@ -23,7 +19,6 @@ class AsyncUtility: ObservableObject {
         onStart?()
         
         do {
-            // 在后台线程执行操作
             let result: T = try await Task.detached(operation: operation).value
             
             isLoading = false
@@ -36,8 +31,7 @@ class AsyncUtility: ObservableObject {
             return .failure(error)
         }
     }
-    
-    // 带重试的异步操作
+
     func performWithRetry<T: Sendable>(_ operation: @escaping @Sendable () async throws -> T,
                             retryCount: Int = 3,
                             retryDelay: TimeInterval = 1.0) async -> AsyncOperationResult<T> {
@@ -59,8 +53,7 @@ class AsyncUtility: ObservableObject {
         
         return .failure(ConfigForgeError.unknown("Maximum retry attempts reached"))
     }
-    
-    // 防抖动执行异步操作
+
     func debounce<T: Sendable>(for duration: TimeInterval = 0.5,
                      operation: @escaping @Sendable () async throws -> T) -> () -> Task<AsyncOperationResult<T>, Never> {
         var task: Task<AsyncOperationResult<T>, Never>?
@@ -84,7 +77,6 @@ class AsyncUtility: ObservableObject {
     }
 }
 
-// 视图修饰符：显示加载状态
 struct LoadingOverlay: ViewModifier {
     let isLoading: Bool
     

@@ -7,43 +7,17 @@
 
 import Foundation
 import SwiftUI
-
-/// 本地化工具类，用于提供本地化字符串
 class LocalizationManager {
-    
-    /// 获取本地化字符串
-    /// - Parameter key: 本地化键
-    /// - Returns: 本地化后的字符串
     static func localizedString(for key: String) -> String {
         return NSLocalizedString(key, bundle: .main, comment: "")
     }
-    
-    /// 获取格式化的本地化字符串
-    /// - Parameters:
-    ///   - key: 本地化键
-    ///   - arguments: 格式化参数
-    /// - Returns: 格式化后的本地化字符串
+
     static func localizedString(for key: String, _ arguments: CVarArg...) -> String {
         let format = NSLocalizedString(key, bundle: .main, comment: "")
         return String(format: format, arguments: arguments)
     }
 }
 
-/// 便捷访问本地化字符串的扩展
-// extension String {
-//    // Renamed to avoid conflict with other extensions
-//    var cfLocalized: String {
-//        return LocalizationManager.localizedString(for: self)
-//    }
-//    
-//    // Renamed to avoid conflict with other extensions
-//    func cfLocalized(with arguments: CVarArg...) -> String {
-//        let format = NSLocalizedString(self, bundle: .main, comment: "")
-//        return String(format: format, arguments: arguments)
-//    }
-// }
-
-/// 本地化文本视图
 struct LocalizedText: View {
     let key: String
     let args: [CVarArg]

@@ -1,14 +1,6 @@
-//
-//  ContentView.swift
-//  ConfigForge
-//
-//  Created by samzong on 4/2/25.
-//
 
 import SwiftUI
 import UniformTypeIdentifiers
-
-// MARK: - Main Content View
 
 struct ContentView: View {
     @StateObject private var viewModel = MainViewModel()
@@ -16,23 +8,17 @@ struct ContentView: View {
     @State private var isShowingBackupFilePicker = false
     
     var body: some View {
-        // Main layout using extracted components
         HStack(spacing: 0) {
             SidebarView(viewModel: viewModel)
             
-            Rectangle().fill(Color.gray.opacity(0.2)).frame(width: 1) // Divider
-            
-            // 根据选择的配置类型决定显示内容
+            Rectangle().fill(Color.gray.opacity(0.2)).frame(width: 1) 
             if viewModel.selectedConfigurationType == .kubernetes {
-                // 显示 Kubernetes 配置文件编辑器
                 ConfigEditorView()
                     .environmentObject(viewModel)
             } else {
-                // 显示 SSH 编辑器区域
                 EditorAreaView(viewModel: viewModel)
             }
         }
-        // Apply original modifiers
         .frame(minWidth: 800, minHeight: 500)
         .background(Color(.windowBackgroundColor))
         .fileExporter(
@@ -44,7 +30,6 @@ struct ContentView: View {
         ) { [viewModel] result in
             switch result {
             case .success(let url):
-                // Call the appropriate backup method based on selected type
                 switch viewModel.selectedConfigurationType {
                 case .ssh:
                     viewModel.backupSshConfig(to: url)
@@ -64,8 +49,6 @@ struct ContentView: View {
         .loadingOverlay(isLoading: viewModel.getAsyncUtility().isLoading)
         .messageOverlay(messageHandler: viewModel.getMessageHandler())
     }
-    
-    // MARK: - File Import Handling
     private func handleFileImport(result: Result<URL, Error>) {
         switch result {
         case .success(let url):
@@ -74,21 +57,17 @@ struct ContentView: View {
                 viewModel.postMessage(L10n.Error.cannotAccessImportFile, type: .error)
                 return
             }
-            // Call the restore method (using explicit self) within a Task
             Task {
                 self.viewModel.restoreCurrentConfig(from: url)
             }
             url.stopAccessingSecurityScopedResource()
         case .failure(let error):
             print("File import error: \(error.localizedDescription)")
-            // Handle cancellation or other errors
              if error.localizedDescription != "The operation couldn't be completed. (SwiftUI.FileImporterPlatformSupport/EK_DEF_CANCEL error 1.)" {
                 viewModel.postMessage(L10n.Error.fileImportFailed(error.localizedDescription), type: .error)
              }
         }
     }
-
-    // MARK: - Helper Functions
     private func formatCurrentConfigContent(viewModel: MainViewModel) -> String {
         switch viewModel.selectedConfigurationType {
         case .ssh:

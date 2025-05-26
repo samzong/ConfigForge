@@ -39,21 +39,21 @@ struct ConfigDocument: FileDocument, Sendable {
               let stringContent = String(data: data, encoding: .utf8) else {
             throw CocoaError(.fileReadCorruptFile)
         }
-        self.content = stringContent
+        content = stringContent
         if configuration.contentType == .yaml || stringContent.contains("apiVersion:") {
-            self.contentType = .kubernetes
+            contentType = .kubernetes
         } else if configuration.contentType == .text {
-            self.contentType = .ssh
+            contentType = .ssh
         }
         else {
-             self.contentType = .unknown
-             print("Warning: Could not determine config type during read.")
+            contentType = .unknown
+            print("Warning: Could not determine config type during read.")
         }
 
     }
     init(content: String, type: ConfigContentType) {
         self.content = content
-        self.contentType = type
+        contentType = type
     }
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         guard let data = content.data(using: .utf8) else {

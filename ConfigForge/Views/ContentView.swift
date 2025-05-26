@@ -58,14 +58,14 @@ struct ContentView: View {
                 return
             }
             Task {
-                self.viewModel.restoreCurrentConfig(from: url)
+                viewModel.restoreCurrentConfig(from: url)
             }
             url.stopAccessingSecurityScopedResource()
         case .failure(let error):
             print("File import error: \(error.localizedDescription)")
-             if error.localizedDescription != "The operation couldn't be completed. (SwiftUI.FileImporterPlatformSupport/EK_DEF_CANCEL error 1.)" {
+            if error.localizedDescription != "The operation couldn't be completed. (SwiftUI.FileImporterPlatformSupport/EK_DEF_CANCEL error 1.)" {
                 viewModel.postMessage(L10n.Error.fileImportFailed(error.localizedDescription), type: .error)
-             }
+            }
         }
     }
     private func formatCurrentConfigContent(viewModel: MainViewModel) -> String {
@@ -84,9 +84,9 @@ struct ContentView: View {
     
     private func defaultBackupFilename(for type: ConfigType) -> String {
         let timestamp = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
-                           .replacingOccurrences(of: "/", with: "-")
-                           .replacingOccurrences(of: ":", with: "-")
-                           .replacingOccurrences(of: " ", with: "_")
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: ":", with: "-")
+            .replacingOccurrences(of: " ", with: "_")
         switch type {
         case .ssh:
             let baseName = SSHConfigConstants.defaultBackupFileName 

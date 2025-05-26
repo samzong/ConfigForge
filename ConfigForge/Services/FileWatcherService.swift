@@ -199,7 +199,7 @@ class FileWatcherService: @unchecked Sendable {
         )
         source.setEventHandler { [weak self] in
             guard let self = self else { return }
-            self.operationQueue.async {
+            operationQueue.async {
                 let flags = source.data
                 let url = URL(fileURLWithPath: path)
                 
@@ -222,7 +222,7 @@ class FileWatcherService: @unchecked Sendable {
         }
         
         source.resume()
-        self.watchedPaths[path] = source
+        watchedPaths[path] = source
     }
     
     private func setupFileMonitor(_ path: String) {
@@ -239,7 +239,7 @@ class FileWatcherService: @unchecked Sendable {
         )
         source.setEventHandler { [weak self] in
             guard let self = self else { return }
-            self.operationQueue.async {
+            operationQueue.async {
                 let flags = source.data
                 let url = URL(fileURLWithPath: path)
                 
@@ -262,7 +262,7 @@ class FileWatcherService: @unchecked Sendable {
         }
         
         source.resume()
-        self.watchedPaths[path] = source
+        watchedPaths[path] = source
     }
 
     private func rescanDirectory(_ directoryURL: URL) {
@@ -275,7 +275,7 @@ class FileWatcherService: @unchecked Sendable {
             
             for fileURL in contents {
                 let filePath = fileURL.path
-                if self.watchedPaths[filePath] == nil {
+                if watchedPaths[filePath] == nil {
                     fileChangesSubject.send(.created(fileURL))
                     _ = watchFile(fileURL)
                 }

@@ -3,14 +3,14 @@ import SwiftUI
 struct ConfigEditorView: View {
     @EnvironmentObject var mainViewModel: MainViewModel
     @StateObject private var viewModel = ConfigEditorViewModel()
-    
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Text(viewModel.editorTitle)
                     .font(.title2.bold())
                     .frame(alignment: .leading)
-                
+
                 Spacer()
                 Button(action: {
                     if viewModel.isEditing {
@@ -26,11 +26,11 @@ struct ConfigEditorView: View {
                 .buttonStyle(BorderedButtonStyle())
                 .controlSize(.large)
                 .disabled(!viewModel.isEditing && (viewModel.configFile?.status != .valid || 
-                          viewModel.configFile == nil))
+                        viewModel.configFile == nil))
             }
             .padding()
             .background(Color(NSColor.textBackgroundColor))
-            
+
             Divider()
             if viewModel.configFile == nil {
                 EmptyEditorView()
@@ -67,11 +67,11 @@ struct ConfigEditorView: View {
 
 struct ConfigStatusLabel: View {
     let status: KubeConfigFileStatus
-    
+
     var body: some View {
         HStack(spacing: 4) {
             statusIcon
-            
+
             Text(statusText)
                 .font(.caption)
         }
@@ -127,11 +127,11 @@ struct EmptyEditorView: View {
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
                 .padding(.bottom, 10)
-            
+
             Text(L10n.Kubernetes.noSelection)
                 .font(.title3)
                 .foregroundColor(.primary)
-            
+
             Text(L10n.Kubernetes.selectOrCreate)
                 .font(.subheadline)
                 .foregroundColor(.secondary)

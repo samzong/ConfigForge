@@ -109,9 +109,9 @@ class KubeConfigManager {
             
             // Basic validation - check if required fields exist
             return yamlString.contains("apiVersion") &&
-                   yamlString.contains("clusters") &&
-                   yamlString.contains("contexts") &&
-                   yamlString.contains("users")
+                yamlString.contains("clusters") &&
+                yamlString.contains("contexts") &&
+                yamlString.contains("users")
         } catch {
             return false
         }

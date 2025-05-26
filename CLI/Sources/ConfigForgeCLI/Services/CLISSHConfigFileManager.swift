@@ -16,7 +16,7 @@ class CLISSHConfigFileManager {
     func readConfigFile() throws -> String {
         if !fileManager.fileExists(atPath: sshConfigPath) {
             throw NSError(domain: "CLISSHConfigFileManager", code: 1, 
-                         userInfo: [NSLocalizedDescriptionKey: "SSH config file does not exist at \(sshConfigPath)"])
+                          userInfo: [NSLocalizedDescriptionKey: "SSH config file does not exist at \(sshConfigPath)"])
         }
         
         return try String(contentsOfFile: sshConfigPath, encoding: .utf8)

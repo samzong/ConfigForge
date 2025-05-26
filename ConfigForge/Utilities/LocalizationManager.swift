@@ -21,12 +21,12 @@ class LocalizationManager {
 struct LocalizedText: View {
     let key: String
     let args: [CVarArg]
-    
+
     init(_ key: String, _ args: CVarArg...) {
         self.key = key
         self.args = args
     }
-    
+
     var body: some View {
         if args.isEmpty {
             let localizedString = NSLocalizedString(key, bundle: .main, comment: "")

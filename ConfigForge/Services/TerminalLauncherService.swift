@@ -4,7 +4,7 @@ import AppKit
 struct TerminalApp: Sendable {
     let name: String
     let bundleIdentifier: String
-    
+
     init(name: String, bundleIdentifier: String) {
         self.name = name
         self.bundleIdentifier = bundleIdentifier
@@ -18,12 +18,12 @@ actor TerminalLauncherService {
     ]
     static let shared = TerminalLauncherService()
     private var permissionRequested = false
-    
+
     private init() {}
 
     func getInstalledTerminalApps() async -> [TerminalApp] {
         var result: [TerminalApp] = []
-        
+
         for app in Self.supportedTerminalApps {
             let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleIdentifier)
             let isInstalled = url != nil
@@ -32,7 +32,7 @@ actor TerminalLauncherService {
                     "/System/Applications/Utilities/Terminal.app",
                     "/Applications/Utilities/Terminal.app"
                 ]
-                
+
                 for path in standardPaths {
                     let fileExists = FileManager.default.fileExists(atPath: path)
                     if fileExists {
@@ -62,7 +62,7 @@ actor TerminalLauncherService {
             let escapedPath = expandedPath.replacingOccurrences(of: " ", with: "\\ ")
             sshCommand += " -i \(escapedPath)"
         }
-        
+
         return await launchTerminalWithCommand(terminal: terminal, command: sshCommand)
     }
 
@@ -106,7 +106,7 @@ actor TerminalLauncherService {
         var error: NSDictionary?
         if let appleScript = NSAppleScript(source: script) {
             _ = appleScript.executeAndReturnError(&error)
-            
+
             if let error = error {
                 if let errorNumber = error["NSAppleScriptErrorNumber"] as? Int, 
                    (errorNumber == -1743 || errorNumber == -1744) {
@@ -123,11 +123,11 @@ actor TerminalLauncherService {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         process.arguments = ["-e", script]
-        
+
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = pipe
-        
+
         do {
             try process.run()
             process.waitUntilExit()
@@ -180,7 +180,7 @@ actor TerminalLauncherService {
                 _ = await executeWithOsascript(script: script)
             }
         }
-        
+
         permissionRequested = true
     }
 }

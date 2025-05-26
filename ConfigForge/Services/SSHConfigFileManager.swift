@@ -12,10 +12,10 @@ extension SSHConfigFileManager: @unchecked Sendable {}
 class SSHConfigFileManager {
     private let fileManager: FileManager
     private let sshConfigPath: String
-    
+
     init(fileManager: FileManager = .default) {
         self.fileManager = fileManager
-        self.sshConfigPath = NSHomeDirectory() + "/.ssh/config"
+        sshConfigPath = NSHomeDirectory() + "/.ssh/config"
     }
 
     private func checkFileAccess() -> Result<Void, ConfigForgeError> {
@@ -37,11 +37,11 @@ class SSHConfigFileManager {
         if !fileManager.isReadableFile(atPath: sshConfigPath) {
             return .failure(.fileAccess("没有SSH配置文件的读取权限"))
         }
-        
+
         if !fileManager.isWritableFile(atPath: sshConfigPath) {
             return .failure(.fileAccess("没有SSH配置文件的写入权限"))
         }
-        
+
         return .success(())
     }
 
@@ -50,7 +50,7 @@ class SSHConfigFileManager {
         if case .failure(let error) = accessCheck {
             throw error
         }
-        
+
         do {
             let content = try String(contentsOfFile: sshConfigPath, encoding: .utf8)
             return content
@@ -94,16 +94,16 @@ class SSHConfigFileManager {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyyMMdd_HHmmss"
             let timestamp = dateFormatter.string(from: Date())
-            
+
             let backupFileName = "config_backup_\(timestamp)"
             let backupURL = destination.appendingPathComponent(backupFileName)
-            
+
             try content.write(to: backupURL, atomically: true, encoding: .utf8)
         } catch {
             throw ConfigForgeError.configWrite("备份SSH配置文件失败: \(error.localizedDescription)")
         }
     }
-    
+
     func restoreConfigFile(from source: URL) async throws -> String {
         do {
             return try String(contentsOf: source, encoding: .utf8)

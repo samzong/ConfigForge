@@ -18,7 +18,7 @@ class CLITerminalService {
             exit(0)
         } catch {
             throw NSError(domain: "CLITerminalService", code: 1, 
-                         userInfo: [NSLocalizedDescriptionKey: "Failed to connect to SSH host: \(error.localizedDescription)"])
+                          userInfo: [NSLocalizedDescriptionKey: "Failed to connect to SSH host: \(error.localizedDescription)"])
         }
     }
 } 

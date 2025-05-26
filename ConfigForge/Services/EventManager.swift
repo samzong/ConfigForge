@@ -29,31 +29,31 @@ final class EventManager: @unchecked Sendable {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] fileEvent in
                 guard let self = self else { return }
-                
+
                 switch fileEvent {
                 case .created(let url):
                     if url.pathExtension.lowercased() == "yaml" || url.pathExtension.lowercased() == "yml" {
-                        self.eventsSubject.send(.configFileAdded(url))
+                        eventsSubject.send(.configFileAdded(url))
                     }
-                    
+
                 case .modified(let url):
                     if url.pathExtension.lowercased() == "yaml" || url.pathExtension.lowercased() == "yml" {
-                        self.eventsSubject.send(.configFileChanged(url))
+                        eventsSubject.send(.configFileChanged(url))
                     }
-                    
+
                 case .deleted(let url):
                     if url.pathExtension.lowercased() == "yaml" || url.pathExtension.lowercased() == "yml" {
-                        self.eventsSubject.send(.configFileRemoved(url))
+                        eventsSubject.send(.configFileRemoved(url))
                     }
-                    
+
                 case .renamed(oldURL: _, newURL: let newURL):
                     if newURL.pathExtension.lowercased() == "yaml" || newURL.pathExtension.lowercased() == "yml" {
-                        self.eventsSubject.send(.configFileAdded(newURL))
+                        eventsSubject.send(.configFileAdded(newURL))
                     }
-                    
+
                 case .directoryChanged(let url):
                     if url.lastPathComponent == "configs" {
-                        self.eventsSubject.send(.reloadConfigRequested)
+                        eventsSubject.send(.reloadConfigRequested)
                     }
                 }
             }
@@ -66,7 +66,7 @@ final class EventManager: @unchecked Sendable {
             try kubeConfigFileManager.ensureConfigsDirectoryExists()
             if let configDir = try? kubeConfigFileManager.getConfigsDirectoryPath() {
                 return fileWatcher.watchDirectory(configDir, fileExtension: "yaml") &&
-                       fileWatcher.watchDirectory(configDir, fileExtension: "yml")
+                    fileWatcher.watchDirectory(configDir, fileExtension: "yml")
             }
             return false
         } catch {

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EditorAreaView: View {
     @ObservedObject var viewModel: MainViewModel
-    
+
     var body: some View {
         ZStack {
             if let selectedEntry = viewModel.selectedEntry {

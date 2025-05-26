@@ -15,11 +15,11 @@ struct EmptyEditorViewModern: View {
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
                 .padding(.bottom, 10)
-            
+
             LocalizedText("editor.empty.title")
                 .font(.title3)
                 .foregroundColor(.primary)
-            
+
             LocalizedText("editor.empty.description")
                 .font(.subheadline)
                 .foregroundColor(.secondary)

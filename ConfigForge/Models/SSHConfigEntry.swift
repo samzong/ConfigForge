@@ -14,7 +14,7 @@ struct SSHConfigEntry: Identifiable, Hashable, Sendable {
     
     // Default initializer that generates a new UUID
     init(host: String, directives: [(key: String, value: String)] = []) {
-        self.id = UUID()
+        id = UUID()
         self.host = host
         self.directives = directives
     }

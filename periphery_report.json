@@ -1,0 +1,2552 @@
+[
+  {
+    "ids" : [
+      "s:11ConfigForge4L10nO11CustomErrorO"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/L10nExtensions.swift:5:17",
+    "name" : "CustomError",
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "enum",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO4KubeO"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/L10nExtensions.swift:10:17",
+    "modifiers" : [
+      "public"
+    ],
+    "name" : "Kube",
+    "accessibility" : "public"
+  },
+  {
+    "name" : "cancel",
+    "accessibility" : "public",
+    "modifiers" : [
+      "static",
+      "public"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO3AppO6cancelSSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:15:23",
+    "kind" : "var.static",
+    "attributes" : [
+
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "name" : "confirm",
+    "kind" : "var.static",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "public",
+    "modifiers" : [
+      "static",
+      "public"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO3AppO7confirmSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:17:23"
+  },
+  {
+    "kind" : "var.static",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public",
+      "static"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:23:23",
+    "accessibility" : "public",
+    "name" : "error",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO3AppO5errorSSvpZ"
+    ]
+  },
+  {
+    "kind" : "var.static",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "static",
+      "public"
+    ],
+    "name" : "name",
+    "ids" : [
+      "s:11ConfigForge4L10nO3AppO4nameSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:25:23",
+    "accessibility" : "public"
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:29:23",
+    "kind" : "var.static",
+    "name" : "success",
+    "accessibility" : "public",
+    "ids" : [
+      "s:11ConfigForge4L10nO3AppO7successSSvpZ"
+    ],
+    "modifiers" : [
+      "static",
+      "public"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "modifiers" : [
+      "public"
+    ],
+    "accessibility" : "public",
+    "name" : "Button",
+    "ids" : [
+      "s:11ConfigForge4L10nO6ButtonO"
+    ],
+    "kind" : "enum",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:35:15",
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "name" : "Editor",
+    "accessibility" : "public",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public"
+    ],
+    "kind" : "enum",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:39:15",
+    "ids" : [
+      "s:11ConfigForge4L10nO6EditorO"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+      "public",
+      "static"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO4HostO7invalidSSvpZ"
+    ],
+    "kind" : "var.static",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "invalid",
+    "accessibility" : "public",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:61:23"
+  },
+  {
+    "kind" : "var.static",
+    "accessibility" : "public",
+    "ids" : [
+      "s:11ConfigForge4L10nO10KubernetesO0A0O6backupSSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public",
+      "static"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:82:25",
+    "name" : "backup"
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge4L10nO10KubernetesO0A0O6deleteSSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:84:25",
+    "attributes" : [
+
+    ],
+    "kind" : "var.static",
+    "name" : "delete",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public",
+      "static"
+    ],
+    "accessibility" : "public"
+  },
+  {
+    "name" : "saved",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO10KubernetesO0A0O5savedSSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:86:25",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static",
+      "public"
+    ],
+    "accessibility" : "public",
+    "kind" : "var.static"
+  },
+  {
+    "name" : "Delete",
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:89:19",
+    "modifiers" : [
+      "public"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO10KubernetesO0A0O6DeleteO"
+    ]
+  },
+  {
+    "accessibility" : "public",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:96:17",
+    "modifiers" : [
+      "public"
+    ],
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO6BackupO"
+    ],
+    "name" : "Backup",
+    "attributes" : [
+
+    ]
+  },
+  {
+    "name" : "Backup",
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO6BackupO"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:103:19",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "public"
+    ],
+    "accessibility" : "public"
+  },
+  {
+    "kind" : "enum",
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO5EntryO"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:119:19",
+    "name" : "Entry",
+    "modifiers" : [
+      "public"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:125:19",
+    "accessibility" : "public",
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO6ExportO"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "public"
+    ],
+    "name" : "Export"
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO4FileO"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "File",
+    "kind" : "enum",
+    "modifiers" : [
+      "public"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:131:19"
+  },
+  {
+    "modifiers" : [
+      "public"
+    ],
+    "accessibility" : "public",
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO6ImportO"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:135:19",
+    "kind" : "enum",
+    "hints" : [
+      "unused"
+    ],
+    "name" : "Import"
+  },
+  {
+    "accessibility" : "public",
+    "kind" : "enum",
+    "name" : "Invalid",
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO7InvalidO"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "public"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:141:19"
+  },
+  {
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+      "public"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO10PermissionO"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "public",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:147:19",
+    "kind" : "enum",
+    "name" : "Permission"
+  },
+  {
+    "kind" : "enum",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "name" : "Restore",
+    "accessibility" : "public",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:151:19",
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO5ErrorO7RestoreO"
+    ],
+    "modifiers" : [
+      "public"
+    ]
+  },
+  {
+    "kind" : "enum",
+    "modifiers" : [
+      "public"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO4HostO"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "name" : "Host",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:156:17"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "public",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:170:17",
+    "modifiers" : [
+      "public"
+    ],
+    "kind" : "enum",
+    "name" : "Restore",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO7MessageO7RestoreO"
+    ]
+  },
+  {
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:245:19",
+    "name" : "In",
+    "kind" : "enum",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO8TerminalO4OpenO2InO"
+    ],
+    "accessibility" : "public",
+    "modifiers" : [
+      "public"
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Generated/Strings.swift:252:17",
+    "kind" : "enum",
+    "name" : "Permission",
+    "attributes" : [
+
+    ],
+    "accessibility" : "public",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge4L10nO8TerminalO10PermissionO"
+    ],
+    "modifiers" : [
+      "public"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "modifiers" : [
+
+    ],
+    "kind" : "var.instance",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Models/ConfigDocument.swift:16:9",
+    "name" : "defaultFilenameExtension",
+    "ids" : [
+      "s:11ConfigForge0A11ContentTypeO24defaultFilenameExtensionSSvp"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Models/Documents/SSHConfigDocument.swift:12:8",
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge17SSHConfigDocumentV"
+    ],
+    "name" : "SSHConfigDocument",
+    "kind" : "struct",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge12ErrorMessageV"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "name" : "ErrorMessage",
+    "modifiers" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Models/ErrorMessage.swift:10:8",
+    "kind" : "struct"
+  },
+  {
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "kind" : "var.instance",
+    "ids" : [
+      "s:11ConfigForge14SSHConfigEntryV11isPortValidSbvp"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Models/SSHConfigEntry.swift:44:9",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "isPortValid",
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge14SSHConfigEntryV15isHostNameValidSbvp"
+    ],
+    "kind" : "var.instance",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Models/SSHConfigEntry.swift:55:9",
+    "name" : "isHostNameValid",
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge12EventManagerC19stopAllFileWatchingSbyF"
+    ],
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "name" : "stopAllFileWatching()",
+    "attributes" : [
+      "discardableResult"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/EventManager.swift:88:10"
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/EventManager.swift:92:10",
+    "accessibility" : "internal",
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge12EventManagerC7publishyyAA03AppC0OF"
+    ],
+    "name" : "publish(_:)",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "name" : "publishNotification(_:type:)",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge12EventManagerC19publishNotification_4typeySS_AA11MessageTypeOtF"
+    ],
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/EventManager.swift:95:10",
+    "kind" : "function.method.instance"
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/EventManager.swift:98:10",
+    "ids" : [
+      "s:11ConfigForge12EventManagerC07requestA6ReloadyyF"
+    ],
+    "name" : "requestConfigReload()",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "kind" : "function.method.instance"
+  },
+  {
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/FileWatcherService.swift:67:10",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge18FileWatcherServiceC12stopWatchingyySSF"
+    ],
+    "name" : "stopWatching(_:)"
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/FileWatcherService.swift:131:10",
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge18FileWatcherServiceC06renameC04from2toSb10Foundation3URLV_AItF"
+    ],
+    "attributes" : [
+      "discardableResult"
+    ],
+    "name" : "renameFile(from:to:)",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/FileWatcherService.swift:155:10",
+    "name" : "copyFile(from:to:newFileName:)",
+    "attributes" : [
+      "discardableResult"
+    ],
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge18FileWatcherServiceC04copyC04from2to03newC4NameSb10Foundation3URLV_AJSSSgtF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:84:10",
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC04saveA07contents6ResultOyytAA0aB5ErrorOGSS_tF"
+    ],
+    "accessibility" : "internal",
+    "kind" : "function.method.instance",
+    "name" : "saveConfig(content:)",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:98:10",
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "backupConfig(content:to:)",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC06backupA07content2toySS_10Foundation3URLVtYaKF"
+    ],
+    "kind" : "function.method.instance"
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:106:10",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC07restoreA04froms6ResultOySSAA0aB5ErrorOG10Foundation3URLV_tYaF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "function.method.instance",
+    "name" : "restoreConfig(from:)"
+  },
+  {
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC19createDefaultBackups6ResultOyytAA0aB5ErrorOGyYaF"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:131:10",
+    "name" : "createDefaultBackup()",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal"
+  },
+  {
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:197:10",
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "function.method.instance",
+    "name" : "createCustomBackup(content:customName:)",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC18createCustomBackup7content10customNames6ResultOy10Foundation3URLVAA0aB5ErrorOGSS_SSSgtYaF"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "name" : "restoreConfigFile(_:)",
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC07restoreaD0ys6ResultOyytAA0aB5ErrorOGAA0caD0VYaF"
+    ],
+    "kind" : "function.method.instance",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:225:10"
+  },
+  {
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC14getBackupFiless6ResultOySayAA0caD0VGAA0aB5ErrorOGyYaF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:266:10",
+    "name" : "getBackupFiles()",
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "name" : "deleteBackupFile(_:)",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:295:10",
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC012deleteBackupD0ys6ResultOyytAA0aB5ErrorOGAA0caD0VF"
+    ],
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "name" : "switchToConfig(_:)",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC08switchToA0ys6ResultOyytAA0aB5ErrorOGAA0caD0VYaF"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:309:10",
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "function.method.instance",
+    "name" : "createConfigFile(content:fileName:)",
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC06createaD07content8fileNames6ResultOyAA0caD0VAA0aB5ErrorOGSS_SStYaF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:313:10"
+  },
+  {
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC06updateaD0_4withs6ResultOyAA0caD0VAA0aB5ErrorOGAI_SStYaF"
+    ],
+    "name" : "updateConfigFile(_:with:)",
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:346:10",
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC09duplicateaD0_03newD4Names6ResultOyAA0caD0VAA0aB5ErrorOGAI_SStYaF"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:386:10",
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "name" : "duplicateConfigFile(_:newFileName:)",
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "kind" : "function.method.instance",
+    "modifiers" : [
+
+    ],
+    "name" : "renameConfigFile(_:to:)",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC06renameaD0_2tos6ResultOyAA0caD0VAA0aB5ErrorOGAI_SStF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:393:10"
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge04KubeA11FileManagerC06deleteaD0ys6ResultOyytAA0aB5ErrorOGAA0caD0VF"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/KubeConfigFileManager.swift:426:10",
+    "accessibility" : "internal",
+    "name" : "deleteConfigFile(_:)",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "attributes" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge20SSHConfigFileManagerC07restoreaD04fromSS10Foundation3URLV_tYaKF"
+    ],
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "restoreConfigFile(from:)",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/SSHConfigFileManager.swift:107:10"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "validateEntry(entry:existingEntries:)",
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Services/SSHConfigParser.swift:140:10",
+    "ids" : [
+      "s:11ConfigForge15SSHConfigParserC13validateEntry5entry15existingEntriesSbAA0cF0V_SayAHGtF"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "ConfigForgeConstants",
+    "attributes" : [
+
+    ],
+    "kind" : "struct",
+    "ids" : [
+      "s:11ConfigForge0aB9ConstantsV"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/AppConstants.swift:6:8"
+  },
+  {
+    "ids" : [
+      "param-retryCount-perform(_:onStart:onSuccess:onError:retryCount:)-s:11ConfigForge12AsyncUtilityC7perform_7onStart0F7Success0F5Error10retryCountAA0C15OperationResultOyxGxyYaYbKc_yycSgyxcSgys0I0_pcSgSitYas8SendableRzlF"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "name" : "retryCount",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/AsyncUtility.swift:17:31",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "var.parameter"
+  },
+  {
+    "name" : "performWithRetry(_:retryCount:retryDelay:)",
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge12AsyncUtilityC16performWithRetry_10retryCount0H5DelayAA0C15OperationResultOyxGxyYaYbKc_SiSdtYas8SendableRzlF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/AsyncUtility.swift:35:10",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/AsyncUtility.swift:57:10",
+    "modifiers" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "name" : "debounce(for:operation:)",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AsyncUtilityC8debounce3for9operationScTyAA0C15OperationResultOyxGs5NeverOGycSd_xyYaYbKcts8SendableRzlF"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "kind" : "var.static",
+    "modifiers" : [
+      "static"
+    ],
+    "name" : "sshConfigPath",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:11:16",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO03sshA4PathSSvpZ"
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO21defaultBackupFileNameSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:12:16",
+    "modifiers" : [
+      "static"
+    ],
+    "name" : "defaultBackupFileName",
+    "kind" : "var.static",
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal"
+  },
+  {
+    "kind" : "var.static",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "name" : "appName",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:13:16",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO7appNameSSvpZ"
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "appVersion",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO10appVersionSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:14:16",
+    "kind" : "var.static",
+    "modifiers" : [
+      "static"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO010fileAccessE0SSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "fileAccessError",
+    "modifiers" : [
+      "static"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:19:20",
+    "kind" : "var.static",
+    "accessibility" : "internal"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "var.static",
+    "attributes" : [
+
+    ],
+    "name" : "invalidConfigFormat",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO07invalidA6FormatSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:20:20",
+    "modifiers" : [
+      "static"
+    ]
+  },
+  {
+    "kind" : "var.static",
+    "modifiers" : [
+      "static"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:21:20",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "name" : "duplicateHostError",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO013duplicateHostE0SSvpZ"
+    ]
+  },
+  {
+    "modifiers" : [
+      "static"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO12backupFailedSSvpZ"
+    ],
+    "kind" : "var.static",
+    "name" : "backupFailed",
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:23:20"
+  },
+  {
+    "kind" : "var.static",
+    "hints" : [
+      "unused"
+    ],
+    "name" : "restoreFailed",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "modifiers" : [
+      "static"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO13restoreFailedSSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:24:20"
+  },
+  {
+    "accessibility" : "internal",
+    "kind" : "var.static",
+    "modifiers" : [
+      "static"
+    ],
+    "name" : "invalidPortError",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO011invalidPortE0SSvpZ"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:25:20"
+  },
+  {
+    "modifiers" : [
+      "static"
+    ],
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "name" : "permissionDeniedError",
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO016permissionDeniedE0SSvpZ"
+    ],
+    "kind" : "var.static",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:26:20",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "accessibility" : "internal",
+    "name" : "entryNotFoundError",
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO13ErrorMessagesO013entryNotFoundE0SSvpZ"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "var.static",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:27:20",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO15SuccessMessagesO"
+    ],
+    "modifiers" : [
+
+    ],
+    "name" : "SuccessMessages",
+    "kind" : "enum",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:30:10",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "modifiers" : [
+      "static"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "var.static",
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge12AppConstantsO19commonSSHPropertiesSaySSGvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/Constants.swift:40:16",
+    "name" : "commonSSHProperties",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "kind" : "var.parameter",
+    "modifiers" : [
+
+    ],
+    "name" : "duration",
+    "accessibility" : "internal",
+    "ids" : [
+      "param-duration-show(_:type:duration:)-s:11ConfigForge14MessageHandlerC4show_4type8durationySS_AA0C4TypeOSdtF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/ErrorHandling.swift:58:61",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:25:10",
+    "kind" : "function.method.instance",
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC05writeC07content2to12createBackups6ResultOyytAA0aB5ErrorOGSS_10Foundation3URLVSbtF"
+    ],
+    "name" : "writeFile(content:to:createBackup:)"
+  },
+  {
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:49:10",
+    "attributes" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC04copyC04from2to9overwrites6ResultOyytAA0aB5ErrorOG10Foundation3URLV_AOSbtF"
+    ],
+    "name" : "copyFile(from:to:overwrite:)",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "name" : "moveFile(from:to:)",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC04moveC04from2tos6ResultOyytAA0aB5ErrorOG10Foundation3URLV_ANtF"
+    ],
+    "kind" : "function.method.instance",
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:71:10"
+  },
+  {
+    "kind" : "function.method.instance",
+    "name" : "deleteFile(at:)",
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC06deleteC02ats6ResultOyytAA0aB5ErrorOG10Foundation3URLV_tF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:87:10"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:101:10",
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC03getC10Attributes2ats6ResultOySDySo18NSFileAttributeKeyaypGAA0aB5ErrorOG10Foundation3URLV_tF"
+    ],
+    "name" : "getFileAttributes(at:)"
+  },
+  {
+    "name" : "isFileWritable(at:)",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:119:10",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC02isC8Writable2atSb10Foundation3URLV_tF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "modifiers" : [
+
+    ],
+    "kind" : "function.method.instance"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "name" : "listDirectory(at:)",
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge15FileSystemUtilsC13listDirectory2ats6ResultOySay10Foundation3URLVGAA0aB5ErrorOGAJ_tF"
+    ],
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/FileSystemUtils.swift:136:10"
+  },
+  {
+    "name" : "defaultKubeConfigPath",
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "kind" : "var.static",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/KubeConfigConstants.swift:4:16",
+    "ids" : [
+      "s:11ConfigForge04KubeA9ConstantsV07defaultcA4PathSSvpZ"
+    ]
+  },
+  {
+    "modifiers" : [
+      "static"
+    ],
+    "name" : "localized(_:)",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:7SwiftUI4TextV11ConfigForgeE9localizedyACSSFZ"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "function.method.static",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/LocalizationExtensions.swift:5:17"
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "name" : "cfLocalized",
+    "accessibility" : "internal",
+    "ids" : [
+      "s:SS11ConfigForgeE11cfLocalizedSSvp"
+    ],
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/LocalizationExtensions.swift:12:9",
+    "kind" : "var.instance",
+    "attributes" : [
+      "available"
+    ]
+  },
+  {
+    "kind" : "function.method.instance",
+    "name" : "cfLocalized(with:)",
+    "accessibility" : "internal",
+    "attributes" : [
+      "available"
+    ],
+    "ids" : [
+      "s:SS11ConfigForgeE11cfLocalized4withSSs7CVarArg_pd_tF"
+    ],
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/LocalizationExtensions.swift:16:10",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge8L10nTextV"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "kind" : "struct",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/LocalizationExtensions.swift:22:8",
+    "name" : "L10nText"
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/LocalizationManager.swift:10:7",
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge19LocalizationManagerC"
+    ],
+    "kind" : "class",
+    "modifiers" : [
+
+    ],
+    "name" : "LocalizationManager",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:12:20",
+    "kind" : "var.static",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV15SuccessMessagesV04kubeA6LoadedSSvpZ"
+    ],
+    "name" : "kubeConfigLoaded",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:16:20",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "kind" : "var.static",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "fileAccessError",
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV010fileAccessE0SSvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "static"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV010configReadE0SSvpZ"
+    ],
+    "kind" : "var.static",
+    "modifiers" : [
+      "static"
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:17:20",
+    "name" : "configReadError",
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV011configWriteE0SSvpZ"
+    ],
+    "kind" : "var.static",
+    "name" : "configWriteError",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:18:20"
+  },
+  {
+    "name" : "parsingError",
+    "accessibility" : "internal",
+    "kind" : "var.static",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:19:20",
+    "modifiers" : [
+      "static"
+    ],
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV07parsingE0SSvpZ"
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "modifiers" : [
+      "static"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:22:20",
+    "name" : "backupFailed",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV12backupFailedSSvpZ"
+    ],
+    "kind" : "var.static"
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:23:20",
+    "kind" : "var.static",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV13restoreFailedSSvpZ"
+    ],
+    "name" : "restoreFailed"
+  },
+  {
+    "kind" : "var.static",
+    "name" : "cannotAccessImportFile",
+    "modifiers" : [
+      "static"
+    ],
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:24:20",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV22cannotAccessImportFileSSvpZ"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/MessageConstants.swift:25:20",
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "kind" : "var.static",
+    "name" : "fileImportFailed",
+    "ids" : [
+      "s:11ConfigForge16MessageConstantsV13ErrorMessagesV16fileImportFailedySSypYbcvpZ"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+      "static"
+    ],
+    "ids" : [
+      "s:11ConfigForge18SSHConfigConstantsV07defaultC4PathSSvpZ"
+    ],
+    "kind" : "var.static",
+    "name" : "defaultSSHConfigPath",
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Utilities/SSHConfigConstants.swift:4:16",
+    "attributes" : [
+
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "name" : "stopEditing()",
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC11stopEditingyyF"
+    ],
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:53:10"
+  },
+  {
+    "accessibility" : "internal",
+    "name" : "discardChanges()",
+    "modifiers" : [
+
+    ],
+    "kind" : "function.method.instance",
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC14discardChangesyyF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:127:10",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC4undoyyF"
+    ],
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "name" : "undo()",
+    "modifiers" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:140:10"
+  },
+  {
+    "attributes" : [
+
+    ],
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC4redoyyF"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:149:10",
+    "name" : "redo()",
+    "kind" : "function.method.instance"
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC02isA5ValidSbvp"
+    ],
+    "kind" : "var.instance",
+    "accessibility" : "internal",
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "isConfigValid",
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:274:9",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "kind" : "var.instance",
+    "name" : "configStatus",
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC12configStatusAA04Kubea4FileG0Ovp"
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:287:9",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:291:9",
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "canUndo",
+    "accessibility" : "internal",
+    "kind" : "var.instance",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC7canUndoSbvp"
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/ConfigEditorViewModel.swift:295:9",
+    "ids" : [
+      "s:11ConfigForge0A15EditorViewModelC7canRedoSbvp"
+    ],
+    "kind" : "var.instance",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "name" : "canRedo"
+  },
+  {
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC12errorMessageSSSgvp"
+    ],
+    "kind" : "var.instance",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:29:20",
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+      "Published"
+    ],
+    "name" : "errorMessage"
+  },
+  {
+    "accessibility" : "private",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:43:17",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "kubeConfigFileManager",
+    "attributes" : [
+
+    ],
+    "kind" : "var.instance",
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC04kubeA11FileManager33_B793EADB60DB787F3DE9FFBA6782FE9FLLAA04KubeagH0Cvp"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+      "private"
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "name" : "refreshKubeConfigFiles()",
+    "kind" : "function.method.instance",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:404:10",
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC011refreshKubeA5FilesyyF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:426:10",
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC04saveA11FileContentyySSYaF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "saveConfigFileContent(_:)",
+    "modifiers" : [
+
+    ]
+  },
+  {
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:505:10",
+    "kind" : "function.method.instance",
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC015promptForRenameA4FileyyAA04KubeaI0VF"
+    ],
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "promptForRenameConfigFile(_:)",
+    "accessibility" : "internal"
+  },
+  {
+    "name" : "renameConfigFile(_:to:)",
+    "kind" : "function.method.instance",
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "hints" : [
+      "unused"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC06renameA4File_2toyAA04KubeaG0V_SStF"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:528:10"
+  },
+  {
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:679:10",
+    "name" : "promptForCopyConfigFile(_:)",
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC013promptForCopyA4FileyyAA04KubeaI0VF"
+    ],
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "internal"
+  },
+  {
+    "kind" : "function.method.instance",
+    "modifiers" : [
+
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "accessibility" : "internal",
+    "ids" : [
+      "s:11ConfigForge13MainViewModelC04copyA4File_2toyAA04KubeaG0V_SStF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/ViewModels/MainViewModel.swift:702:10",
+    "name" : "copyConfigFile(_:to:)"
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge0A17ListView_PreviewsV"
+    ],
+    "accessibility" : "internal",
+    "kind" : "struct",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "modifiers" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Components/ConfigListView.swift:156:8",
+    "name" : "ConfigListView_Previews",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge13MessageBannerV"
+    ],
+    "name" : "MessageBanner",
+    "accessibility" : "internal",
+    "attributes" : [
+
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Components/MessageBanner.swift:10:8",
+    "modifiers" : [
+
+    ],
+    "kind" : "struct"
+  },
+  {
+    "accessibility" : "private",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Components/SidebarView.swift:195:18",
+    "modifiers" : [
+      "private"
+    ],
+    "name" : "handleItemTapGesture(entry:)",
+    "attributes" : [
+
+    ],
+    "ids" : [
+      "s:11ConfigForge11SidebarViewV20handleItemTapGesture33_DDE96095E8096B3CB693D7638945AF6ELL5entryyx_ts12IdentifiableRzlF"
+    ],
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "function.method.instance",
+    "modules" : [
+      "ConfigForge"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge0A11StatusLabelV"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "ConfigStatusLabel",
+    "hints" : [
+      "unused"
+    ],
+    "modifiers" : [
+
+    ],
+    "attributes" : [
+
+    ],
+    "accessibility" : "internal",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Editors/ConfigEditorView.swift:68:8",
+    "kind" : "struct"
+  },
+  {
+    "attributes" : [
+
+    ],
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Editors/ConfigEditorView.swift:148:8",
+    "ids" : [
+      "s:11ConfigForge0A19EditorView_PreviewsV"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "name" : "ConfigEditorView_Previews",
+    "modifiers" : [
+
+    ],
+    "accessibility" : "internal",
+    "kind" : "struct",
+    "hints" : [
+      "unused"
+    ]
+  },
+  {
+    "modifiers" : [
+      "private"
+    ],
+    "ids" : [
+      "s:11ConfigForge21ModernEntryEditorViewV19isShowingFilePicker33_BD9DBF884C16AF2409E7162E10C5901ELLSbvp"
+    ],
+    "name" : "isShowingFilePicker",
+    "hints" : [
+      "unused"
+    ],
+    "accessibility" : "private",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Editors/ModernEntryEditorView.swift:17:24",
+    "attributes" : [
+      "State"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "var.instance"
+  },
+  {
+    "name" : "currentEditingKey",
+    "hints" : [
+      "unused"
+    ],
+    "kind" : "var.instance",
+    "attributes" : [
+      "State"
+    ],
+    "modifiers" : [
+      "private"
+    ],
+    "accessibility" : "private",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Editors/ModernEntryEditorView.swift:18:24",
+    "modules" : [
+      "ConfigForge"
+    ],
+    "ids" : [
+      "s:11ConfigForge21ModernEntryEditorViewV17currentEditingKey33_BD9DBF884C16AF2409E7162E10C5901ELLSSvp"
+    ]
+  },
+  {
+    "ids" : [
+      "s:11ConfigForge21ModernEntryEditorViewV15removeDirective33_BD9DBF884C16AF2409E7162E10C5901ELL9atOffsetsy10Foundation8IndexSetV_tF"
+    ],
+    "modules" : [
+      "ConfigForge"
+    ],
+    "kind" : "function.method.instance",
+    "hints" : [
+      "unused"
+    ],
+    "name" : "removeDirective(atOffsets:)",
+    "modifiers" : [
+      "private"
+    ],
+    "accessibility" : "private",
+    "location" : "/Users/x/git/samzong/ConfigForge/ConfigForge/Views/Editors/ModernEntryEditorView.swift:240:18",
+    "attributes" : [
+
+    ]
+  }
+]

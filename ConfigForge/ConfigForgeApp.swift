@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct ConfigForgeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     var body: some Scene {
         WindowGroup(content: {
             ContentView()

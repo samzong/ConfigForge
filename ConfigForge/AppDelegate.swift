@@ -10,7 +10,7 @@ import AppKit
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    
+
     @MainActor
     func applicationDidFinishLaunching(_ notification: Notification) {
         let savedLanguage = UserDefaults.standard.string(forKey: "appLanguage")

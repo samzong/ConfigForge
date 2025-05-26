@@ -1,0 +1,4 @@
+--rules indent, linebreaks, redundantSelf
+--swiftversion 6.1
+--indent 4
+--exclude ConfigForge/Generated

@@ -11,10 +11,10 @@ class AsyncUtility: ObservableObject {
     @Published var errorMessage: String?
 
     func perform<T: Sendable>(_ operation: @escaping @Sendable () async throws -> T,
-                   onStart: (() -> Void)? = nil,
-                   onSuccess: ((T) -> Void)? = nil,
-                   onError: ((Error) -> Void)? = nil,
-                   retryCount: Int = 1) async -> AsyncOperationResult<T> {
+                              onStart: (() -> Void)? = nil,
+                              onSuccess: ((T) -> Void)? = nil,
+                              onError: ((Error) -> Void)? = nil,
+                              retryCount: Int = 1) async -> AsyncOperationResult<T> {
         isLoading = true 
         onStart?()
         
@@ -33,8 +33,8 @@ class AsyncUtility: ObservableObject {
     }
 
     func performWithRetry<T: Sendable>(_ operation: @escaping @Sendable () async throws -> T,
-                            retryCount: Int = 3,
-                            retryDelay: TimeInterval = 1.0) async -> AsyncOperationResult<T> {
+                                       retryCount: Int = 3,
+                                       retryDelay: TimeInterval = 1.0) async -> AsyncOperationResult<T> {
         var currentRetry = 0
         
         while currentRetry <= retryCount {
@@ -55,7 +55,7 @@ class AsyncUtility: ObservableObject {
     }
 
     func debounce<T: Sendable>(for duration: TimeInterval = 0.5,
-                     operation: @escaping @Sendable () async throws -> T) -> () -> Task<AsyncOperationResult<T>, Never> {
+                               operation: @escaping @Sendable () async throws -> T) -> () -> Task<AsyncOperationResult<T>, Never> {
         var task: Task<AsyncOperationResult<T>, Never>?
         
         return {

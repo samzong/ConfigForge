@@ -9,24 +9,24 @@ struct ConfigForgeApp: App {
         }
         .commands {
             CommandGroup(after: .saveItem) { 
-                 Divider()
-                 Button("Backup SSH configuration...") {
-                     triggerSshBackup()
-                 }
-                 .keyboardShortcut("b", modifiers: [.command, .shift]) 
+                Divider()
+                Button("Backup SSH configuration...") {
+                    triggerSshBackup()
+                }
+                .keyboardShortcut("b", modifiers: [.command, .shift]) 
 
-                 Button("Restore SSH configuration...") {
-                      triggerSshRestore()
-                 }
-                 .keyboardShortcut("r", modifiers: [.command, .shift]) 
-                 Divider() 
+                Button("Restore SSH configuration...") {
+                    triggerSshRestore()
+                }
+                .keyboardShortcut("r", modifiers: [.command, .shift]) 
+                Divider() 
 
                 Button("Backup Kubeconfig...") {
                     triggerKubeBackup()
                 }
                 .keyboardShortcut("k", modifiers: [.command, .option]) 
                 Button("Restore Kubeconfig...") {
-                     triggerKubeRestore()
+                    triggerKubeRestore()
                 }
                 .keyboardShortcut("j", modifiers: [.command, .option]) 
             }
@@ -43,13 +43,13 @@ struct ConfigForgeApp: App {
     private func triggerSshRestore() {
         print("Trigger SSH Restore (Needs ViewModel access)")
     }
-   private func triggerKubeBackup() {
-       print("Trigger Kube Backup (Needs ViewModel access)")
-       getViewModelFromActiveScene()?.backupKubeConfig() 
-   }
+    private func triggerKubeBackup() {
+        print("Trigger Kube Backup (Needs ViewModel access)")
+        getViewModelFromActiveScene()?.backupKubeConfig() 
+    }
 
-   private func triggerKubeRestore() {
-       print("Trigger Kube Restore (Needs ViewModel access)")
-       getViewModelFromActiveScene()?.restoreKubeConfig() 
-   }
+    private func triggerKubeRestore() {
+        print("Trigger Kube Restore (Needs ViewModel access)")
+        getViewModelFromActiveScene()?.restoreKubeConfig() 
+    }
 } 

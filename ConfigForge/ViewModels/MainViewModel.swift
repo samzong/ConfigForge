@@ -15,7 +15,7 @@ import Yams
 enum ConfigType: String, CaseIterable, Identifiable {
     case ssh = "SSH"
     case kubernetes = "Kubernetes"
-    var id: String { self.rawValue }
+    var id: String { rawValue }
 }
 
 @MainActor
@@ -62,7 +62,7 @@ class MainViewModel: ObservableObject {
         } else {
             return configFiles.filter { 
                 $0.fileName.localizedCaseInsensitiveContains(configSearchText) ||
-                $0.displayName.localizedCaseInsensitiveContains(configSearchText)
+                    $0.displayName.localizedCaseInsensitiveContains(configSearchText)
             }
         }
     }
@@ -74,12 +74,12 @@ class MainViewModel: ObservableObject {
     
     func postMessage(_ message: String, type: MessageType) {
         updateUIState {
-             self.appMessage = AppMessage(type: type, message: message)
+            self.appMessage = AppMessage(type: type, message: message)
         }
     }
     
     init() {
-        self.messageHandler.messagePoster = { [weak self] message, type in
+        messageHandler.messagePoster = { [weak self] message, type in
             Task { @MainActor in
                 self?.postMessage(message, type: type)
             }
@@ -136,7 +136,7 @@ class MainViewModel: ObservableObject {
                 let formattedContent = await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
                 }.value
-                try await self.sshFileManager.writeConfigFile(content: formattedContent)
+                try await sshFileManager.writeConfigFile(content: formattedContent)
                 return ()
             }
             
@@ -212,7 +212,7 @@ class MainViewModel: ObservableObject {
                 let content = await Task.detached { [entries = self.sshEntries, parser = self.sshParser] in
                     return parser.formatConfig(entries: entries)
                 }.value
-                try await self.sshFileManager.backupConfigFile(content: content, to: url)
+                try await sshFileManager.backupConfigFile(content: content, to: url)
                 return ()
             }
             
@@ -239,8 +239,8 @@ class MainViewModel: ObservableObject {
 
         switch result {
         case .success(let parsedEntries):
-            self.sshEntries = parsedEntries
-            safelySelectEntry(self.sshEntries.first)
+            sshEntries = parsedEntries
+            safelySelectEntry(sshEntries.first)
             messageHandler.show(MessageConstants.SuccessMessages.configRestored, type: .success)
         case .failure(let error):
             ErrorHandler.handle(error, messageHandler: messageHandler)
@@ -406,7 +406,7 @@ class MainViewModel: ObservableObject {
     }
     
     func selectConfigFile(_ configFile: KubeConfigFile) {
-        self.selectedConfigFile = configFile
+        selectedConfigFile = configFile
         
         Task {
             do {
@@ -553,12 +553,12 @@ class MainViewModel: ObservableObject {
             let success = fileWatcher.renameFile(from: oldFilePath, to: newFilePath)
             
             if success {
-                if self.selectedConfigFile?.id == configFile.id {
-                    self.selectedConfigFile = nil
-                    self.selectedConfigFileContent = ""
+                if selectedConfigFile?.id == configFile.id {
+                    selectedConfigFile = nil
+                    selectedConfigFileContent = ""
                 }
                 
-                self.configFiles.removeAll(where: { $0.id == configFile.id })
+                configFiles.removeAll(where: { $0.id == configFile.id })
                 
                 messageHandler.show("File renamed to \(newFileName)", type: .success)
                 
@@ -567,8 +567,8 @@ class MainViewModel: ObservableObject {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                     guard let self = self else { return }
                     
-                    if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
-                        self.selectConfigFile(newFile)
+                    if let newFile = configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                        selectConfigFile(newFile)
                     }
                 }
             } else {
@@ -595,9 +595,9 @@ class MainViewModel: ObservableObject {
     }
     
     func deleteConfigFile(_ configFile: KubeConfigFile) {
-        if self.selectedConfigFile?.id == configFile.id {
-            self.selectedConfigFile = nil
-            self.selectedConfigFileContent = ""
+        if selectedConfigFile?.id == configFile.id {
+            selectedConfigFile = nil
+            selectedConfigFileContent = ""
         }
 
         let fileWatcher = EventManager.shared.getFileWatcher()
@@ -612,7 +612,7 @@ class MainViewModel: ObservableObject {
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                 guard let self = self else { return }
-                self.loadKubeConfigFiles()
+                loadKubeConfigFiles()
             }
         } else {
             messageHandler.show("Failed to delete file", type: .error)
@@ -721,8 +721,8 @@ class MainViewModel: ObservableObject {
                     guard let self = self else { return }
                     
                     let newFilePath = configsDir.appendingPathComponent(newFileName)
-                    if let newFile = self.configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
-                        self.selectConfigFile(newFile)
+                    if let newFile = configFiles.first(where: { $0.filePath.path == newFilePath.path }) {
+                        selectConfigFile(newFile)
                     }
                 }
             } else {
@@ -822,7 +822,7 @@ class MainViewModel: ObservableObject {
             let success = fileWatcher.createOrUpdateFile(content: backupContent, at: mainConfigPath)
             
             if success {
-                self.activeConfigContent = backupContent
+                activeConfigContent = backupContent
                 messageHandler.show("Kubeconfig restored from \(url.lastPathComponent)", type: .success)
             } else {
                 messageHandler.show("Failed to restore Kubeconfig", type: .error)

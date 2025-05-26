@@ -38,7 +38,7 @@ class SSHConfigParser {
         var inMultilineValue = false
         var multilineKey: String?
         let lines = content.components(separatedBy: .newlines)
-        
+
         for lineIndex in 0..<lines.count {
             let line = lines[lineIndex]
             if line.first?.isWhitespace == true && inMultilineValue && multilineKey != nil {
@@ -59,9 +59,9 @@ class SSHConfigParser {
                     // Or, if the first part of a multiline was not added, which is a bug
                     // For now, let's add the previous directive back if it was popped
                     if let poppedDirective = currentDirectives.popLast(), poppedDirective.key == multilineKey {
-                         currentDirectives.append(poppedDirective) // Add it back
+                        currentDirectives.append(poppedDirective) // Add it back
                     }
-                     // And ignore this continuation line or log an error
+                    // And ignore this continuation line or log an error
                 }
                 continue
             }
@@ -72,7 +72,7 @@ class SSHConfigParser {
             guard let (key, value) = splitConfigLine(line) else {
                 continue
             }
-            
+
             let keyword = key.lowercased()
             if keyword == "host" {
                 if let host = currentHost, !host.isEmpty {
@@ -96,7 +96,7 @@ class SSHConfigParser {
             // ensureBasicProperties call removed
             entries.append(SSHConfigEntry(host: host, directives: currentDirectives))
         }
-        
+
         return entries
     }
 
@@ -123,7 +123,7 @@ class SSHConfigParser {
 
     func formatConfig(entries: [SSHConfigEntry]) -> String {
         var content = ""
-        
+
         for entry in entries {
             content += "Host \(entry.host)\n"
             for directive in entry.directives {
@@ -133,7 +133,7 @@ class SSHConfigParser {
             }
             content += "\n"
         }
-        
+
         return content
     }
 
@@ -154,10 +154,10 @@ class SSHConfigParser {
         if !entry.isPortValid {
             return false
         }
-        
+
         return true
     }
-    
+
     private func formatPropertyValue(_ value: String) -> String {
         if value.contains(" ") && !value.hasPrefix("\"") && !value.hasSuffix("\"") {
             return "\"\(value)\""

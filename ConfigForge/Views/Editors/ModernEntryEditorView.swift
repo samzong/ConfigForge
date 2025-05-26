@@ -41,30 +41,30 @@ struct ModernEntryEditorView: View {
     private func bindingForDirective(key canonicalKey: String, defaultValue: String = "") -> Binding<String> {
         Binding<String>(
             get: {
-                self.editedDirectives.first { $0.key.lowercased() == canonicalKey.lowercased() }?.value ?? defaultValue
+                editedDirectives.first { $0.key.lowercased() == canonicalKey.lowercased() }?.value ?? defaultValue
             },
             set: { newValue in
-                if let index = self.editedDirectives.firstIndex(where: { $0.key.lowercased() == canonicalKey.lowercased() }) {
+                if let index = editedDirectives.firstIndex(where: { $0.key.lowercased() == canonicalKey.lowercased() }) {
                     // Check if the new value is empty and the key is not essential like Port
                     // For Port, if empty, it should revert to "22" or be handled by validation.
                     // For HostName/User, empty is acceptable.
                     // This logic might need refinement based on desired behavior for empty values.
                     // For now, simple update/append.
-                    self.editedDirectives[index].value = newValue
+                    editedDirectives[index].value = newValue
                 } else {
                     // Only add if the new value is not the default for non-essential keys,
                     // or if it's an essential key like Port.
                     // This prevents adding empty HostName/User directives if they weren't there.
                     // However, for simplicity now, always add. Specific behavior for empty can be refined.
                     if !newValue.isEmpty || defaultValue != "" { // Avoid adding (HostName, "") if not present
-                         self.editedDirectives.append((key: canonicalKey, value: newValue))
+                        editedDirectives.append((key: canonicalKey, value: newValue))
                     } else if canonicalKey.lowercased() == "port" && newValue.isEmpty { // Port specific
-                        self.editedDirectives.append((key: canonicalKey, value: "22"))
+                        editedDirectives.append((key: canonicalKey, value: "22"))
                     } else if newValue.isEmpty && defaultValue.isEmpty { // e.g. Hostname or User becomes empty
                         // if it existed, it would have been updated by the first branch.
                         // if it didn't exist, don't add an empty one.
                     } else {
-                         self.editedDirectives.append((key: canonicalKey, value: newValue))
+                        editedDirectives.append((key: canonicalKey, value: newValue))
                     }
 
                 }
@@ -113,16 +113,16 @@ struct ModernEntryEditorView: View {
     // Binding for a specific directive at an index
     private func bindingForDirective(at index: Int) -> Binding<String> {
         Binding<String>(
-            get: { self.editedDirectives[index].value },
-            set: { newValue in self.editedDirectives[index].value = newValue }
+            get: { editedDirectives[index].value },
+            set: { newValue in editedDirectives[index].value = newValue }
         )
     }
     
     // Binding for a specific directive's key at an index (for Advanced section)
     private func bindingForKey(at index: Int) -> Binding<String> {
         Binding<String>(
-            get: { self.editedDirectives[index].key },
-            set: { newValue in self.editedDirectives[index].key = newValue }
+            get: { editedDirectives[index].key },
+            set: { newValue in editedDirectives[index].key = newValue }
         )
     }
 
@@ -256,8 +256,8 @@ struct ModernEntryEditorView: View {
             if result == .OK, let url = openPanel.url {
                 DispatchQueue.main.async {
                     // Ensure index is still valid before updating, though less likely an issue here
-                    if self.editedDirectives.indices.contains(index) {
-                        self.editedDirectives[index].value = url.path
+                    if editedDirectives.indices.contains(index) {
+                        editedDirectives[index].value = url.path
                         print("Selected file path for directive at index \(index): \(url.path)")
                     }
                 }
@@ -340,7 +340,7 @@ struct ModernEntryEditorView: View {
                            let index = viewModel.sshEntries.firstIndex(where: { $0.id == sshEntry.id }) {
                             viewModel.sshEntries.remove(at: index) 
                         }
-                         viewModel.addSshEntry(host: editedHost, directives: editedDirectives) 
+                        viewModel.addSshEntry(host: editedHost, directives: editedDirectives) 
                     } else {
                         viewModel.updateSshEntry(id: entry.id, host: editedHost, directives: editedDirectives) 
                     }

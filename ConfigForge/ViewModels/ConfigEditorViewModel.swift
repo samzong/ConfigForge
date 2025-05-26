@@ -70,7 +70,7 @@ class ConfigEditorViewModel: ObservableObject {
     
     func saveChanges() {
         guard let configFile = configFile, hasUnsavedChanges else { 
-            self.isEditing = false
+            isEditing = false
             return
         }
         

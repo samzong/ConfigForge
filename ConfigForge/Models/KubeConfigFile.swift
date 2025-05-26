@@ -50,11 +50,11 @@ struct KubeConfigFile: Identifiable, Equatable {
         }
 
         do {
-             yamlContent = try String(contentsOf: url, encoding: .utf8)
+            yamlContent = try String(contentsOf: url, encoding: .utf8)
         } catch {
             print("Warning: Could not read file content for \(url.path): \(error.localizedDescription)")
         }
-        
+
         return KubeConfigFile(
             fileName: url.lastPathComponent,
             filePath: url,
@@ -67,17 +67,17 @@ struct KubeConfigFile: Identifiable, Equatable {
     }
 
     mutating func updateYamlContent(_ newContent: String) {
-        self.yamlContent = newContent
-        self.status = .unknown 
-        self.modificationDate = Date() 
+        yamlContent = newContent
+        status = .unknown 
+        modificationDate = Date() 
     }
 
     mutating func markAsInvalid(_ reason: String) {
-        self.status = .invalid(reason)
+        status = .invalid(reason)
     }
-    
+
     static func == (lhs: KubeConfigFile, rhs: KubeConfigFile) -> Bool {
         return lhs.filePath == rhs.filePath &&
-               lhs.fileType == rhs.fileType
+            lhs.fileType == rhs.fileType
     }
 } 

@@ -21,11 +21,11 @@ extension String {
 
 struct L10nText: View {
     let key: LocalizedStringKey
-    
+
     init(_ key: String) {
         self.key = LocalizedStringKey(key)
     }
-    
+
     var body: some View {
         Text(key)
     }

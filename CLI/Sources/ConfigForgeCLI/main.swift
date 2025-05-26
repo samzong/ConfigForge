@@ -16,10 +16,10 @@ struct ConfigForgeCLI: ParsableCommand {
         ],
         defaultSubcommand: SSHCommand.self
     )
-    
+
     @Flag(name: .shortAndLong, help: "Enable verbose output")
     var verbose = false
-    
+
     func run() throws {
         // 设置全局verbose标志
         GlobalOptions.verbose = verbose

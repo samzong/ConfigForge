@@ -13,7 +13,7 @@ class KubeConfigFileManager {
          fileUtils: FileSystemUtils = FileSystemUtils.shared) {
         self.fileManager = fileManager
         self.fileUtils = fileUtils
-        
+
         do {
             try ensureConfigDirectoryExists()
             try ensureConfigsDirectoryExists()
@@ -45,7 +45,7 @@ class KubeConfigFileManager {
     private func ensureConfigDirectoryExists() throws {
         let directoryURL = try getConfigDirectoryPath()
         let result = fileUtils.createDirectoryIfNeeded(at: directoryURL)
-        
+
         if case .failure(let error) = result {
             throw error
         }
@@ -54,7 +54,7 @@ class KubeConfigFileManager {
     func ensureConfigsDirectoryExists() throws {
         let directoryURL = try getConfigsDirectoryPath()
         let result = fileUtils.createDirectoryIfNeeded(at: directoryURL)
-        
+
         if case .failure(let error) = result {
             throw error
         }
@@ -89,7 +89,7 @@ class KubeConfigFileManager {
             return fileUtils.writeFile(content: content, to: configPath, createBackup: true)
 
         } catch let error as ConfigForgeError {
-             return .failure(error) 
+            return .failure(error) 
         } catch {
             return .failure(.configWrite("写入 Kubeconfig 文件失败: \\(error.localizedDescription)"))
         }
@@ -97,7 +97,7 @@ class KubeConfigFileManager {
 
     func backupConfig(content: String, to destination: URL) async throws {
         let writeResult = fileUtils.writeFile(content: content, to: destination)
-        
+
         if case .failure(let error) = writeResult {
             throw error
         }
@@ -105,7 +105,7 @@ class KubeConfigFileManager {
 
     func restoreConfig(from source: URL) async -> Result<String, ConfigForgeError> {
         let readResult = fileUtils.readFile(at: source)
-        
+
         switch readResult {
         case .success(let yamlString):
             do {
@@ -113,16 +113,16 @@ class KubeConfigFileManager {
                 let writeResult = fileUtils.writeFile(content: yamlString, to: configPath, createBackup: false) 
 
                 if case .failure(let error) = writeResult {
-                     return .failure(error) 
+                    return .failure(error) 
                 }
                 return .success(yamlString)
-                
+
             } catch let error as ConfigForgeError {
                 return .failure(error) 
             } catch {
-                 return .failure(.configWrite("恢复过程中写回 Kubeconfig 文件失败: \\(error.localizedDescription)"))
+                return .failure(.configWrite("恢复过程中写回 Kubeconfig 文件失败: \\(error.localizedDescription)"))
             }
-            
+
         case .failure(let error):
             return .failure(error)
         }
@@ -131,7 +131,7 @@ class KubeConfigFileManager {
     func createDefaultBackup() async -> Result<Void, ConfigForgeError> {
         do {
             let loadResult = loadConfig()
-            
+
             switch loadResult {
             case .success(let config):
                 let backupPath = try getConfigBackupFilePath()
@@ -154,7 +154,7 @@ class KubeConfigFileManager {
             let configsDir = try getConfigsDirectoryPath()
             let mainConfigPath = try getConfigFilePath()
             var activeConfigIdentifier: String? = nil
-            
+
             if fileManager.fileExists(atPath: mainConfigPath.path) {
                 do {
                     let mainConfigContent = try String(contentsOf: mainConfigPath, encoding: .utf8)
@@ -176,7 +176,7 @@ class KubeConfigFileManager {
             }
             for fileURL in yamlFiles {
                 let isActive = activeConfigIdentifier != nil && 
-                               fileURL.lastPathComponent == activeConfigIdentifier
+                    fileURL.lastPathComponent == activeConfigIdentifier
                 if var configFile = KubeConfigFile.from(url: fileURL, fileType: .stored) {
                     if isActive {
                         configFile.isActive = true
@@ -184,9 +184,9 @@ class KubeConfigFileManager {
                     configFiles.append(configFile)
                 }
             }
-            
+
             return .success(configFiles)
-            
+
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
@@ -200,21 +200,21 @@ class KubeConfigFileManager {
             let timestamp = ISO8601DateFormatter().string(from: Date())
                 .replacingOccurrences(of: ":", with: "-")
                 .replacingOccurrences(of: ".", with: "-") 
-            
+
             let backupFileName: String
             if let customName = customName, !customName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                 let sanitizedName = customName.replacingOccurrences(of: "/", with: "-")
-                                              .replacingOccurrences(of: "\\\\", with: "-")
-                 backupFileName = "backup-\(sanitizedName).yaml"
+                let sanitizedName = customName.replacingOccurrences(of: "/", with: "-")
+                    .replacingOccurrences(of: "\\\\", with: "-")
+                backupFileName = "backup-\(sanitizedName).yaml"
             } else {
-                 backupFileName = "backup-\(timestamp).yaml"
+                backupFileName = "backup-\(timestamp).yaml"
             }
             let configsDir = try getConfigsDirectoryPath()
             let backupPath = configsDir.appendingPathComponent(backupFileName)
             try await backupConfig(content: content, to: backupPath)
-            
+
             return .success(backupPath)
-            
+
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
@@ -245,17 +245,17 @@ class KubeConfigFileManager {
             } else {
                 filteredLines.insert(identifierComment, at: 0)
             }
-            
+
             modifiedContent = filteredLines.joined(separator: "\n")
             let saveResult = saveConfig(content: modifiedContent)
-            
+
             switch saveResult {
             case .success:
                 return .success(())
             case .failure(let error):
                 return .failure(error)
             }
-            
+
         } catch {
             // This catch block is unreachable because no errors are thrown in 'do' block
             // But keeping it for future error handling if needed
@@ -282,9 +282,9 @@ class KubeConfigFileManager {
                let backupFile = KubeConfigFile.from(url: defaultBackupPath, fileType: .backup) {
                 backupFileObjects.append(backupFile)
             }
-            
+
             return .success(backupFileObjects)
-            
+
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
@@ -295,12 +295,12 @@ class KubeConfigFileManager {
     func deleteBackupFile(_ backupFile: KubeConfigFile) -> Result<Void, ConfigForgeError> {
         do {
             guard backupFile.fileType == .backup || 
-                  (backupFile.fileType == .stored && backupFile.fileName.starts(with: "backup-")) else {
+                (backupFile.fileType == .stored && backupFile.fileName.starts(with: "backup-")) else {
                 return .failure(.fileAccess("只能删除备份文件"))
             }
             try fileManager.removeItem(at: backupFile.filePath)
             return .success(())
-            
+
         } catch {
             return .failure(.fileAccess("删除备份文件失败: \(error.localizedDescription)"))
         }
@@ -318,24 +318,24 @@ class KubeConfigFileManager {
             if !fileName.lowercased().hasSuffix(".yaml") && !fileName.lowercased().hasSuffix(".yml") {
                 finalFileName = "\\(fileName).yaml"
             }
-            
+
             let filePath = configsDir.appendingPathComponent(finalFileName)
             if fileManager.fileExists(atPath: filePath.path) {
                 return .failure(.fileAccess("文件 \'\\(finalFileName)\' 已存在"))
             }
             let writeResult = fileUtils.writeFile(content: content, to: filePath, createBackup: false) 
-            
+
             switch writeResult {
             case .success:
-                 guard let newConfigFile = KubeConfigFile.from(url: filePath, fileType: .stored) else {
-                     return .failure(.unknown("创建文件后无法为其创建配置文件对象"))
-                 }
-                 return .success(newConfigFile)
-                 
+                guard let newConfigFile = KubeConfigFile.from(url: filePath, fileType: .stored) else {
+                    return .failure(.unknown("创建文件后无法为其创建配置文件对象"))
+                }
+                return .success(newConfigFile)
+
             case .failure(let error):
                 return .failure(error)
             }
-            
+
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
@@ -348,38 +348,38 @@ class KubeConfigFileManager {
             if configFile.fileType == .active {
                 let backupResult = await createDefaultBackup()
                 if case .failure(let error) = backupResult {
-                     print("更新活动配置前创建备份失败，更新中止: \(error.localizedDescription)")
-                     return .failure(.configWrite("更新前创建备份失败: \(error.localizedDescription)"))
+                    print("更新活动配置前创建备份失败，更新中止: \(error.localizedDescription)")
+                    return .failure(.configWrite("更新前创建备份失败: \(error.localizedDescription)"))
                 }
             }
-             let writeResult = fileUtils.writeFile(content: content, to: configFile.filePath, createBackup: false)
+            let writeResult = fileUtils.writeFile(content: content, to: configFile.filePath, createBackup: false)
 
-             switch writeResult {
-             case .success:
-                 var updatedConfigFile = configFile
-                 updatedConfigFile.updateYamlContent(content) 
-                  if let attributes = try? fileManager.attributesOfItem(atPath: configFile.filePath.path),
-                     let modDate = attributes[.modificationDate] as? Date {
-                      updatedConfigFile = KubeConfigFile(
-                         fileName: updatedConfigFile.fileName,
-                         filePath: updatedConfigFile.filePath,
-                         fileType: updatedConfigFile.fileType,
-                         yamlContent: updatedConfigFile.yamlContent, 
-                         creationDate: updatedConfigFile.creationDate,
-                         modificationDate: modDate 
-                     )
-                  }
+            switch writeResult {
+            case .success:
+                var updatedConfigFile = configFile
+                updatedConfigFile.updateYamlContent(content) 
+                if let attributes = try? fileManager.attributesOfItem(atPath: configFile.filePath.path),
+                   let modDate = attributes[.modificationDate] as? Date {
+                    updatedConfigFile = KubeConfigFile(
+                        fileName: updatedConfigFile.fileName,
+                        filePath: updatedConfigFile.filePath,
+                        fileType: updatedConfigFile.fileType,
+                        yamlContent: updatedConfigFile.yamlContent, 
+                        creationDate: updatedConfigFile.creationDate,
+                        modificationDate: modDate 
+                    )
+                }
 
-                 return .success(updatedConfigFile)
+                return .success(updatedConfigFile)
 
-             case .failure(let error):
-                  return .failure(error) 
-             }
+            case .failure(let error):
+                return .failure(error) 
+            }
 
         } catch let error as ConfigForgeError {
-             return .failure(error)
+            return .failure(error)
         } catch {
-             return .failure(.configWrite("更新配置文件失败: \\\\(error.localizedDescription)"))
+            return .failure(.configWrite("更新配置文件失败: \\\\(error.localizedDescription)"))
         }
     }
 
@@ -413,16 +413,16 @@ class KubeConfigFileManager {
                 creationDate: configFile.creationDate,
                 modificationDate: Date() 
             )
-            
+
             return .success(renamedFile)
-            
+
         } catch let error as ConfigForgeError {
             return .failure(error)
         } catch {
             return .failure(.fileAccess("重命名配置文件失败: \\\\(error.localizedDescription)"))
         }
     }
-    
+
     func deleteConfigFile(_ configFile: KubeConfigFile) -> Result<Void, ConfigForgeError> {
         do {
             guard configFile.fileType == .stored else {
@@ -430,7 +430,7 @@ class KubeConfigFileManager {
             }
             try fileManager.removeItem(at: configFile.filePath)
             return .success(())
-            
+
         } catch {
             return .failure(.fileAccess("删除配置文件失败: \(error.localizedDescription)"))
         }

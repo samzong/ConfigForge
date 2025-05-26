@@ -36,7 +36,7 @@ enum AppConstants {
         static let configBackedUp = L10n.Message.Success.Config.backup
         static let configRestored = L10n.Message.Success.Config.restore
     }
-    
+
     static let commonSSHProperties = [
         "HostName", 
         "User", 

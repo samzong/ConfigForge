@@ -14,11 +14,11 @@ struct MessageBanner: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: iconName)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.headline)
                 .foregroundColor(.white)
             
             Text(message.message)
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote)
                 .foregroundColor(.white)
             
             if message.type != .success {
@@ -26,7 +26,7 @@ struct MessageBanner: View {
                     onDismiss()
                 }) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.caption2)
                         .foregroundColor(.white.opacity(0.8))
                 }
                 .buttonStyle(PlainButtonStyle())

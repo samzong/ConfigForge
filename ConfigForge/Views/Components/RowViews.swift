@@ -13,12 +13,12 @@ struct HostRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(entry.host)
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote)
                 .foregroundColor(.primary)
 
             if !entry.hostname.isEmpty {
                 Text(entry.hostname)
-                    .font(.system(size: 10))
+                    .font(.caption2)
                     .foregroundColor(.secondary)
             }
         }

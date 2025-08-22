@@ -88,21 +88,21 @@ struct ConfigFileRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(configFile.displayName)
-                .font(.system(size: 13, weight: .medium))
+                .font(.footnote)
                 .foregroundColor(.primary)
             HStack(spacing: 4) {
                 if configFile.isActive {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.green)
-                        .font(.system(size: 10))
+                        .font(.caption2)
                 } else if case .invalid = configFile.status {
                     Image(systemName: "exclamationmark.triangle.fill")  
                         .foregroundColor(.red)
-                        .font(.system(size: 10))
+                        .font(.caption2)
                 }
                 
                 Text(statusText)
-                    .font(.system(size: 10))
+                    .font(.caption2)
                     .foregroundColor(.secondary)
             }
         }

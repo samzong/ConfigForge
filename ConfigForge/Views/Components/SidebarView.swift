@@ -20,7 +20,7 @@ struct SidebarView: View {
                     .scaledToFit()
                     .frame(height: 40)
                 Text("ConfigForge")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.headline)
                     .foregroundColor(.primary)
                 Spacer()
                 

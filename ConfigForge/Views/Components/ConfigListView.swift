@@ -50,7 +50,9 @@ private struct ConfigListContent: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .background(Color(.windowBackgroundColor))
+        .background(Color(.controlBackgroundColor).opacity(0.3))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 16)
         .onChange(of: selectedConfigFileId, perform: handleSelectionChange)
     }
     

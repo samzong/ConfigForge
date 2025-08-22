@@ -47,7 +47,7 @@ struct SidebarView: View {
                     Text(NSLocalizedString(type.rawValue, bundle: .main, comment: "")).tag(type)
                 }
             }
-            .pickerStyle(.segmented) // Use segmented style for top level
+            .pickerStyle(.segmented)
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
             // ---- End Top Navigation Picker ----
@@ -93,6 +93,18 @@ struct SidebarView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
             
+            // Configuration List Section Header
+            HStack {
+                Text(viewModel.selectedConfigurationType == .ssh ? "HOSTS" : "CONFIGURATIONS")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .fontWeight(.medium)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 4)
+            
             // SSH 模式显示主机列表
             if viewModel.selectedConfigurationType == .ssh {
                 // 主机列表区域
@@ -121,7 +133,9 @@ struct SidebarView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .background(Color(.windowBackgroundColor))
+                .background(Color(.controlBackgroundColor).opacity(0.3))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 16)
                 .onChange(of: selectedListIndex) { newIndex in
                     // Sync list index selection TO ViewModel selection
                     let currentlySelectedVMEntryId = viewModel.selectedEntry?.id as? AnyHashable

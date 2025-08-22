@@ -252,11 +252,10 @@ struct ModernEntryEditorView: View {
         openPanel.allowsMultipleSelection = false
         openPanel.allowedContentTypes = [.text, .data] // Allow common key file types
         
-        openPanel.begin { (result) in
-            if result == .OK, let url = openPanel.url {
-                DispatchQueue.main.async {
-                    // Ensure index is still valid before updating, though less likely an issue here
-                    if editedDirectives.indices.contains(index) {
+        openPanel.begin { result in
+            if result == .OK {
+                Task { @MainActor in
+                    if let url = openPanel.url, editedDirectives.indices.contains(index) {
                         editedDirectives[index].value = url.path
                         print("Selected file path for directive at index \(index): \(url.path)")
                     }

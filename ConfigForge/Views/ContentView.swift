@@ -11,7 +11,7 @@ struct ContentView: View {
         HStack(spacing: 0) {
             SidebarView(viewModel: viewModel)
             
-            Rectangle().fill(Color.gray.opacity(0.2)).frame(width: 1) 
+            Rectangle().fill(Color.quaternary).frame(width: 1) 
             if viewModel.selectedConfigurationType == .kubernetes {
                 ConfigEditorView()
                     .environmentObject(viewModel)

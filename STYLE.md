@@ -1,4 +1,4 @@
-# ConfigForge UI Style Guide
+# ConfigForge UI Style Guide (Apple HIG 2025 Compliant)
 
 ## Button Design System
 
@@ -141,6 +141,130 @@ Button("Terminal") { action() }
 
 ---
 
+## Typography System (Apple HIG 2025 Compliant)
+
+### Semantic Text Styles
+Use SwiftUI semantic text styles for optimal Dynamic Type support and accessibility:
+
+- **Large Title**: `.largeTitle` - Main app headers (34pt default)
+- **Title**: `.title` - Section headers (28pt default)  
+- **Title 2**: `.title2` - Subsection headers (22pt default)
+- **Title 3**: `.title3` - Minor headers (20pt default)
+- **Headline**: `.headline` - Emphasized body text (17pt semibold)
+- **Body**: `.body` - Primary content text (17pt regular) 
+- **Callout**: `.callout` - Secondary content (16pt regular)
+- **Subheadline**: `.subheadline` - Supporting text (15pt regular)
+- **Footnote**: `.footnote` - Fine print (13pt regular)
+- **Caption**: `.caption` - Labels and captions (12pt regular)
+- **Caption 2**: `.caption2` - Smallest text (11pt regular)
+
+### SF Pro Font Usage Rules (2025)
+- **SF Pro Text**: Automatically used for text ≤19pt
+- **SF Pro Display**: Automatically used for text ≥20pt  
+- **Dynamic Optical Sizing**: Enabled by default in macOS 26+
+- **Never specify font manually**: Use semantic styles only
+
+### Text Colors & Accessibility
+- **Primary**: `.primary` - Main content text (adapts to light/dark mode)
+- **Secondary**: `.secondary` - Supporting text, placeholders
+- **Tertiary**: `.tertiary` - De-emphasized text
+- **Quaternary**: `.quaternary` - Minimal prominence text
+- **White**: `.white` - Text on colored backgrounds (use sparingly)
+
+---
+
+## Color System (Apple HIG 2025)
+
+### Semantic Color Hierarchy
+- **`.primary`**: Main content text, primary UI elements
+- **`.secondary`**: Secondary content, subtle UI elements  
+- **`.tertiary`**: Placeholder text, disabled content
+- **`.quaternary`**: Borders, dividers, very subtle backgrounds
+- **`.quinary`**: Ultra-light backgrounds, container fills
+
+### Background Colors
+- **Window**: `Color(.windowBackgroundColor)` - Main backgrounds
+- **Input**: `Color(.textBackgroundColor)` - Text fields, input areas
+- **Section**: `Color.quinary` - Section backgrounds (replaces manual opacity)
+
+### Status Colors
+- **Success**: `.green` - Positive states, active indicators
+- **Error**: `.red` - Error states, destructive actions
+- **Info**: `.blue` - Information, links, accents
+- **Warning**: `.orange` - Warning states
+
+### Material Backgrounds
+- **`.regularMaterial`**: Standard glass effect
+- **`.thickMaterial`**: Stronger glass effect for important overlays
+
+### Usage Guidelines
+- Prioritize semantic colors over custom opacity values
+- Use `.quaternary` instead of `.gray.opacity(0.3)`
+- Use `.tertiary` instead of `.gray.opacity(0.5)` 
+- Use `.primary.opacity()` instead of `.black.opacity()` for shadows
+- Preserve system colors (`.red`, `.green`) for status indication
+
+---
+
+## Spacing System (8pt Grid - Apple HIG 2025)
+
+### Standard Spacing Scale
+Apple's 8-point grid system ensures consistency across all platforms:
+
+- **4pt**: Tight spacing, icon-text gaps
+- **8pt**: Base unit - component spacing, small padding
+- **16pt**: Standard component spacing, comfortable padding  
+- **24pt**: Section spacing, moderate separation
+- **32pt**: Block spacing between major sections
+- **40pt**: Large section separation
+- **48pt**: Major layout breaks
+
+### Padding Standards
+- **Tight**: `padding(4)` - Icon spacing, minimal areas
+- **Standard**: `padding(8)` - Default component padding
+- **Comfortable**: `padding(16)` - Headers, form elements
+- **Spacious**: `padding(24)` - Section containers
+- **Large**: `padding(32)` - Major layout areas
+
+### Dynamic Type Spacing
+- Spacing automatically adjusts with user's text size preferences
+- Use semantic spacing modifiers when available
+- Test with largest Dynamic Type sizes (AX sizes)
+
+---
+
+## Layout Standards (macOS 26 / 2025)
+
+### Corner Radius (Liquid Glass Design)
+Following Apple's 2025 Liquid Glass design language:
+
+- **Small**: `6pt` - Status badges, small components
+- **Standard**: `12pt` - Cards, sections, input fields  
+- **Large**: `16pt` - Major containers, modal dialogs
+- **Button**: Use system defaults via `ButtonStyle` (auto-adaptive)
+- **Capsule**: `Capsule()` - Pills, banners, tags
+
+### TextField Styling
+- **Plain**: `PlainTextFieldStyle()` - Search bars, inline editing
+- **Bordered**: `RoundedBorderTextFieldStyle()` - Form inputs
+- **Automatic**: Let SwiftUI choose based on context (recommended)
+
+### Glass Material Effects (New in 2025)
+```swift
+.background(.regularMaterial)     // Standard glass effect
+.background(.thickMaterial)       // Prominent glass effect  
+.background(.thinMaterial)        // Subtle glass effect
+.background(.ultraThinMaterial)   // Minimal glass effect
+```
+
+### Shadow Effects (Refined for Liquid Glass)
+- **Soft**: `shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)` - Cards, elevated content
+- **Standard**: `shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)` - Floating elements
+- **Prominent**: `shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 8)` - Modal dialogs
+- **Usage**: Combine with material backgrounds for glass effect
+
+---
+
 ## Migration Notes
 
 ### Components Updated ✅
@@ -150,14 +274,24 @@ Button("Terminal") { action() }
 4. **ModernEntryEditorView**: Add buttons updated to secondary style (.regular)
 5. **MessageBanner**: Close button uses utility style (PlainButtonStyle)
 
-### Deprecated Patterns
+### Deprecated Patterns (2025 Update)
+- ❌ Manual font sizes: `.system(size: 13)` → Use `.body`, `.caption` etc.
 - ❌ Custom `.background()` and `.foregroundColor()` combinations
 - ❌ Manual `.cornerRadius()` on buttons  
 - ❌ Custom button heights via `.frame(height:)`
 - ❌ Inconsistent `.controlSize()` usage
+- ❌ Fixed spacing values without 8pt grid alignment
+- ❌ Ignoring Dynamic Type accessibility
 
-### Approved Patterns  
+### Approved Patterns (2025 Standards)
+- ✅ Semantic text styles: `.body`, `.headline`, `.caption`
+- ✅ SF Pro automatic optical sizing (system handled)
 - ✅ SwiftUI built-in `ButtonStyle` variants
 - ✅ `.controlSize()` for consistent sizing
 - ✅ `.tint()` for accent colors
 - ✅ `role:` parameter for semantic actions
+- ✅ 8pt grid-based spacing: `8, 16, 24, 32, 40, 48`
+- ✅ Material backgrounds: `.regularMaterial`, `.thickMaterial`
+- ✅ Liquid Glass corner radius: `6pt, 12pt, 16pt`
+- ✅ Semantic color hierarchy: `.primary`, `.secondary`, `.tertiary`, `.quaternary`
+- ✅ Dynamic Type support and testing

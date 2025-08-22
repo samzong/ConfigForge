@@ -138,7 +138,7 @@ struct ModernEntryEditorView: View {
                     .frame(height: 30)
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            .stroke(Color.quaternary, lineWidth: 1)
                     )
                 if viewModel.isEditing {
                     TextField(placeholder, text: value)
@@ -147,7 +147,7 @@ struct ModernEntryEditorView: View {
                         .padding(.vertical, 4)
                 } else {
                     Text(value.wrappedValue.isEmpty ? placeholder : value.wrappedValue)
-                        .foregroundColor(value.wrappedValue.isEmpty ? .gray.opacity(0.5) : .primary)
+                        .foregroundColor(value.wrappedValue.isEmpty ? .tertiary : .primary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                 }
@@ -155,7 +155,7 @@ struct ModernEntryEditorView: View {
             .frame(height: 30)
         }
         .padding()
-        .background(Color.secondary.opacity(0.05))
+        .background(Color.quinary)
         .cornerRadius(8)
     }
     
@@ -173,7 +173,7 @@ struct ModernEntryEditorView: View {
                             .frame(height: 30)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                    .stroke(Color.quaternary, lineWidth: 1)
                             )
                         if viewModel.isEditing {
                             TextField(L10n.Property.Identityfile.placeholder, text: bindingForDirective(at: index))
@@ -183,7 +183,7 @@ struct ModernEntryEditorView: View {
                         } else {
                             let value = editedDirectives[index].value
                             Text(value.isEmpty ? L10n.Property.Identityfile.placeholder : value)
-                                .foregroundColor(value.isEmpty ? .gray.opacity(0.5) : .primary)
+                                .foregroundColor(value.isEmpty ? .tertiary : .primary)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                         }
@@ -225,7 +225,7 @@ struct ModernEntryEditorView: View {
             }
         }
         .padding()
-        .background(Color.secondary.opacity(0.05))
+        .background(Color.quinary)
         .cornerRadius(8)
     }
 
@@ -419,7 +419,7 @@ struct ModernEntryEditorView: View {
             }
         }
         .padding()
-        .background(Color.secondary.opacity(0.05))
+        .background(Color.quinary)
         .cornerRadius(8)
     }
 

@@ -27,7 +27,7 @@ struct MessageBanner: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white.opacity(0.7))
                 }
                 .buttonStyle(PlainButtonStyle())
                 .padding(.leading, 4)
@@ -36,7 +36,7 @@ struct MessageBanner: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
         .background(Capsule().fill(bannerColor))
-        .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
+        .shadow(color: .primary.opacity(0.1), radius: 3, x: 0, y: 2)
         .padding(.top, 16)
     }
     

@@ -133,7 +133,7 @@ struct MessageBannerView: View {
         .background(message.type.backgroundColor.opacity(0.9))
         .foregroundColor(.white)
         .cornerRadius(4)
-        .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
+        .shadow(color: .primary.opacity(0.08), radius: 1, x: 0, y: 1)
         .padding(.horizontal, 10)
         .frame(maxWidth: 300)
         .padding(.top, 2)

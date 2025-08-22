@@ -84,7 +84,7 @@ struct LoadingOverlay: ViewModifier {
         ZStack {
             content
             if isLoading {
-                Color.black.opacity(0.3)
+                Color.primary.opacity(0.2)
                     .edgesIgnoringSafeArea(.all)
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))

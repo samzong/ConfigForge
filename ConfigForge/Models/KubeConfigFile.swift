@@ -10,6 +10,7 @@ enum KubeConfigFileType: Equatable {
     case active
     case backup
     case stored
+    case main
 }
 
 struct KubeConfigFile: Identifiable, Equatable {

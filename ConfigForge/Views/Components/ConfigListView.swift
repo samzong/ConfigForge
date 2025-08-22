@@ -56,19 +56,21 @@ private struct ConfigListContent: View {
     
     private func configFileContextMenu(for configFile: KubeConfigFile) -> some View {
         Group {
-            Button(action: {
-                viewModel.activateConfigFile(configFile)
-            }) {
-                Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
-            }
-            .disabled(configFile.isActive || configFile.status != .valid)
-            
-            Divider()
-            
-            Button(role: .destructive, action: {
-                viewModel.promptForDeleteConfigFile(configFile)
-            }) {
-                Label(L10n.App.delete, systemImage: "trash")
+            if configFile.fileType != .main {
+                Button(action: {
+                    viewModel.activateConfigFile(configFile)
+                }) {
+                    Label(L10n.Kubernetes.Config.setActive, systemImage: "checkmark.circle")
+                }
+                .disabled(configFile.isActive || configFile.status != .valid)
+                
+                Divider()
+                
+                Button(role: .destructive, action: {
+                    viewModel.promptForDeleteConfigFile(configFile)
+                }) {
+                    Label(L10n.App.delete, systemImage: "trash")
+                }
             }
         }
     }
@@ -89,23 +91,39 @@ struct ConfigFileRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(configFile.displayName)
-                .font(.footnote)
-                .foregroundColor(.primary)
             HStack(spacing: 4) {
-                if configFile.isActive {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption2)
-                } else if case .invalid = configFile.status {
-                    Image(systemName: "exclamationmark.triangle.fill")  
-                        .foregroundColor(.red)
+                if configFile.fileType == .main {
+                    Image(systemName: "lock.fill")
+                        .foregroundColor(.secondary)
                         .font(.caption2)
                 }
-                
-                Text(statusText)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                Text(configFile.fileType == .main ? 
+                    "Active Configuration (Read-Only)" : 
+                    configFile.displayName)
+                    .font(.footnote)
+                    .foregroundColor(configFile.fileType == .main ? 
+                        .secondary : .primary)
+            }
+            HStack(spacing: 4) {
+                if configFile.fileType == .main {
+                    Text("~/.kube/config")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                } else {
+                    if configFile.isActive {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption2)
+                    } else if case .invalid = configFile.status {
+                        Image(systemName: "exclamationmark.triangle.fill")  
+                            .foregroundColor(.red)
+                            .font(.caption2)
+                    }
+                    
+                    Text(statusText)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
             }
         }
         .padding(.vertical, 4)
@@ -161,4 +179,4 @@ struct ConfigListView_Previews: PreviewProvider {
         ConfigListView(viewModel: MainViewModel())
             .frame(width: 300, height: 500)
     }
-} 
+}

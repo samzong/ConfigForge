@@ -37,21 +37,23 @@ struct ConfigEditorView: View {
                 .frame(height: 40)
 
                 Spacer()
-                Button(action: {
-                    if viewModel.isEditing {
-                        viewModel.saveChanges()
-                    } else {
-                        viewModel.startEditing()
+                if viewModel.configFile?.fileType != .main {
+                    Button(action: {
+                        if viewModel.isEditing {
+                            viewModel.saveChanges()
+                        } else {
+                            viewModel.startEditing()
+                        }
+                    }) {
+                        Text(viewModel.isEditing ? L10n.App.save : L10n.App.edit)
+                            .frame(minWidth: 80)
                     }
-                }) {
-                    Text(viewModel.isEditing ? L10n.App.save : L10n.App.edit)
-                        .frame(minWidth: 80)
+                    .keyboardShortcut(viewModel.isEditing ? "s" : .return, modifiers: .command)
+                    .buttonStyle(BorderedButtonStyle())
+                    .controlSize(.large)
+                    .disabled(viewModel.isEditing ? (!viewModel.titleValid || viewModel.editableTitle.isEmpty) : 
+                        (viewModel.configFile?.status != .valid || viewModel.configFile == nil))
                 }
-                .keyboardShortcut(viewModel.isEditing ? "s" : .return, modifiers: .command)
-                .buttonStyle(BorderedButtonStyle())
-                .controlSize(.large)
-                .disabled(viewModel.isEditing ? (!viewModel.titleValid || viewModel.editableTitle.isEmpty) : 
-                         (viewModel.configFile?.status != .valid || viewModel.configFile == nil))
             }
             .padding()
             .background(Color(.windowBackgroundColor))
@@ -175,4 +177,4 @@ struct ConfigEditorView_Previews: PreviewProvider {
         ConfigEditorView()
             .environmentObject(MainViewModel())
     }
-} 
+}

@@ -167,8 +167,8 @@ enum AppLauncherError: LocalizedError {
         switch self {
         case .appNotFound(let paths):
             return "ConfigForge.app not found. Searched in:\n" + 
-                   paths.map { "  - \($0)" }.joined(separator: "\n") + 
-                   "\n\nPlease install ConfigForge or run from the correct directory."
+                paths.map { "  - \($0)" }.joined(separator: "\n") + 
+                "\n\nPlease install ConfigForge or run from the correct directory."
         case .launchFailed(let error):
             return "Failed to launch ConfigForge application: \(error.localizedDescription)"
         }

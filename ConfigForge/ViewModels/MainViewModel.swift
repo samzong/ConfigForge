@@ -265,6 +265,12 @@ class MainViewModel: ObservableObject {
             switch result {
             case .success(let yamlContent):
                 self.activeConfigContent = yamlContent
+                
+                if let mainIndex = configFiles.firstIndex(where: { $0.fileType == .main }) {
+                    var updatedMainConfig = configFiles[mainIndex]
+                    updatedMainConfig.updateYamlContent(yamlContent)
+                    configFiles[mainIndex] = updatedMainConfig
+                }
 
                 if selectedConfigurationType == .kubernetes {
                     messageHandler.show("Kubeconfig loaded successfully", type: .success)
@@ -302,7 +308,11 @@ class MainViewModel: ObservableObject {
             
             switch result {
             case .success(let files):
-                self.configFiles = files
+                var finalFiles = files
+                if let mainConfig = createMainConfigFileEntry() {
+                    finalFiles.insert(mainConfig, at: 0)
+                }
+                self.configFiles = finalFiles
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
                 self.configFiles = []
@@ -331,6 +341,28 @@ class MainViewModel: ObservableObject {
         }
         
         return validatedFiles
+    }
+    
+    private func createMainConfigFileEntry() -> KubeConfigFile? {
+        do {
+            let mainPath = try kubeConfigFileManager.getConfigFilePath()
+            guard FileManager.default.fileExists(atPath: mainPath.path),
+                  !activeConfigContent.isEmpty else {
+                return nil
+            }
+            
+            return KubeConfigFile(
+                fileName: "config",
+                filePath: mainPath,
+                fileType: .main,
+                yamlContent: activeConfigContent,
+                creationDate: nil,
+                modificationDate: nil,
+                isActive: false
+            )
+        } catch {
+            return nil
+        }
     }
     
     private func validateYamlContent(_ content: String) async -> Result<Void, ConfigForgeError> {
@@ -425,6 +457,10 @@ class MainViewModel: ObservableObject {
 
     func saveConfigFileContent(_ content: String) async {
         guard let configFile = selectedConfigFile else { return }
+        guard configFile.fileType != .main else {
+            messageHandler.show("Cannot save main config file", type: .error)
+            return
+        }
         
         let fileWatcher = EventManager.shared.getFileWatcher()
         let success = fileWatcher.createOrUpdateFile(content: content, at: configFile.filePath)
@@ -466,6 +502,11 @@ class MainViewModel: ObservableObject {
     }
     
     func activateConfigFile(_ configFile: KubeConfigFile) {
+        guard configFile.fileType != .main else {
+            messageHandler.show("Cannot activate main config file", type: .error)
+            return
+        }
+        
         guard configFile.status == .valid else {
             messageHandler.show("Cannot activate invalid config file", type: .error)
             return
@@ -526,6 +567,11 @@ class MainViewModel: ObservableObject {
     }
     
     func renameConfigFile(_ configFile: KubeConfigFile, to newName: String) {
+        guard configFile.fileType != .main else {
+            messageHandler.show("Cannot rename main config file", type: .error)
+            return
+        }
+        
         guard !newName.isEmpty else {
             messageHandler.show("File name cannot be empty", type: .error)
             return
@@ -595,6 +641,11 @@ class MainViewModel: ObservableObject {
     }
     
     func deleteConfigFile(_ configFile: KubeConfigFile) {
+        guard configFile.fileType != .main else {
+            messageHandler.show("Cannot delete main config file", type: .error)
+            return
+        }
+        
         if selectedConfigFile?.id == configFile.id {
             selectedConfigFile = nil
             selectedConfigFileContent = ""
@@ -700,6 +751,11 @@ class MainViewModel: ObservableObject {
     }
     
     func copyConfigFile(_ configFile: KubeConfigFile, to newName: String) {
+        guard configFile.fileType != .main else {
+            messageHandler.show("Cannot copy main config file", type: .error)
+            return
+        }
+        
         do {
             let fileManager = KubeConfigFileManager()
             let configsDir = try fileManager.getConfigsDirectoryPath()

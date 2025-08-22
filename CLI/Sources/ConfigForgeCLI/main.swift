@@ -12,7 +12,8 @@ struct ConfigForgeCLI: ParsableCommand {
         abstract: "ConfigForge CLI - Manage SSH and Kubernetes configurations",
         subcommands: [
             SSHCommand.self,
-            KubeCommand.self
+            KubeCommand.self,
+            OpenCommand.self
         ],
         defaultSubcommand: SSHCommand.self
     )

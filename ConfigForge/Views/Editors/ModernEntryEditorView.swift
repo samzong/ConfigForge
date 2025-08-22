@@ -266,63 +266,44 @@ struct ModernEntryEditorView: View {
 
     private var headerView: some View {
         HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                ZStack {
-                    let newHostString = L10n.Host.new
-                    if viewModel.isEditing {
-                        TextField(L10n.Host.Enter.name, text: $editedHost)
-                            .font(.title2.bold())
-                            .textFieldStyle(PlainTextFieldStyle())
-                            .frame(maxWidth: 300, minHeight: 40)
-                            .padding(4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .fill(entry.host == newHostString ? Color.accentColor.opacity(0.1) : Color.clear)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(entry.host == newHostString ? Color.accentColor : Color.clear, lineWidth: 1)
-                                    )
-                            )
-                            .onChange(of: editedHost) { newValue in
-                                Task {
-                                    let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
-                                    let isValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
-                                    
-                                    await MainActor.run {
-                                        hostValid = isValid
-                                    }
+            // Editable title similar to Kubernetes config editing
+            ZStack(alignment: .leading) {
+                if viewModel.isEditing {
+                    TextField(L10n.Host.Enter.name, text: $editedHost)
+                        .font(.title2.bold())
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .frame(maxWidth: 300, minHeight: 40)
+                        .padding(4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(Color.accentColor.opacity(0.1))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(Color.accentColor, lineWidth: 1)
+                                )
+                        )
+                        .onChange(of: editedHost) { newValue in
+                            Task {
+                                let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-_.*?"))
+                                let isValid = newValue.rangeOfCharacter(from: allowedCharacters.inverted) == nil && !newValue.isEmpty
+                                
+                                await MainActor.run {
+                                    hostValid = isValid
                                 }
                             }
-                    } else {
-                        Text(entry.host)
-                            .font(.title2.bold())
-                            .frame(maxWidth: 300, minHeight: 40, alignment: .leading)
-                            .padding(4)
-                    }
+                        }
+                } else {
+                    Text(entry.host)
+                        .font(.title2.bold())
+                        .frame(maxWidth: 300, minHeight: 40, alignment: .leading)
+                        .padding(4)
                 }
-                .frame(height: 40)
-                
-                HStack {
-                    if !entry.hostname.isEmpty {
-                        Text(entry.hostname)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    if !entry.user.isEmpty {
-                        Text("@\(entry.user)")
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .font(.subheadline)
             }
+            .frame(height: 40)
 
             if !viewModel.isEditing {
-                HStack {
-                    TerminalLauncherButton(sshEntry: entry)
-                        .frame(height: 32)
-                        .padding(.vertical, 8)
-                }
-                .padding(.top, 8)
+                TerminalLauncherButton(sshEntry: entry)
+                    .frame(height: 32)
             }
             
             Spacer()

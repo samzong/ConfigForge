@@ -7,6 +7,8 @@ import Yams
 class ConfigEditorViewModel: ObservableObject {
     @Published var configFile: KubeConfigFile?
     @Published var editorContent: String = ""
+    @Published var editableTitle: String = ""
+    @Published var titleValid: Bool = true
     @Published var isEditing: Bool = false
     @Published var hasUnsavedChanges: Bool = false
     @Published var errorMessage: String?
@@ -29,6 +31,8 @@ class ConfigEditorViewModel: ObservableObject {
                 await MainActor.run {
                     self.configFile = configFile
                     self.editorContent = content
+                    self.editableTitle = configFile.displayName
+                    self.titleValid = true
                     self.isEditing = false
                     self.hasUnsavedChanges = false
                     self.clearHistory()
@@ -47,7 +51,17 @@ class ConfigEditorViewModel: ObservableObject {
         if !isEditing {
             pushToUndoStack(editorContent)
             isEditing = true
+            if let configFile = configFile {
+                editableTitle = configFile.displayName
+            }
         }
+    }
+    
+    func validateTitle(_ title: String) {
+        // Validate title: should not be empty and should not contain invalid file name characters
+        let invalidChars = CharacterSet(charactersIn: "/\\:*?\"<>|")
+        titleValid = !title.isEmpty && title.rangeOfCharacter(from: invalidChars) == nil
+        updateUnsavedChanges()
     }
     
     func stopEditing() {
@@ -58,7 +72,7 @@ class ConfigEditorViewModel: ObservableObject {
         if isEditing {
             let oldContent = editorContent
             editorContent = newContent
-            hasUnsavedChanges = true
+            updateUnsavedChanges()
             
             if abs(oldContent.count - newContent.count) > 10 {
                 pushToUndoStack(oldContent)
@@ -68,9 +82,31 @@ class ConfigEditorViewModel: ObservableObject {
         }
     }
     
+    private func updateUnsavedChanges() {
+        // Check if content or title has changed
+        let contentChanged = configFile.map { originalConfig in
+            do {
+                let originalContent = try String(contentsOf: originalConfig.filePath, encoding: .utf8)
+                return editorContent != originalContent
+            } catch {
+                return true // If we can't read original, assume changed
+            }
+        } ?? true
+        
+        let titleChanged = configFile?.displayName != editableTitle
+        
+        hasUnsavedChanges = contentChanged || titleChanged
+    }
+    
     func saveChanges() {
-        guard let configFile = configFile, hasUnsavedChanges else { 
+        guard let configFile = configFile else { 
             isEditing = false
+            return
+        }
+        
+        // Check if title is valid
+        if !titleValid || editableTitle.isEmpty {
+            messageHandler.show("Config file name is invalid", type: .error)
             return
         }
         
@@ -81,13 +117,45 @@ class ConfigEditorViewModel: ObservableObject {
         
         Task {
             do {
-                try editorContent.write(to: configFile.filePath, atomically: true, encoding: .utf8)
+                var currentFile = configFile
+                var targetFilePath = configFile.filePath
+                
+                // Check if title has changed and handle file renaming
+                let originalDisplayName = configFile.displayName
+                if editableTitle != originalDisplayName {
+                    // Generate new file path based on edited title
+                    let directory = configFile.filePath.deletingLastPathComponent()
+                    let fileExtension = configFile.filePath.pathExtension.isEmpty ? "yaml" : configFile.filePath.pathExtension
+                    let newFileName = editableTitle.hasSuffix(".\(fileExtension)") ? editableTitle : "\(editableTitle).\(fileExtension)"
+                    let newFilePath = directory.appendingPathComponent(newFileName)
+                    
+                    // Check if new file path already exists (unless it's the same file)
+                    if newFilePath != configFile.filePath && FileManager.default.fileExists(atPath: newFilePath.path) {
+                        await MainActor.run {
+                            self.messageHandler.show("A file with this name already exists", type: .error)
+                        }
+                        return
+                    }
+                    
+                    // Rename the file
+                    try FileManager.default.moveItem(at: configFile.filePath, to: newFilePath)
+                    targetFilePath = newFilePath
+                    
+                    // Update the configFile object
+                    currentFile = KubeConfigFile(fileName: newFileName, filePath: newFilePath, fileType: configFile.fileType)
+                    await MainActor.run {
+                        self.configFile = currentFile
+                    }
+                }
+                
+                // Write content to the file (renamed or original)
+                try editorContent.write(to: targetFilePath, atomically: true, encoding: .utf8)
                 
                 let validationResult = await validateYamlContent(editorContent)
                 
                 switch validationResult {
                 case .success:
-                    var updatedFile = configFile
+                    var updatedFile = currentFile
                     updatedFile.updateYamlContent(editorContent)
                     updatedFile.status = .valid
                     
@@ -99,12 +167,12 @@ class ConfigEditorViewModel: ObservableObject {
                         self.isEditing = false
                     }
                     
-                    if configFile.fileType == .active {
+                    if currentFile.fileType == .active {
                         EventManager.shared.notifyActiveConfigChanged(editorContent)
                     }
                     
                 case .failure(let error):
-                    var updatedFile = configFile
+                    var updatedFile = currentFile
                     updatedFile.updateYamlContent(editorContent)
                     updatedFile.markAsInvalid(error.localizedDescription)
                     

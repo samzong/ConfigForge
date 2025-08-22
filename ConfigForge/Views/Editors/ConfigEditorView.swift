@@ -7,9 +7,33 @@ struct ConfigEditorView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(viewModel.editorTitle)
-                    .font(.title2.bold())
-                    .frame(alignment: .leading)
+                // Editable title similar to SSH host editing
+                ZStack(alignment: .leading) {
+                    if viewModel.isEditing {
+                        TextField("Config File Name", text: $viewModel.editableTitle)
+                            .font(.title2.bold())
+                            .textFieldStyle(PlainTextFieldStyle())
+                            .frame(maxWidth: 300, minHeight: 40)
+                            .padding(4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .fill(Color.accentColor.opacity(0.1))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.accentColor, lineWidth: 1)
+                                    )
+                            )
+                            .onChange(of: viewModel.editableTitle) { newValue in
+                                viewModel.validateTitle(newValue)
+                            }
+                    } else {
+                        Text(viewModel.editorTitle)
+                            .font(.title2.bold())
+                            .frame(maxWidth: 300, minHeight: 40, alignment: .leading)
+                            .padding(4)
+                    }
+                }
+                .frame(height: 40)
 
                 Spacer()
                 Button(action: {
@@ -25,8 +49,8 @@ struct ConfigEditorView: View {
                 .keyboardShortcut(viewModel.isEditing ? "s" : .return, modifiers: .command)
                 .buttonStyle(BorderedButtonStyle())
                 .controlSize(.large)
-                .disabled(!viewModel.isEditing && (viewModel.configFile?.status != .valid || 
-                        viewModel.configFile == nil))
+                .disabled(viewModel.isEditing ? (!viewModel.titleValid || viewModel.editableTitle.isEmpty) : 
+                         (viewModel.configFile?.status != .valid || viewModel.configFile == nil))
             }
             .padding()
             .background(Color(NSColor.textBackgroundColor))

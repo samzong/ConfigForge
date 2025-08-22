@@ -16,7 +16,7 @@ struct ConfigForgeApp: App {
             ContentView()
                 .frame(minWidth: 800, minHeight: 600)
         })
-        .windowStyle(.hiddenTitleBar) 
+        .windowStyle(.titleBar) 
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button(L10n.Sidebar.Add.host) {

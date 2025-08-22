@@ -39,7 +39,7 @@ struct SidebarView: View {
                 }
             }
             .padding([.horizontal, .top], 16)
-            .padding(.bottom, 4)
+            .padding(.bottom, 8)
             
             // ---- Top Navigation Picker (SSH / Kubernetes) ----
             Picker("", selection: $viewModel.selectedConfigurationType) {
@@ -90,7 +90,8 @@ struct SidebarView: View {
             .padding(8)
             .background(Color(.controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(.quaternary, lineWidth: 0.5))
-            .padding([.horizontal, .top], 8)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
             
             // SSH 模式显示主机列表
             if viewModel.selectedConfigurationType == .ssh {
@@ -185,7 +186,7 @@ struct SidebarView: View {
             }
             .buttonStyle(BorderedProminentButtonStyle())
             .controlSize(.large)
-            .padding(8)
+            .padding(16)
         }
         .frame(width: 250)
         .background(Color(.windowBackgroundColor))

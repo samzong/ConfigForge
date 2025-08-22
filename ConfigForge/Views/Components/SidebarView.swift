@@ -38,7 +38,7 @@ struct SidebarView: View {
                     .help(L10n.App.Save.help)
                 }
             }
-            .padding([.horizontal, .top], 12)
+            .padding([.horizontal, .top], 16)
             .padding(.bottom, 4)
             
             // ---- Top Navigation Picker (SSH / Kubernetes) ----
@@ -48,7 +48,7 @@ struct SidebarView: View {
                 }
             }
             .pickerStyle(.segmented) // Use segmented style for top level
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.bottom, 8)
             // ---- End Top Navigation Picker ----
             

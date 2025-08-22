@@ -9,12 +9,12 @@ import SwiftUI
 
 struct EmptyEditorViewModern: View {
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             Image(systemName: "square.on.square.dashed")
                 .font(.system(size: 56))
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
-                .padding(.bottom, 10)
+                .padding(.bottom, 8)
 
             LocalizedText("editor.empty.title")
                 .font(.title3)

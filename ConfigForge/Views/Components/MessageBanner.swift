@@ -12,7 +12,7 @@ struct MessageBanner: View {
     let onDismiss: () -> Void
     
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Image(systemName: iconName)
                 .font(.headline)
                 .foregroundColor(.white)
@@ -34,10 +34,10 @@ struct MessageBanner: View {
             }
         }
         .padding(.vertical, 8)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 16)
         .background(Capsule().fill(bannerColor))
         .shadow(color: Color.black.opacity(0.15), radius: 3, x: 0, y: 2)
-        .padding(.top, 12)
+        .padding(.top, 16)
     }
     
     private var iconName: String {

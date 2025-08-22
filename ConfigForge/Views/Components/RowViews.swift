@@ -11,7 +11,7 @@ struct HostRowView: View {
     let entry: SSHConfigEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(entry.host)
                 .font(.footnote)
                 .foregroundColor(.primary)

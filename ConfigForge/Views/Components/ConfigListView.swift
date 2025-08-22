@@ -86,7 +86,7 @@ struct ConfigFileRow: View {
     let isActive: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(configFile.displayName)
                 .font(.footnote)
                 .foregroundColor(.primary)
@@ -123,12 +123,12 @@ struct EmptyConfigView: View {
     @ObservedObject var viewModel: MainViewModel
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 24) {
             Image(systemName: "square.on.square.dashed")
                 .font(.system(size: 56))
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
-                .padding(.bottom, 10)
+                .padding(.bottom, 8)
             
             Text(L10n.Kubernetes.noSelection)
                 .font(.title3)

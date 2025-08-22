@@ -150,7 +150,7 @@ struct EmptyEditorView: View {
                 .font(.system(size: 56))
                 .foregroundColor(.secondary)
                 .symbolRenderingMode(.hierarchical)
-                .padding(.bottom, 10)
+                .padding(.bottom, 8)
 
             Text(L10n.Kubernetes.noSelection)
                 .font(.title3)

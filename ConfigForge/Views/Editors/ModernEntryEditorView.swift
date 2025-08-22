@@ -143,12 +143,12 @@ struct ModernEntryEditorView: View {
                 if viewModel.isEditing {
                     TextField(placeholder, text: value)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .padding(.horizontal, 6)
+                        .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                 } else {
                     Text(value.wrappedValue.isEmpty ? placeholder : value.wrappedValue)
                         .foregroundColor(value.wrappedValue.isEmpty ? .gray.opacity(0.5) : .primary)
-                        .padding(.horizontal, 6)
+                        .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                 }
             }
@@ -178,13 +178,13 @@ struct ModernEntryEditorView: View {
                         if viewModel.isEditing {
                             TextField(L10n.Property.Identityfile.placeholder, text: bindingForDirective(at: index))
                                 .textFieldStyle(PlainTextFieldStyle())
-                                .padding(.horizontal, 6)
+                                .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                         } else {
                             let value = editedDirectives[index].value
                             Text(value.isEmpty ? L10n.Property.Identityfile.placeholder : value)
                                 .foregroundColor(value.isEmpty ? .gray.opacity(0.5) : .primary)
-                                .padding(.horizontal, 6)
+                                .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                         }
                     }

@@ -163,7 +163,7 @@ class ConfigEditorViewModel: ObservableObject {
                         self.configFile = updatedFile
                         self.hasUnsavedChanges = false
                         self.clearRedoStack()
-                        self.messageHandler.show("Config saved", type: .success)
+                        self.messageHandler.show("Config saved", type: .success, priority: .low)
                         self.isEditing = false
                     }
                     

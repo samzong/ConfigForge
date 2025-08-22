@@ -116,7 +116,7 @@ class MainViewModel: ObservableObject {
             case .success(let parsedEntries):
                 self.sshEntries = parsedEntries
                 if !parsedEntries.isEmpty && selectedConfigurationType == .ssh {
-                    messageHandler.show(MessageConstants.SuccessMessages.configLoaded, type: .success)
+                    messageHandler.show(MessageConstants.SuccessMessages.configLoaded, type: .success, priority: .low)
                 }
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
@@ -143,7 +143,7 @@ class MainViewModel: ObservableObject {
             isLoading = false
             switch result {
             case .success:
-                messageHandler.show(MessageConstants.SuccessMessages.configSaved, type: .success)
+                messageHandler.show(MessageConstants.SuccessMessages.configSaved, type: .success, priority: .low)
             case .failure(let error):
                 ErrorHandler.handle(error, messageHandler: messageHandler)
             }
@@ -164,7 +164,7 @@ class MainViewModel: ObservableObject {
         let newEntry = SSHConfigEntry(host: host, directives: directives)
         sshEntries.append(newEntry)
         safelySelectEntry(newEntry)
-        messageHandler.show(MessageConstants.SuccessMessages.entryAdded, type: .success)
+        messageHandler.show(MessageConstants.SuccessMessages.entryAdded, type: .success, priority: .low)
         saveSshConfig()
     }
     
@@ -185,7 +185,7 @@ class MainViewModel: ObservableObject {
             var updatedEntry = SSHConfigEntry(id: id, host: host, directives: directives)
             sshEntries[index] = updatedEntry
             safelySelectEntry(updatedEntry)
-            messageHandler.show(MessageConstants.SuccessMessages.entryUpdated, type: .success)
+            messageHandler.show(MessageConstants.SuccessMessages.entryUpdated, type: .success, priority: .low)
             saveSshConfig()
         }
     }
@@ -487,7 +487,7 @@ class MainViewModel: ObservableObject {
                 selectedConfigFileContent = content
                 
                 if updatedFile.status == .valid {
-                    messageHandler.show("Config saved", type: .success)
+                    messageHandler.show("Config saved", type: .success, priority: .low)
                 } else {
                     messageHandler.show("Config saved, but validation failed: \(updatedFile.status)", type: .error)
                 }

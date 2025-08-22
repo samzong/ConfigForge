@@ -35,15 +35,23 @@ enum MessageType: Sendable {
     case info
 }
 
+enum MessagePriority: Sendable {
+    case low        // 可省略的成功提示
+    case normal     // 一般操作反馈
+    case high       // 错误和重要操作
+}
+
 struct AppMessage: Identifiable, Sendable {
     let id: UUID
     let type: MessageType
     let message: String
+    let priority: MessagePriority
     
-    init(id: UUID = UUID(), type: MessageType, message: String) {
+    init(id: UUID = UUID(), type: MessageType, message: String, priority: MessagePriority = .normal) {
         self.id = id
         self.type = type
         self.message = message
+        self.priority = priority
     }
 }
 
@@ -55,8 +63,12 @@ class MessageHandler: ObservableObject {
 
     var messagePoster: (@Sendable (String, MessageType) -> Void)?
     
-    func show(_ message: String, type: MessageType = .info, duration: TimeInterval = 1.5) {
-        let appMessage = AppMessage(type: type, message: message)
+    func show(_ message: String, type: MessageType = .info, priority: MessagePriority = .normal) {
+        if priority == .low {
+            return
+        }
+        
+        let appMessage = AppMessage(type: type, message: message, priority: priority)
         messageQueue.append(appMessage)
         processMessageQueue()
     }
@@ -68,13 +80,23 @@ class MessageHandler: ObservableObject {
         currentMessage = message
         messageQueue.removeFirst()
         
+        let duration = displayDuration(for: message)
+        
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(1.5 * 1_000_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             withAnimation {
                 currentMessage = nil
                 isShowingMessage = false
                 processMessageQueue()
             }
+        }
+    }
+    
+    private func displayDuration(for message: AppMessage) -> TimeInterval {
+        switch message.type {
+        case .error: return 3.0
+        case .success: return 1.0
+        case .info: return 2.0
         }
     }
 }
@@ -106,10 +128,15 @@ struct MessageOverlay: ViewModifier {
             Group {
                 if let message = messageHandler.currentMessage {
                     VStack {
-                        MessageBannerView(message: message)
                         Spacer()
+                        HStack {
+                            Spacer()
+                            MessageBannerView(message: message)
+                        }
                     }
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .padding(.bottom, 20)
+                    .padding(.trailing, 20)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
         )
@@ -125,19 +152,17 @@ struct MessageBannerView: View {
                 .imageScale(.small)
                 .foregroundColor(message.type.backgroundColor)
             Text(message.message)
-                .font(.caption)
-                .lineLimit(1)
-            Spacer(minLength: 0)
+                .font(.caption2)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
         }
         .padding(.vertical, 6)
-        .padding(.horizontal, 10)
-        .background(.thickMaterial, in: Capsule())
-        .overlay(Capsule().stroke(message.type.backgroundColor, lineWidth: 2))
+        .padding(.horizontal, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(message.type.backgroundColor, lineWidth: 1))
         .foregroundColor(.primary)
-        .shadow(color: message.type.backgroundColor.opacity(0.4), radius: 8, x: 0, y: 4)
-        .padding(.horizontal, 10)
-        .frame(maxWidth: 300)
-        .padding(.top, 2)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .frame(maxWidth: 200)
     }
 }
 

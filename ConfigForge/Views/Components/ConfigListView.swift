@@ -50,6 +50,7 @@ private struct ConfigListContent: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .background(Color(.windowBackgroundColor))
         .onChange(of: selectedConfigFileId, perform: handleSelectionChange)
     }
     

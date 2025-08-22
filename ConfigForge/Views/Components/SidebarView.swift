@@ -88,8 +88,8 @@ struct SidebarView: View {
                 }
             }
             .padding(8)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .background(Color(.controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(.quaternary, lineWidth: 0.5))
             .padding([.horizontal, .top], 8)
             
             // SSH 模式显示主机列表

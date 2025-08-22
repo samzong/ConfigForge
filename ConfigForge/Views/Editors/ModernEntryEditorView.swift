@@ -138,7 +138,7 @@ struct ModernEntryEditorView: View {
                     .frame(height: 30)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.quaternary, lineWidth: 0.5)
+                            .stroke(.quaternary, lineWidth: 0.5)
                     )
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                 if viewModel.isEditing {
@@ -148,7 +148,7 @@ struct ModernEntryEditorView: View {
                         .padding(.vertical, 4)
                 } else {
                     Text(value.wrappedValue.isEmpty ? placeholder : value.wrappedValue)
-                        .foregroundColor(value.wrappedValue.isEmpty ? .tertiary : .primary)
+                        .foregroundStyle(value.wrappedValue.isEmpty ? .tertiary : .primary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                 }
@@ -174,7 +174,7 @@ struct ModernEntryEditorView: View {
                             .frame(height: 30)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.quaternary, lineWidth: 0.5)
+                                    .stroke(.quaternary, lineWidth: 0.5)
                             )
                             .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                         if viewModel.isEditing {
@@ -185,7 +185,7 @@ struct ModernEntryEditorView: View {
                         } else {
                             let value = editedDirectives[index].value
                             Text(value.isEmpty ? L10n.Property.Identityfile.placeholder : value)
-                                .foregroundColor(value.isEmpty ? .tertiary : .primary)
+                                .foregroundStyle(value.isEmpty ? .tertiary : .primary)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                         }

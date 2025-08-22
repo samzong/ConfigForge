@@ -102,14 +102,14 @@ struct ConfigFileRow: View {
                 Text(configFile.fileType == .main ? 
                     "Active Configuration (Read-Only)" : 
                     configFile.displayName)
-                    .font(.footnote)
+                    .font(.callout)
                     .foregroundColor(configFile.fileType == .main ? 
                         .secondary : .primary)
             }
             HStack(spacing: 4) {
                 if configFile.fileType == .main {
                     Text("~/.kube/config")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(.blue)
                 } else {
                     if configFile.isActive {
@@ -123,7 +123,7 @@ struct ConfigFileRow: View {
                     }
                     
                     Text(statusText)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }

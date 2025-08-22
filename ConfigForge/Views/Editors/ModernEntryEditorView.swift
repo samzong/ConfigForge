@@ -219,7 +219,8 @@ struct ModernEntryEditorView: View {
                 Button(action: addIdentityFile) {
                     Label("Add Identity File", systemImage: "plus.circle.fill")
                 }
-                .buttonStyle(LinkButtonStyle())
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.regular)
                 .padding(.top, 4)
             }
         }
@@ -336,7 +337,7 @@ struct ModernEntryEditorView: View {
                 Text(viewModel.isEditing ? L10n.App.save : L10n.App.edit)
                     .frame(minWidth: 80)
             }
-            .keyboardShortcut(.return, modifiers: .command)
+            .keyboardShortcut(viewModel.isEditing ? "s" : .return, modifiers: .command)
             .buttonStyle(BorderedButtonStyle())
             .controlSize(.large)
             .disabled(viewModel.isEditing && (!hostValid || editedHost.isEmpty))
@@ -412,7 +413,8 @@ struct ModernEntryEditorView: View {
                 Button(action: addAdvancedDirective) {
                     Label("Add Directive", systemImage: "plus.circle.fill")
                 }
-                .buttonStyle(LinkButtonStyle())
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.regular)
                 .padding(.top, 4)
             }
         }

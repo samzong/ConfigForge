@@ -22,12 +22,10 @@ struct TerminalLauncherButton: View {
                     }
                 } label: {
                     Label(L10n.Terminal.Open.in, systemImage: "terminal")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(6)
                 }
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.regular)
+                .tint(.blue)
             } else if installedTerminals.count == 1 {
                 Button(action: {
                     Task { await launchSSHInTerminal(terminal: installedTerminals[0]) }
@@ -35,24 +33,18 @@ struct TerminalLauncherButton: View {
                     let terminalName = installedTerminals[0].name
                     Label(terminalName, systemImage: terminalIconName(for: installedTerminals[0]))
                         .frame(minWidth: 80)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 8)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(6)
                 }
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.regular)
+                .tint(.blue)
             } else {
                 Button(action: {
                     showingNoTerminalAlert = true
                 }) {
                     Label(L10n.Terminal.Open.in, systemImage: "terminal")
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 8)
-                        .background(Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(6)
-                        .opacity(0.7)
                 }
+                .buttonStyle(BorderedButtonStyle())
+                .controlSize(.regular)
                 .disabled(true)
                 .help("No terminal applications detected")
                 .alert("Terminal Not Found", isPresented: $showingNoTerminalAlert) {

@@ -33,7 +33,7 @@ struct SidebarView: View {
                         Text(L10n.App.save)
                     }
                     .buttonStyle(BorderedButtonStyle())
-                    .controlSize(.small)
+                    .controlSize(.large)
                     .keyboardShortcut("s", modifiers: .command)
                     .help(L10n.App.Save.help)
                 }
@@ -180,12 +180,9 @@ struct SidebarView: View {
                     Text(addButtonText()) 
                 }
                 .frame(maxWidth: .infinity)
-                .padding(8)
-                .background(Color.accentColor)
-                .foregroundColor(.white)
-                .cornerRadius(8)
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(BorderedProminentButtonStyle())
+            .controlSize(.large)
             .padding(8)
         }
         .frame(width: 250)

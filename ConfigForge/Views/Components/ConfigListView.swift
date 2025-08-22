@@ -144,7 +144,8 @@ struct EmptyConfigView: View {
             Button(L10n.Kubernetes.createNew) {
                 viewModel.createNewConfigFile()
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(BorderedButtonStyle())
+            .controlSize(.large)
             .padding(.top)
         }
         .padding()

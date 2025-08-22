@@ -25,5 +25,6 @@ struct EditorAreaView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .background(Color(.windowBackgroundColor))
     }
 } 

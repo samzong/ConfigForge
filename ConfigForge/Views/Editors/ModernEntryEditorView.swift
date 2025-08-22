@@ -133,13 +133,14 @@ struct ModernEntryEditorView: View {
                 .font(.headline)
                 .foregroundColor(.primary)
             ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(Color(NSColor.textBackgroundColor))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.regularMaterial)
                     .frame(height: 30)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.quaternary, lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.quaternary, lineWidth: 0.5)
                     )
+                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                 if viewModel.isEditing {
                     TextField(placeholder, text: value)
                         .textFieldStyle(PlainTextFieldStyle())
@@ -155,8 +156,8 @@ struct ModernEntryEditorView: View {
             .frame(height: 30)
         }
         .padding()
-        .background(Color.quinary)
-        .cornerRadius(8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
     
     private var identityFileListView: some View {
@@ -168,13 +169,14 @@ struct ModernEntryEditorView: View {
             ForEach(editedDirectives.indices.filter { editedDirectives[$0].key.lowercased() == "identityfile" }, id: \.self) { index in
                 HStack {
                     ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 5)
-                            .fill(Color(NSColor.textBackgroundColor))
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.regularMaterial)
                             .frame(height: 30)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.quaternary, lineWidth: 1)
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.quaternary, lineWidth: 0.5)
                             )
+                            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
                         if viewModel.isEditing {
                             TextField(L10n.Property.Identityfile.placeholder, text: bindingForDirective(at: index))
                                 .textFieldStyle(PlainTextFieldStyle())
@@ -225,8 +227,8 @@ struct ModernEntryEditorView: View {
             }
         }
         .padding()
-        .background(Color.quinary)
-        .cornerRadius(8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 
     private func addIdentityFile() {
@@ -276,12 +278,13 @@ struct ModernEntryEditorView: View {
                         .frame(maxWidth: 300, minHeight: 40)
                         .padding(4)
                         .background(
-                            RoundedRectangle(cornerRadius: 5)
-                                .fill(Color.accentColor.opacity(0.1))
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(.thickMaterial)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 5)
-                                        .stroke(Color.accentColor, lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.accentColor, lineWidth: 2)
                                 )
+                                .shadow(color: Color.accentColor.opacity(0.3), radius: 8, x: 0, y: 4)
                         )
                         .onChange(of: editedHost) { newValue in
                             Task {
@@ -343,7 +346,7 @@ struct ModernEntryEditorView: View {
             .disabled(viewModel.isEditing && (!hostValid || editedHost.isEmpty))
         }
         .padding()
-        .background(Color(NSColor.textBackgroundColor))
+        .background(Color(.windowBackgroundColor))
         .animation(.easeInOut(duration: 0.2), value: viewModel.isEditing)
     }
     
@@ -419,8 +422,8 @@ struct ModernEntryEditorView: View {
             }
         }
         .padding()
-        .background(Color.quinary)
-        .cornerRadius(8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 
     private func addAdvancedDirective() {

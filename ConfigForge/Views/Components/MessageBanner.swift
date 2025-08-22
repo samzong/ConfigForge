@@ -15,11 +15,11 @@ struct MessageBanner: View {
         HStack(spacing: 8) {
             Image(systemName: iconName)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(bannerColor)
             
             Text(message.message)
                 .font(.footnote)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
             
             if message.type != .success {
                 Button(action: {
@@ -27,7 +27,7 @@ struct MessageBanner: View {
                 }) {
                     Image(systemName: "xmark")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.secondary)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .padding(.leading, 4)
@@ -35,8 +35,9 @@ struct MessageBanner: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
-        .background(Capsule().fill(bannerColor))
-        .shadow(color: .primary.opacity(0.1), radius: 3, x: 0, y: 2)
+        .background(.thickMaterial, in: Capsule())
+        .overlay(Capsule().stroke(bannerColor, lineWidth: 2))
+        .shadow(color: bannerColor.opacity(0.4), radius: 12, x: 0, y: 8)
         .padding(.top, 16)
     }
     

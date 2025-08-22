@@ -88,8 +88,8 @@ struct SidebarView: View {
                 }
             }
             .padding(8)
-            .background(Color(NSColor.textBackgroundColor))
-            .cornerRadius(8)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             .padding([.horizontal, .top], 8)
             
             // SSH 模式显示主机列表
@@ -118,7 +118,9 @@ struct SidebarView: View {
                         Text("Loading...") // Placeholder for out-of-bounds index
                     }
                 }
-                .listStyle(.sidebar)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(Color(.windowBackgroundColor))
                 .onChange(of: selectedListIndex) { newIndex in
                     // Sync list index selection TO ViewModel selection
                     let currentlySelectedVMEntryId = viewModel.selectedEntry?.id as? AnyHashable
@@ -186,6 +188,7 @@ struct SidebarView: View {
             .padding(8)
         }
         .frame(width: 250)
+        .background(Color(.windowBackgroundColor))
     }
     
     // Extracted reusable function to handle item tap gestures

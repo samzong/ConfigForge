@@ -16,12 +16,13 @@ struct ConfigEditorView: View {
                             .frame(maxWidth: 300, minHeight: 40)
                             .padding(4)
                             .background(
-                                RoundedRectangle(cornerRadius: 5)
-                                    .fill(Color.accentColor.opacity(0.1))
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.thickMaterial)
                                     .overlay(
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(Color.accentColor, lineWidth: 1)
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.accentColor, lineWidth: 2)
                                     )
+                                    .shadow(color: Color.accentColor.opacity(0.3), radius: 8, x: 0, y: 4)
                             )
                             .onChange(of: viewModel.editableTitle) { newValue in
                                 viewModel.validateTitle(newValue)
@@ -53,7 +54,7 @@ struct ConfigEditorView: View {
                          (viewModel.configFile?.status != .valid || viewModel.configFile == nil))
             }
             .padding()
-            .background(Color(NSColor.textBackgroundColor))
+            .background(Color(.windowBackgroundColor))
 
             Divider()
             if viewModel.configFile == nil {
@@ -101,9 +102,9 @@ struct ConfigStatusLabel: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(statusColor.opacity(0.2))
+        .background(.regularMaterial, in: Capsule())
         .foregroundColor(statusColor)
-        .cornerRadius(4)
+        .shadow(color: statusColor.opacity(0.2), radius: 6, x: 0, y: 3)
     }
 
     private var statusIcon: some View {

@@ -123,6 +123,7 @@ struct MessageBannerView: View {
         HStack(spacing: 6) {
             Image(systemName: message.type.iconName)
                 .imageScale(.small)
+                .foregroundColor(message.type.backgroundColor)
             Text(message.message)
                 .font(.caption)
                 .lineLimit(1)
@@ -130,10 +131,10 @@ struct MessageBannerView: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 10)
-        .background(message.type.backgroundColor.opacity(0.9))
-        .foregroundColor(.white)
-        .cornerRadius(4)
-        .shadow(color: .primary.opacity(0.08), radius: 1, x: 0, y: 1)
+        .background(.thickMaterial, in: Capsule())
+        .overlay(Capsule().stroke(message.type.backgroundColor, lineWidth: 2))
+        .foregroundColor(.primary)
+        .shadow(color: message.type.backgroundColor.opacity(0.4), radius: 8, x: 0, y: 4)
         .padding(.horizontal, 10)
         .frame(maxWidth: 300)
         .padding(.top, 2)

@@ -48,7 +48,8 @@ private struct ConfigListContent: View {
                 configFileContextMenu(for: configFile)
             }
         }
-        .listStyle(.sidebar)
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
         .onChange(of: selectedConfigFileId, perform: handleSelectionChange)
     }
     

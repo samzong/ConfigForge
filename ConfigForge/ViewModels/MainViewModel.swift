@@ -1,5 +1,5 @@
 //
-//  SSHConfigViewModel.swift
+//  MainViewModel.swift
 //  ConfigForge
 //
 //  Created by samzong on 4/2/25.

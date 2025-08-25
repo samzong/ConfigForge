@@ -1,3 +1,10 @@
+//
+//  TerminalLauncherButton.swift
+//  ConfigForge
+//
+//  Created by samzong on 4/2/25.
+//
+
 import SwiftUI
 
 struct TerminalLauncherButton: View {

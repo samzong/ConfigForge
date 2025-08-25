@@ -233,21 +233,16 @@ update-homebrew:
 		sed -i '' "s/version \\\".*\\\"/version \\\"$(CLEAN_VERSION)\\\"/g" $(CASK_FILE); \
 		echo "    - 更新版本后的cask文件:"; \
 		cat $(CASK_FILE); \
-		if grep -q "Hardware::CPU.arm" $(CASK_FILE); then \
-			echo "    - 更新ARM架构SHA256..."; \
-			sed -i '' "/if Hardware::CPU.arm/,/else/ s/sha256 \\\".*\\\"/sha256 \\\"$$ARM64_SHA256\\\"/g" $(CASK_FILE); \
-			echo "    - 更新Intel架构SHA256..."; \
-			sed -i '' "/else/,/end/ s/sha256 \\\".*\\\"/sha256 \\\"$$X86_64_SHA256\\\"/g" $(CASK_FILE); \
-			echo "    - 更新ARM下载URL..."; \
-			sed -i '' "s|url \\\".*v#{version}/.*-ARM64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg\\\"|g" $(CASK_FILE); \
-			echo "    - 更新Intel下载URL..."; \
-			sed -i '' "s|url \\\".*v#{version}/.*-Intel.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg\\\"|g" $(CASK_FILE); \
-			echo "    - 最终cask文件内容:"; \
-			cat $(CASK_FILE); \
-		else \
-			echo "❌ 未知的 cask 格式，无法更新 SHA256 值"; \
-			exit 1; \
-		fi; \
+		echo "    - 更新ARM架构SHA256..."; \
+		sed -i '' "/on_arm/,/end/ s/sha256 \\\".*\\\"/sha256 \\\"$$ARM64_SHA256\\\"/g" $(CASK_FILE); \
+		echo "    - 更新Intel架构SHA256..."; \
+		sed -i '' "/on_intel/,/end/ s/sha256 \\\".*\\\"/sha256 \\\"$$X86_64_SHA256\\\"/g" $(CASK_FILE); \
+		echo "    - 更新ARM下载URL..."; \
+		sed -i '' "s|url \\\".*v#{version}/.*-arm64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg\\\"|g" $(CASK_FILE); \
+		echo "    - 更新Intel下载URL..."; \
+		sed -i '' "s|url \\\".*v#{version}/.*-x86_64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg\\\"|g" $(CASK_FILE); \
+		echo "    - 最终cask文件内容:"; \
+		cat $(CASK_FILE); \
 	else \
 		echo "    - 未找到cask文件，创建新文件..."; \
 		mkdir -p $$(dirname $(CASK_FILE)); \

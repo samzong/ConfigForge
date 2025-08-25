@@ -1,43 +1,71 @@
-## Description
+## 📝 Description
 
 Briefly describe the purpose and changes in this Pull Request.
 
-## Change Type
+## 🔄 Change Type
 
-- [ ] Bug fix (bug fix)
-- [ ] New feature (new feature)
-- [ ] Code improvement (code improvement)
-- [ ] Documentation update (documentation)
-- [ ] Build/CI related changes (build/CI)
-- [ ] Other (please specify in the description)
+**Important**: Select the primary type to help with automatic release note generation.
 
-## Related Issues
+- [ ] ✨ **Feature** - New feature or enhancement (`feat:` in commit)
+- [ ] 🐛 **Bug Fix** - Fix for a bug or issue (`fix:` in commit)  
+- [ ] 🎨 **UI/UX** - User interface improvements (`style:` in commit)
+- [ ] 🔧 **Refactor** - Code refactoring without functional changes (`refactor:` in commit)
+- [ ] 📚 **Documentation** - Documentation updates (`docs:` in commit)
+- [ ] 🧹 **Maintenance** - Chores, dependencies, housekeeping (`chore:` in commit)
+- [ ] ⚡ **Performance** - Performance improvements (`perf:` in commit)
+- [ ] 💥 **Breaking Change** - Changes that break backwards compatibility (add `!` to commit)
 
-Please link the issue this PR solves (if any).
-For example: Fixes #123
+## 📱 Platform Impact
 
-## Testing
+- [ ] **macOS App** - Changes affect the main SwiftUI application
+- [ ] **CLI Tool** - Changes affect the command-line interface (`cf`)  
+- [ ] **Build System** - Changes affect Makefile, CI/CD, or build process
+- [ ] **Both App & CLI** - Changes affect multiple components
 
-Please describe the tests you performed and the environments you tested in.
+## 🔗 Related Issues
 
-- [ ] Tested on Intel Mac
-- [ ] Tested on Apple Silicon Mac
-- [ ] Unit tests passed
-- [ ] UI tests passed
+Please link any related issues using keywords:
+- `Closes #123` or `Fixes #456` for bug fixes
+- `Relates to #789` for general connections
 
-## Screenshots
+## 🧪 Testing
 
-If applicable, add screenshots to help explain your changes.
+Please describe the tests you performed:
 
-## Checklist
+- [ ] **Manual Testing** - Tested functionality manually
+- [ ] **Intel Mac** - Tested on x86_64 architecture  
+- [ ] **Apple Silicon** - Tested on arm64 architecture
+- [ ] **Unit Tests** - Added/updated unit tests
+- [ ] **Integration Tests** - Tested with other components
+- [ ] **CLI Testing** - Tested command-line interface (if applicable)
 
-- [ ] My code follows the project's code style
-- [ ] I have performed self-testing
-- [ ] I have updated the relevant documentation (if applicable)
-- [ ] My changes do not introduce new warnings or errors
-- [ ] My changes are compatible with Intel and Apple Silicon architectures
+## 📸 Screenshots
 
-## Additional Information
+If applicable, add screenshots to help explain UI/UX changes.
 
-Any other information that reviewers need to know.
+## 📋 Checklist
+
+- [ ] Code follows the project's style guidelines (SwiftFormat/SwiftLint)
+- [ ] Self-review of code completed  
+- [ ] Code is properly commented (especially complex areas)
+- [ ] Documentation updated if needed (`CLAUDE.md`, comments, etc.)
+- [ ] No compiler warnings or errors introduced
+- [ ] Changes are compatible with both Intel and Apple Silicon
+- [ ] SwiftGen run if localization strings changed (`make swiftgen`)
+- [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) format
+
+## 🎯 Release Notes Impact
+
+This change should be included in the release notes under:
+- [ ] **New Features** ✨
+- [ ] **UI/UX Improvements** 🎨  
+- [ ] **Bug Fixes** 🐛
+- [ ] **Technical Improvements** 🔧
+- [ ] **Documentation** 📚
+- [ ] **Maintenance** 🧹
+- [ ] **Skip Release Notes** (minor changes only)
+
+## 💡 Additional Notes
+
+Any additional context, concerns, or notes for reviewers.
 

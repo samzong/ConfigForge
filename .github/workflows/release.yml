@@ -34,32 +34,67 @@ jobs:
           echo "==> Check release version architecture compatibility..."
           make check-arch
 
-      - name: Generate Release Notes
-        id: release_notes
+      - name: Get Release Draft
+        id: get_draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Generate GitHub-style release notes using the GitHub CLI
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/releases/generate-notes \
-            -f tag_name='${{ env.VERSION }}' > generated_notes.json
+          # Try to get existing draft release
+          DRAFT_ID=$(gh release list --json isDraft,tagName,id | jq -r '.[] | select(.isDraft == true) | .id' | head -1)
           
-          jq -r '.body' generated_notes.json > release_notes.md
+          if [ -n "$DRAFT_ID" ] && [ "$DRAFT_ID" != "null" ]; then
+            echo "Found existing draft release: $DRAFT_ID"
+            echo "draft_id=$DRAFT_ID" >> $GITHUB_OUTPUT
+            
+            # Get the draft release body
+            gh release view --json body | jq -r '.body' > release_notes.md
+          else
+            echo "No draft release found, generating basic release notes..."
+            echo "draft_id=" >> $GITHUB_OUTPUT
+            
+            # Fallback: generate basic release notes
+            gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              /repos/${{ github.repository }}/releases/generate-notes \
+              -f tag_name='${{ env.VERSION }}' | jq -r '.body' > release_notes.md
+          fi
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ env.VERSION }}
-          body_path: release_notes.md
-          draft: false
-          prerelease: false
-          files: |
-            build/ConfigForge-x86_64.dmg
-            build/ConfigForge-arm64.dmg
+      - name: Create or Update Release
+        id: create_release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ steps.get_draft.outputs.draft_id }}" ]; then
+            echo "Publishing existing draft release..."
+            
+            # Update the draft release to published and add assets
+            gh release edit ${{ steps.get_draft.outputs.draft_id }} \
+              --draft=false \
+              --tag=${{ env.VERSION }} \
+              --title="${{ env.VERSION }}"
+            
+            # Upload assets to the existing release
+            gh release upload ${{ env.VERSION }} \
+              build/ConfigForge-x86_64.dmg \
+              build/ConfigForge-arm64.dmg \
+              --clobber
+              
+            echo "Release published successfully from draft"
+          else
+            echo "Creating new release..."
+            
+            # Create new release using softprops action as fallback
+            gh release create ${{ env.VERSION }} \
+              --title "${{ env.VERSION }}" \
+              --notes-file release_notes.md \
+              --draft=false \
+              --prerelease=false \
+              build/ConfigForge-x86_64.dmg \
+              build/ConfigForge-arm64.dmg
+              
+            echo "New release created successfully"
+          fi
 
       - name: Trigger Homebrew Update
         #Trigger workflow only when release is successful

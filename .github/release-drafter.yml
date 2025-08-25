@@ -1,0 +1,131 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+template: |
+  # ConfigForge v$RESOLVED_VERSION 🚀
+
+  A $RELEASE_TYPE release with $CHANGES_COUNT change(s).
+
+  $CHANGES
+
+  ## 📦 Binary Assets
+
+  - `ConfigForge-arm64.dmg` - Apple Silicon (M1/M2/M3/M4) Macs
+  - `ConfigForge-x86_64.dmg` - Intel-based Macs
+
+  ## 🔗 Full Changelog
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+  ---
+
+  *This release continues ConfigForge's commitment to excellence in configuration management.*
+
+categories:
+  - title: '✨ New Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+      - 'feat'
+    collapse-after: 5
+  - title: '🎨 UI/UX Improvements'  
+    labels:
+      - 'ui'
+      - 'ux'
+      - 'design'
+      - 'style'
+    collapse-after: 8
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+    collapse-after: 5
+  - title: '🔧 Technical Improvements'
+    labels:
+      - 'refactor'
+      - 'performance'
+      - 'technical-debt'
+      - 'optimization'
+    collapse-after: 6
+  - title: '📚 Documentation'
+    labels:
+      - 'documentation'
+      - 'docs'
+    collapse-after: 3
+  - title: '🧹 Maintenance'
+    labels:
+      - 'chore'
+      - 'maintenance'
+      - 'dependencies'
+    collapse-after: 8
+
+change-template: '- **$TITLE** by @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking-change'
+      - 'breaking'
+  minor:
+    labels:
+      - 'minor'
+      - 'feature'
+      - 'enhancement'
+      - 'feat'
+  patch:
+    labels:
+      - 'patch'
+      - 'fix'
+      - 'bugfix'
+      - 'chore'
+      - 'style'
+      - 'refactor'
+      - 'docs'
+  default: patch
+
+autolabeler:
+  - label: 'feature'
+    title:
+      - '/^feat(\(.*\))?!?:/i'
+      - '/^feature(\(.*\))?!?:/i'
+  - label: 'fix'
+    title:
+      - '/^fix(\(.*\))?!?:/i'
+      - '/^bugfix(\(.*\))?!?:/i'
+  - label: 'style'
+    title:
+      - '/^style(\(.*\))?!?:/i'
+  - label: 'refactor'
+    title:
+      - '/^refactor(\(.*\))?!?:/i'
+  - label: 'documentation'
+    title:
+      - '/^docs(\(.*\))?!?:/i'
+      - '/^doc(\(.*\))?!?:/i'
+  - label: 'chore'
+    title:
+      - '/^chore(\(.*\))?!?:/i'
+  - label: 'performance'
+    title:
+      - '/^perf(\(.*\))?!?:/i'
+      - '/^performance(\(.*\))?!?:/i'
+  - label: 'breaking'
+    title:
+      - '/^.*!:/i'
+  - label: 'ui'
+    title:
+      - '/^style\(ui\)/i'
+      - '/^style\(views\)/i'
+      - '/^style\(components\)/i'
+  - label: 'enhancement'
+    title:
+      - '/^feat\(.*\): (?:add|enhance|improve)/i'
+      - '/^enhancement/i'
+
+exclude-labels:
+  - 'skip-changelog'
+  - 'dependencies'
+
+sort-direction: 'descending'

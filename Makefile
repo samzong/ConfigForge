@@ -1,6 +1,10 @@
-.PHONY: clean dmg check-arch update-homebrew swiftgen install install-cli-local
+BOLD  := \033[1m
+CYAN  := \033[36m
+GREEN := \033[32m
+RESET := \033[0m
 
-# 变量
+.DEFAULT_GOAL := help
+
 APP_NAME = ConfigForge
 CLI_NAME = cf
 BUILD_DIR = build
@@ -11,52 +15,36 @@ X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.dmg
 ARM64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.dmg
 DMG_VOLUME_NAME = \"$(APP_NAME)\"
 
-# 签名变量
 ifeq ($(CI_BUILD),true)
     CODE_SIGN_IDENTITY = "Developer ID Application"
 else
     CODE_SIGN_IDENTITY = "-"
 endif
 
-# 版本信息
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
 VERSION ?= $(if $(CI_BUILD),$(shell git describe --tags --always),Dev-$(shell git rev-parse --short HEAD))
 CLEAN_VERSION = $(shell echo $(VERSION) | sed 's/^v//')
 
-# CLI 相关变量
 CLI_INSTALL_PATH = .
 APP_CLI_PATH = $(BUILD_DIR)/app/$(APP_NAME).app/Contents/Resources/bin
 
-# Homebrew 相关变量
 HOMEBREW_TAP_REPO = homebrew-tap
 CASK_FILE = Casks/configforge.rb
 BRANCH_NAME = update-configforge-$(CLEAN_VERSION)
 
-# 运行 SwiftGen 生成本地化代码
-swiftgen:
+# ── Build ────────────────────────────────────────────────────────────────────
+
+.PHONY: swiftgen build-cli build-x86_64 build-arm64
+
+swiftgen: ## Generate type-safe localized strings with SwiftGen
 	@echo "==> 运行 SwiftGen 生成类型安全的本地化代码..."
 	swiftgen
 
-# 清理构建产物
-clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(CLI_BUILD_DIR)
-	xcodebuild clean -scheme $(APP_NAME)
-
-# 构建 CLI
-build-cli:
+build-cli: ## Build the cf CLI in release mode
 	@echo "==> 构建 CLI..."
 	cd CLI && swift build -c release
 
-# 为本地开发安装 CLI (需要 sudo)
-install-cli-local: build-cli
-	@echo "==> 安装 CLI 到 $(CLI_INSTALL_PATH)..."
-	@mkdir -p $(CLI_INSTALL_PATH)
-	@cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
-	@echo "==> CLI 已安装到 $(CLI_INSTALL_PATH)/$(CLI_NAME)"
-
-# 构建 x86_64 (Intel)
-build-x86_64: swiftgen
+build-x86_64: swiftgen ## Archive the app for Intel
 	@echo "==> 构建 x86_64 架构的应用..."
 	xcodebuild clean archive \
 		-project $(APP_NAME).xcodeproj \
@@ -70,8 +58,7 @@ build-x86_64: swiftgen
 		ARCHS="x86_64" \
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
-# 构建 arm64 (Apple Silicon)
-build-arm64: swiftgen
+build-arm64: swiftgen ## Archive the app for Apple Silicon
 	@echo "==> 构建 arm64 架构的应用..."
 	xcodebuild clean archive \
 		-project $(APP_NAME).xcodeproj \
@@ -85,8 +72,11 @@ build-arm64: swiftgen
 		ARCHS="arm64" \
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
-# 创建 DMG (构建 x86_64 和 arm64 版本)
-dmg: build-x86_64 build-arm64 build-cli
+# ── Release ──────────────────────────────────────────────────────────────────
+
+.PHONY: dmg check-arch version update-homebrew
+
+dmg: build-x86_64 build-arm64 build-cli ## Package DMGs for Intel and Apple Silicon
 	# 导出 x86_64 归档
 	xcodebuild -exportArchive \
 		-archivePath $(X86_64_ARCHIVE_PATH) \
@@ -162,8 +152,7 @@ dmg: build-x86_64 build-arm64 build-cli
 	@echo ""
 	@echo "注意: 这些应用$(if $(filter true,$(CI_BUILD)),,使用了自签名，用户首次运行时可能需要在系统偏好设置中手动允许运行)。"
 
-# 检查架构兼容性
-check-arch:
+check-arch: ## Verify each archive contains its own architecture
 	@echo "==> 检查应用架构兼容性..."
 	@if [ -f "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" ]; then \
 		echo "==> 检查 x86_64 版本架构:"; \
@@ -187,13 +176,11 @@ check-arch:
 		fi; \
 	fi
 
-# 显示版本信息
-version:
+version: ## Print version and commit
 	@echo "版本:     $(VERSION)"
 	@echo "Git 提交: $(GIT_COMMIT)"
 
-# 更新 Homebrew Cask
-update-homebrew:
+update-homebrew: ## Open a homebrew-tap PR for the released DMGs (needs GH_PAT)
 	@echo "==> 开始 Homebrew cask 更新流程..."
 	@if [ -z "$(GH_PAT)" ]; then \
 		echo "❌ 错误: 需要设置 GH_PAT 环境变量"; \
@@ -296,8 +283,11 @@ update-homebrew:
 	@rm -rf tmp
 	@echo "✅ Homebrew cask 更新流程完成"
 
-# 安装应用到当前系统 (基于当前架构)
-install: swiftgen
+# ── Install ──────────────────────────────────────────────────────────────────
+
+.PHONY: install install-cli-local
+
+install: swiftgen ## Build for this Mac and install to /Applications (uses sudo)
 	@echo "==> 确定当前架构..."
 	@ARCH=$$(uname -m); \
 	if [ "$$ARCH" = "x86_64" ]; then \
@@ -334,50 +324,55 @@ install: swiftgen
 	@rm -rf $(BUILD_DIR)/x86_64 $(BUILD_DIR)/arm64
 	@echo "==> 您现在可以从 /Applications 运行 $(APP_NAME)"
 
-# 步骤1：归档
-archive-release:
+install-cli-local: build-cli ## Copy the release cf CLI into the repo root
+	@echo "==> 安装 CLI 到 $(CLI_INSTALL_PATH)..."
+	@mkdir -p $(CLI_INSTALL_PATH)
+	@cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
+	@echo "==> CLI 已安装到 $(CLI_INSTALL_PATH)/$(CLI_NAME)"
+
+# ── Release Check ────────────────────────────────────────────────────────────
+
+.PHONY: archive-release export-release check-signature build-and-check run-release
+
+archive-release: ## Archive the Release build
 	xcodebuild -project $(APP_NAME).xcodeproj \
 		-scheme $(APP_NAME) \
 		-configuration Release \
 		archive \
 		-archivePath $(BUILD_DIR)/$(APP_NAME)-Release.xcarchive
 
-# 步骤2：导出 .app
-export-release: archive-release
+export-release: archive-release ## Export the Release archive to build/release
 	xcodebuild -exportArchive \
 		-archivePath $(BUILD_DIR)/$(APP_NAME)-Release.xcarchive \
 		-exportPath $(BUILD_DIR)/release \
 		-exportOptionsPlist exportOptions.plist
 
-# 步骤3：检查签名
-check-signature: export-release
+check-signature: export-release ## Show the exported app's code signature
 	codesign -dv --verbose=4 $(BUILD_DIR)/release/$(APP_NAME).app
 
-# 一键命令
-build-and-check: check-signature
+build-and-check: check-signature ## Archive, export, and check the signature
 
-# 运行 Release 版本
-run-release:
+run-release: ## Quit and relaunch build/release/ConfigForge.app
 	@echo "==> 关闭已运行的 $(APP_NAME) 应用..."
 	@-pkill -x $(APP_NAME) || true
 	@echo "==> 启动 $(BUILD_DIR)/release/$(APP_NAME).app ..."
 	open "$(BUILD_DIR)/release/$(APP_NAME).app"
 
-# 帮助命令
-help:
-	@echo "可用命令:"
-	@echo "  make clean               - Clean build artifacts"
-	@echo "  make dmg                 - Create DMG Installer Package (Intel and Apple Silicon)"
-	@echo "  make version             - Display version information"
-	@echo "  make check-arch          - Check application architecture compatibility"
-	@echo "  make update-homebrew     - Update Homebrew cask (requires GH_PAT)"
-	@echo "  make swiftgen            - Run SwiftGen to generate type-safe localized code"
-	@echo "  make install             - Install the app to the current system (based on the current architecture)"
-	@echo "  make archive-release     - Archive the Release version"
-	@echo "  make export-release      - Export the Release version"
-	@echo "  make check-signature     - Check signature"
-	@echo "  make build-and-check     - One-click command"
-	@echo "  make run-release         - Run the Release version"
-	@echo "  make install-cli-local   - Install CLI to local"
+# ── Maintenance ──────────────────────────────────────────────────────────────
 
-.DEFAULT_GOAL := help 
+.PHONY: clean
+
+clean: ## Remove app and CLI build artifacts
+	rm -rf $(BUILD_DIR)
+	rm -rf $(CLI_BUILD_DIR)
+	xcodebuild clean -scheme $(APP_NAME)
+
+# ── Help ─────────────────────────────────────────────────────────────────────
+
+.PHONY: help
+
+help: ## Show available targets
+	@awk 'BEGIN {FS = ":.*## "; printf "\n$(BOLD)ConfigForge$(RESET) — SSH and kubeconfig manager for macOS\n"} \
+		/^# ── / {n = $$0; gsub(/(^# ── | (─)+$$)/, "", n); printf "\n$(BOLD)%s$(RESET)\n", n} \
+		/^[a-zA-Z0-9_-]+:.*## / {printf "  $(CYAN)make %-18s$(RESET) %s\n", $$1, $$2} \
+		END {printf "\n"}' $(MAKEFILE_LIST)

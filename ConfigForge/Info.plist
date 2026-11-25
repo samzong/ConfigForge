@@ -24,9 +24,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.seimo.ConfigForge</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.2.1</string>
+    <string>0.2.3</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>ConfigForge needs access to control Terminal or iTerm to open SSH connections and run commands.</string>
     <key>NSAppleScriptEnabled</key>

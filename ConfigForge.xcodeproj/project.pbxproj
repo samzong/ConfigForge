@@ -33,8 +33,14 @@
 		17935F432D9D7D410055BABF /* ConfigForgeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ConfigForgeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+		A483F12D5AE0427280DB034C = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (Info.plist,);
+			target = 17935F2A2D9D7D400055BABF;
+		};
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		17935F2D2D9D7D400055BABF /* ConfigForge */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForge; sourceTree = "<group>"; };
+		17935F2D2D9D7D400055BABF /* ConfigForge */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A483F12D5AE0427280DB034C,); explicitFileTypes = {}; explicitFolders = (); path = ConfigForge; sourceTree = "<group>"; };
 		17935F3C2D9D7D410055BABF /* ConfigForgeTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForgeTests; sourceTree = "<group>"; };
 		17935F462D9D7D410055BABF /* ConfigForgeUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConfigForgeUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -407,7 +413,8 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = DUPETW8BMH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ConfigForge/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -416,7 +423,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -442,7 +448,8 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = DUPETW8BMH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ConfigForge/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ConfigForge;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -451,7 +458,6 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
-				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.seimo.ConfigForge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

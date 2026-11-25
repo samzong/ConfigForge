@@ -9,8 +9,8 @@ template: |
 
   ## 📦 Binary Assets
 
-  - `ConfigForge-arm64.dmg` - Apple Silicon (M1/M2/M3/M4) Macs
-  - `ConfigForge-x86_64.dmg` - Intel-based Macs
+  - `ConfigForge-$RESOLVED_VERSION-arm64.dmg` - Apple Silicon (M1/M2/M3/M4) Macs
+  - `ConfigForge-$RESOLVED_VERSION-x86_64.dmg` - Intel-based Macs
 
   ## 🔗 Full Changelog
 

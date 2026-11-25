@@ -44,8 +44,8 @@ swiftgen: ## Generate type-safe localized strings with SwiftGen
 build-cli: ## Build a universal cf CLI in release mode
 	@echo "==> Building the universal CLI..."
 	cd CLI && swift build -c release --arch arm64 --arch x86_64
-	lipo -verify_arch arm64 "$(CLI_BINARY)"
-	lipo -verify_arch x86_64 "$(CLI_BINARY)"
+	lipo "$(CLI_BINARY)" -verify_arch arm64
+	lipo "$(CLI_BINARY)" -verify_arch x86_64
 
 build-x86_64: swiftgen ## Archive the app for Intel
 	@echo "==> 构建 x86_64 架构的应用..."
@@ -150,8 +150,8 @@ dmg: build-x86_64 build-arm64 build-cli ## Package DMGs for Intel and Apple Sili
 	@echo "注意: 这些应用$(if $(filter true,$(CI_BUILD)),,使用了自签名，用户首次运行时可能需要在系统偏好设置中手动允许运行)。"
 
 check-arch: ## Verify each archive contains its own architecture
-	lipo -verify_arch x86_64 "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
-	lipo -verify_arch arm64 "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
+	lipo "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" -verify_arch x86_64
+	lipo "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" -verify_arch arm64
 
 version: ## Print version and commit
 	@echo "版本:     $(VERSION)"

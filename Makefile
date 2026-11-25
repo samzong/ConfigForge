@@ -9,6 +9,7 @@ APP_NAME = ConfigForge
 CLI_NAME = cf
 BUILD_DIR = build
 CLI_BUILD_DIR = CLI/.build
+CLI_BINARY = $(shell cd CLI && swift build -c release --arch arm64 --arch x86_64 --show-bin-path)/$(CLI_NAME)
 X86_64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.xcarchive
 ARM64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.xcarchive
 X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg
@@ -40,9 +41,11 @@ swiftgen: ## Generate type-safe localized strings with SwiftGen
 	@echo "==> 运行 SwiftGen 生成类型安全的本地化代码..."
 	swiftgen
 
-build-cli: ## Build the cf CLI in release mode
-	@echo "==> 构建 CLI..."
-	cd CLI && swift build -c release
+build-cli: ## Build a universal cf CLI in release mode
+	@echo "==> Building the universal CLI..."
+	cd CLI && swift build -c release --arch arm64 --arch x86_64
+	lipo -verify_arch arm64 "$(CLI_BINARY)"
+	lipo -verify_arch x86_64 "$(CLI_BINARY)"
 
 build-x86_64: swiftgen ## Archive the app for Intel
 	@echo "==> 构建 x86_64 架构的应用..."
@@ -86,9 +89,8 @@ dmg: build-x86_64 build-arm64 build-cli ## Package DMGs for Intel and Apple Sili
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/x86_64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-x86_64/"
 	
-	# 添加 CLI 到应用程序包内
 	mkdir -p "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app/Contents/Resources/bin"
-	cp -f "$(CLI_BUILD_DIR)/release/$(CLI_NAME)" "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app/Contents/Resources/bin/"
+	cp -f "$(CLI_BINARY)" "$(BUILD_DIR)/tmp-x86_64/$(APP_NAME).app/Contents/Resources/bin/"
 	
 	# 对 x86_64 应用进行签名
 	@echo "==> 对 x86_64 应用进行签名..."
@@ -119,9 +121,8 @@ dmg: build-x86_64 build-arm64 build-cli ## Package DMGs for Intel and Apple Sili
 	# 复制应用到临时目录
 	cp -r "$(BUILD_DIR)/arm64/$(APP_NAME).app" "$(BUILD_DIR)/tmp-arm64/"
 	
-	# 添加 CLI 到应用程序包内
 	mkdir -p "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app/Contents/Resources/bin"
-	cp -f "$(CLI_BUILD_DIR)/release/$(CLI_NAME)" "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app/Contents/Resources/bin/"
+	cp -f "$(CLI_BINARY)" "$(BUILD_DIR)/tmp-arm64/$(APP_NAME).app/Contents/Resources/bin/"
 	
 	# 对 arm64 应用进行签名
 	@echo "==> 对 arm64 应用进行签名..."
@@ -149,28 +150,8 @@ dmg: build-x86_64 build-arm64 build-cli ## Package DMGs for Intel and Apple Sili
 	@echo "注意: 这些应用$(if $(filter true,$(CI_BUILD)),,使用了自签名，用户首次运行时可能需要在系统偏好设置中手动允许运行)。"
 
 check-arch: ## Verify each archive contains its own architecture
-	@echo "==> 检查应用架构兼容性..."
-	@if [ -f "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" ]; then \
-		echo "==> 检查 x86_64 版本架构:"; \
-		lipo -info "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"; \
-		if lipo -info "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" | grep -q "x86_64"; then \
-			echo "✅ x86_64 版本支持 x86_64 架构"; \
-		else \
-			echo "❌ x86_64 版本不支持 x86_64 架构"; \
-			exit 1; \
-		fi; \
-	fi
-	
-	@if [ -f "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" ]; then \
-		echo "==> 检查 arm64 版本架构:"; \
-		lipo -info "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"; \
-		if lipo -info "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)" | grep -q "arm64"; then \
-			echo "✅ arm64 版本支持 arm64 架构"; \
-		else \
-			echo "❌ arm64 版本不支持 arm64 架构"; \
-			exit 1; \
-		fi; \
-	fi
+	lipo -verify_arch x86_64 "$(X86_64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
+	lipo -verify_arch arm64 "$(ARM64_ARCHIVE_PATH)/Products/Applications/$(APP_NAME).app/Contents/MacOS/$(APP_NAME)"
 
 version: ## Print version and commit
 	@echo "版本:     $(VERSION)"
@@ -323,7 +304,7 @@ install: swiftgen ## Build for this Mac and install to /Applications (uses sudo)
 install-cli-local: build-cli ## Copy the release cf CLI into the repo root
 	@echo "==> 安装 CLI 到 $(CLI_INSTALL_PATH)..."
 	@mkdir -p $(CLI_INSTALL_PATH)
-	@cp -f $(CLI_BUILD_DIR)/release/$(CLI_NAME) $(CLI_INSTALL_PATH)/
+	@cp -f "$(CLI_BINARY)" $(CLI_INSTALL_PATH)/
 	@echo "==> CLI 已安装到 $(CLI_INSTALL_PATH)/$(CLI_NAME)"
 
 # ── Release Check ────────────────────────────────────────────────────────────

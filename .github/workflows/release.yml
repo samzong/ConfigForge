@@ -5,107 +5,74 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.ref_name }}
+
 jobs:
   release:
-    name: Create Release
-    runs-on: macos-latest
-
+    runs-on: macos-15
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Verify SemVer tag and tracked Info.plist
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(alpha|beta|rc)\.[1-9][0-9]*)?$ ]]; then
+            echo "::error::Invalid SemVer release tag: $RELEASE_TAG"
+            exit 1
+          fi
+          version="${RELEASE_TAG#v}"
+          core="${version%%-*}"
+          plist_short="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ConfigForge/Info.plist)"
+          [[ "$plist_short" == "$core" ]] || { echo "::error::Info.plist does not match $core"; exit 1; }
+          plist_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' ConfigForge/Info.plist)"
+          [[ "$plist_build" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Invalid bundle build number"; exit 1; }
+          [[ "$(git rev-parse HEAD)" == "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" ]] || exit 1
+          echo "VERSION=$version" >> "$GITHUB_ENV"
 
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
-      - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
       - name: Install SwiftGen
         run: brew install swiftgen
 
-      - name: Build Packages
-        run: |
-          make VERSION=${{ env.VERSION }} dmg
+      - name: Build packages
+        run: make dmg VERSION="$VERSION"
 
-      - name: Verify Architecture Support
+      - name: Verify DMGs
         run: |
-          echo "==> Check release version architecture compatibility..."
-          make check-arch
+          set -euo pipefail
+          hdiutil verify "build/ConfigForge-${VERSION}-x86_64.dmg"
+          hdiutil verify "build/ConfigForge-${VERSION}-arm64.dmg"
 
-      - name: Get Release Draft
-        id: get_draft
+      - name: Create or update tag-scoped release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          # Try to get existing draft release
-          DRAFT_ID=$(gh release list --json isDraft,tagName,id | jq -r '.[] | select(.isDraft == true) | .id' | head -1)
-          
-          if [ -n "$DRAFT_ID" ] && [ "$DRAFT_ID" != "null" ]; then
-            echo "Found existing draft release: $DRAFT_ID"
-            echo "draft_id=$DRAFT_ID" >> $GITHUB_OUTPUT
-            
-            # Get the draft release body
-            gh release view --json body | jq -r '.body' > release_notes.md
+          set -euo pipefail
+          args=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            args+=(--prerelease --latest=false)
           else
-            echo "No draft release found, generating basic release notes..."
-            echo "draft_id=" >> $GITHUB_OUTPUT
-            
-            # Fallback: generate basic release notes
-            gh api \
-              --method POST \
-              -H "Accept: application/vnd.github+json" \
-              /repos/${{ github.repository }}/releases/generate-notes \
-              -f tag_name='${{ env.VERSION }}' | jq -r '.body' > release_notes.md
+            args+=(--prerelease=false --latest)
           fi
-
-      - name: Create or Update Release
-        id: create_release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ -n "${{ steps.get_draft.outputs.draft_id }}" ]; then
-            echo "Publishing existing draft release..."
-            
-            # Update the draft release to published and add assets
-            gh release edit ${{ steps.get_draft.outputs.draft_id }} \
-              --draft=false \
-              --tag=${{ env.VERSION }} \
-              --title="${{ env.VERSION }}"
-            
-            # Upload assets to the existing release
-            gh release upload ${{ env.VERSION }} \
-              build/ConfigForge-x86_64.dmg \
-              build/ConfigForge-arm64.dmg \
-              --clobber
-              
-            echo "Release published successfully from draft"
+          assets=("build/ConfigForge-${VERSION}-x86_64.dmg" "build/ConfigForge-${VERSION}-arm64.dmg")
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' > release-state; then
+            [[ "$(cat release-state)" == "true" ]] || { echo "::error::Release is already published"; exit 1; }
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+            gh release edit "$RELEASE_TAG" --draft=false "${args[@]}"
           else
-            echo "Creating new release..."
-            
-            # Create new release using softprops action as fallback
-            gh release create ${{ env.VERSION }} \
-              --title "${{ env.VERSION }}" \
-              --notes-file release_notes.md \
-              --draft=false \
-              --prerelease=false \
-              build/ConfigForge-x86_64.dmg \
-              build/ConfigForge-arm64.dmg
-              
-            echo "New release created successfully"
+            gh release create "$RELEASE_TAG" "${assets[@]}" --verify-tag --generate-notes "${args[@]}"
           fi
-
-      - name: Trigger Homebrew Update
-        #Trigger workflow only when release is successful
-        if: success()
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_PAT }}
-          event-type: trigger-homebrew-update
-          client-payload: '{"version": "${{ env.VERSION }}"}'
-
-      - name: Update Latest Tag
-        run: |
-          git tag -f latest
-          git push origin latest --force 

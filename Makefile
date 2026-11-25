@@ -11,8 +11,8 @@ BUILD_DIR = build
 CLI_BUILD_DIR = CLI/.build
 X86_64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.xcarchive
 ARM64_ARCHIVE_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.xcarchive
-X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-x86_64.dmg
-ARM64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-arm64.dmg
+X86_64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg
+ARM64_DMG_PATH = $(BUILD_DIR)/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg
 DMG_VOLUME_NAME = \"$(APP_NAME)\"
 
 ifeq ($(CI_BUILD),true)
@@ -22,7 +22,7 @@ else
 endif
 
 GIT_COMMIT = $(shell git rev-parse --short HEAD)
-VERSION ?= $(if $(CI_BUILD),$(shell git describe --tags --always),Dev-$(shell git rev-parse --short HEAD))
+VERSION ?= $(shell /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' ConfigForge/Info.plist)
 CLEAN_VERSION = $(shell echo $(VERSION) | sed 's/^v//')
 
 CLI_INSTALL_PATH = .
@@ -53,8 +53,6 @@ build-x86_64: swiftgen ## Archive the app for Intel
 		-archivePath $(X86_64_ARCHIVE_PATH) \
 		CODE_SIGN_STYLE=Manual \
 		CODE_SIGN_IDENTITY=$(CODE_SIGN_IDENTITY) \
-		CURRENT_PROJECT_VERSION=$(VERSION) \
-		MARKETING_VERSION=$(VERSION) \
 		ARCHS="x86_64" \
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
@@ -67,8 +65,6 @@ build-arm64: swiftgen ## Archive the app for Apple Silicon
 		-archivePath $(ARM64_ARCHIVE_PATH) \
 		CODE_SIGN_STYLE=Manual \
 		CODE_SIGN_IDENTITY=$(CODE_SIGN_IDENTITY) \
-		CURRENT_PROJECT_VERSION=$(VERSION) \
-		MARKETING_VERSION=$(VERSION) \
 		ARCHS="arm64" \
 		OTHER_CODE_SIGN_FLAGS="--options=runtime"
 
@@ -195,20 +191,20 @@ update-homebrew: ## Open a homebrew-tap PR for the released DMGs (needs GH_PAT)
 	@rm -rf tmp && mkdir -p tmp
 	
 	@echo "==> 下载 DMG 文件..."
-	@curl -L -o tmp/$(APP_NAME)-x86_64.dmg "https://github.com/samzong/$(APP_NAME)/releases/download/v$(CLEAN_VERSION)/$(APP_NAME)-x86_64.dmg"
-	@curl -L -o tmp/$(APP_NAME)-arm64.dmg "https://github.com/samzong/$(APP_NAME)/releases/download/v$(CLEAN_VERSION)/$(APP_NAME)-arm64.dmg"
+	@curl -L -o tmp/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg "https://github.com/samzong/$(APP_NAME)/releases/download/v$(CLEAN_VERSION)/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg"
+	@curl -L -o tmp/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg "https://github.com/samzong/$(APP_NAME)/releases/download/v$(CLEAN_VERSION)/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg"
 	
 	@echo "==> 计算 SHA256 校验和..."
-	@X86_64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-x86_64.dmg | cut -d ' ' -f 1) && echo "    - x86_64 SHA256: $$X86_64_SHA256"
-	@ARM64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-arm64.dmg | cut -d ' ' -f 1) && echo "    - arm64 SHA256: $$ARM64_SHA256"
+	@X86_64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg | cut -d ' ' -f 1) && echo "    - x86_64 SHA256: $$X86_64_SHA256"
+	@ARM64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg | cut -d ' ' -f 1) && echo "    - arm64 SHA256: $$ARM64_SHA256"
 	
 	@echo "==> 克隆 Homebrew tap 仓库..."
 	@cd tmp && git clone https://$(GH_PAT)@github.com/samzong/$(HOMEBREW_TAP_REPO).git
 	@cd tmp/$(HOMEBREW_TAP_REPO) && echo "    - 创建新分支: $(BRANCH_NAME)" && git checkout -b $(BRANCH_NAME)
 
 	@echo "==> 更新 cask 文件..."
-	@X86_64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-x86_64.dmg | cut -d ' ' -f 1) && \
-	ARM64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-arm64.dmg | cut -d ' ' -f 1) && \
+	@X86_64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg | cut -d ' ' -f 1) && \
+	ARM64_SHA256=$$(shasum -a 256 tmp/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg | cut -d ' ' -f 1) && \
 	echo "==> 再次确认SHA256: x86_64=$$X86_64_SHA256, arm64=$$ARM64_SHA256" && \
 	cd tmp/$(HOMEBREW_TAP_REPO) && \
 	echo "==> 当前目录: $$(pwd)" && \
@@ -225,9 +221,9 @@ update-homebrew: ## Open a homebrew-tap PR for the released DMGs (needs GH_PAT)
 		echo "    - 更新Intel架构SHA256..."; \
 		sed -i '' "/on_intel/,/end/ s/sha256 \\\".*\\\"/sha256 \\\"$$X86_64_SHA256\\\"/g" $(CASK_FILE); \
 		echo "    - 更新ARM下载URL..."; \
-		sed -i '' "s|url \\\".*v#{version}/.*-arm64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg\\\"|g" $(CASK_FILE); \
+		sed -i '' "s|url \\\".*v#{version}/.*-arm64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg\\\"|g" $(CASK_FILE); \
 		echo "    - 更新Intel下载URL..."; \
-		sed -i '' "s|url \\\".*v#{version}/.*-x86_64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg\\\"|g" $(CASK_FILE); \
+		sed -i '' "s|url \\\".*v#{version}/.*-x86_64.dmg\\\"|url \\\"https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg\\\"|g" $(CASK_FILE); \
 		echo "    - 最终cask文件内容:"; \
 		cat $(CASK_FILE); \
 	else \
@@ -238,10 +234,10 @@ update-homebrew: ## Open a homebrew-tap PR for the released DMGs (needs GH_PAT)
 		echo '  version "$(CLEAN_VERSION)"' >> $(CASK_FILE); \
 		echo '' >> $(CASK_FILE); \
 		echo '  if Hardware::CPU.arm?' >> $(CASK_FILE); \
-		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-arm64.dmg"' >> $(CASK_FILE); \
+		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-$(CLEAN_VERSION)-arm64.dmg"' >> $(CASK_FILE); \
 		echo '    sha256 "'$$ARM64_SHA256'"' >> $(CASK_FILE); \
 		echo '  else' >> $(CASK_FILE); \
-		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-x86_64.dmg"' >> $(CASK_FILE); \
+		echo '    url "https://github.com/samzong/$(APP_NAME)/releases/download/v#{version}/$(APP_NAME)-$(CLEAN_VERSION)-x86_64.dmg"' >> $(CASK_FILE); \
 		echo '    sha256 "'$$X86_64_SHA256'"' >> $(CASK_FILE); \
 		echo '  end' >> $(CASK_FILE); \
 		echo '' >> $(CASK_FILE); \

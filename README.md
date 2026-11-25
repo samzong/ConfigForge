@@ -109,6 +109,27 @@ The `Host` section is the core of the configuration file, used to specify config
 There are more than 100 configuration items in the `Host` section of the `.ssh/config` file.
 Please refer to the official documentation: [OpenSSH Manual Pages](https://www.openssh.com/manual.html) and [Linux man page for ssh_config(5)](https://man7.org/linux/man-pages/man5/ssh_config.5.html).
 
+## Builds and releases
+
+`ConfigForge/Info.plist` is the source for the app version and build number.
+Run `ruby scripts/verify-release.rb` on macOS to exercise the release workflow without publishing a release.
+Run `make dmg VERSION=0.2.1` to package both architectures with Xcode and SwiftGen installed.
+The output names are `ConfigForge-0.2.1-arm64.dmg` and `ConfigForge-0.2.1-x86_64.dmg` in `build/`.
+
+Pull requests and pushes to `main` build DMGs in Actions.
+Download the `ConfigForge-commit.<full-sha>` artifact from the Development Build run.
+Actions retains these development artifacts for 90 days.
+These artifacts are CI snapshots, not published release versions.
+
+Published versions use immutable `vX.Y.Z` tags or `vX.Y.Z-alpha.N`, `vX.Y.Z-beta.N`, and `vX.Y.Z-rc.N` prerelease tags.
+Prerelease counters start at 1.
+Before an authorized release, commit the matching core version and an increased build number in `ConfigForge/Info.plist`.
+The release workflow rejects invalid tags and version mismatches before Xcode runs.
+It publishes only the release for that tag and rejects changes to an already published release.
+Prereleases stay outside the stable latest channel.
+Historical `develop` and `latest` tags remain unchanged. New builds do not update those channel pointers.
+Homebrew updates use the centralized tap scanner instead of a repository dispatch.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
